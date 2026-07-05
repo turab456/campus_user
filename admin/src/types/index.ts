@@ -13,6 +13,8 @@ export interface User {
   spamScore: number;
   scamScore: number;
   flagged?: boolean;
+  blocked?: boolean;
+  blockReason?: string;
   createdAt: string;
   updatedAt: string;
 }

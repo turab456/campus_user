@@ -13,6 +13,7 @@ export interface User {
   scamScore?: number;
   flagged?: boolean;
   blocked?: boolean;
+  blockReason?: string;
 }
 
 export type BookCondition = 'New' | 'Like New' | 'Very Good' | 'Good' | 'Acceptable';

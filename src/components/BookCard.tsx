@@ -24,11 +24,15 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
       showToast('Please sign in to save books to your wishlist.', 'warning');
       return;
     }
-    await toggleSave(book.id);
-    showToast(
-      saved ? `Removed "${book.title}" from saved items` : `Saved "${book.title}" to wishlist`,
-      'success'
-    );
+    try {
+      await toggleSave(book.id);
+      showToast(
+        saved ? `Removed "${book.title}" from saved items` : `Saved "${book.title}" to wishlist`,
+        'success'
+      );
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update wishlist.', 'danger');
+    }
   };
 
   const getConditionColor = (cond: typeof book.condition) => {

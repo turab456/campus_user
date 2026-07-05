@@ -14,7 +14,7 @@ export const UserManagementPage: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showActionModal, setShowActionModal] = useState(false);
-  const [actionType, setActionType] = useState<'delete' | 'flag' | 'unflag' | null>(null);
+  const [actionType, setActionType] = useState<'delete' | 'flag' | 'unflag' | 'block' | 'unblock' | null>(null);
   const [reason, setReason] = useState('');
   const [page, setPage] = useState(1);
 
@@ -41,12 +41,14 @@ export const UserManagementPage: React.FC = () => {
       if (actionType === 'delete') {
         await adminApi.deleteUser(selectedUser._id, reason);
         setUsers(users.filter(u => u._id !== selectedUser._id));
-      } else if (actionType === 'flag') {
-        await adminApi.flagUser(selectedUser._id, reason);
-        selectedUser.flagged = true;
-      } else if (actionType === 'unflag') {
-        await adminApi.unflagUser(selectedUser._id);
-        selectedUser.flagged = false;
+      } else if (actionType === 'block') {
+        await adminApi.blockUser(selectedUser._id, reason);
+        selectedUser.blocked = true;
+        selectedUser.blockReason = reason;
+      } else if (actionType === 'unblock') {
+        await adminApi.unblockUser(selectedUser._id);
+        selectedUser.blocked = false;
+        selectedUser.blockReason = undefined;
       }
       setShowActionModal(false);
       setReason('');
@@ -56,7 +58,7 @@ export const UserManagementPage: React.FC = () => {
     }
   };
 
-  const openActionModal = (user: User, type: 'delete' | 'flag' | 'unflag') => {
+  const openActionModal = (user: User, type: 'delete' | 'flag' | 'unflag' | 'block' | 'unblock') => {
     setSelectedUser(user);
     setActionType(type);
     setShowActionModal(true);
@@ -160,7 +162,7 @@ export const UserManagementPage: React.FC = () => {
             </button>
             {selectedUser && (
               <>
-                {selectedUser.flagged ? (
+                 {selectedUser.flagged ? (
                   <button
                     onClick={() => openActionModal(selectedUser, 'unflag')}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
@@ -173,6 +175,21 @@ export const UserManagementPage: React.FC = () => {
                     className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-2"
                   >
                     <Flag size={18} /> Flag User
+                  </button>
+                )}
+                {selectedUser.blocked ? (
+                  <button
+                    onClick={() => openActionModal(selectedUser, 'unblock')}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+                  >
+                    <CheckCircle size={18} /> Activate User
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => openActionModal(selectedUser, 'block')}
+                    className="px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800 flex items-center gap-2 animate-pulse"
+                  >
+                    <Flag size={18} /> Deactivate User
                   </button>
                 )}
                 <button
@@ -228,10 +245,15 @@ export const UserManagementPage: React.FC = () => {
                 }`}>
                   Email: {selectedUser.isVerified ? 'Verified' : 'Pending Verification'}
                 </p>
-                <p className={`text-sm px-3 py-2 rounded-lg ${
+                 <p className={`text-sm px-3 py-2 rounded-lg ${
                   selectedUser.flagged ? 'bg-red-50 text-red-800' : 'bg-green-50 text-green-800'
                 }`}>
                   {selectedUser.flagged ? 'Flagged for Review' : 'No Issues'}
+                </p>
+                <p className={`text-sm px-3 py-2 rounded-lg ${
+                  selectedUser.blocked ? 'bg-red-100 text-red-800 font-bold' : 'bg-green-50 text-green-800'
+                }`}>
+                  Account status: {selectedUser.blocked ? `Deactivated (${selectedUser.blockReason || 'Suspicious Activity'})` : 'Active / Reactivated'}
                 </p>
               </div>
             </div>
@@ -240,9 +262,14 @@ export const UserManagementPage: React.FC = () => {
       </Modal>
 
       {/* Action Modal */}
-      <Modal
+       <Modal
         isOpen={showActionModal}
-        title={`${actionType === 'delete' ? 'Delete User' : actionType === 'flag' ? 'Flag User' : 'Unflag User'}`}
+        title={
+          actionType === 'delete' ? 'Delete User' :
+          actionType === 'flag' ? 'Flag User' :
+          actionType === 'unflag' ? 'Unflag User' :
+          actionType === 'block' ? 'Deactivate User' : 'Activate User'
+        }
         onClose={() => setShowActionModal(false)}
         footer={
           <>
@@ -255,7 +282,8 @@ export const UserManagementPage: React.FC = () => {
             <button
               onClick={handleAction}
               className={`px-4 py-2 text-white rounded-lg ${
-                actionType === 'delete' ? 'bg-red-600 hover:bg-red-700' :
+                actionType === 'delete' || actionType === 'block' ? 'bg-red-600 hover:bg-red-700' :
+                actionType === 'unblock' ? 'bg-green-600 hover:bg-green-700' :
                 'bg-blue-600 hover:bg-blue-700'
               }`}
             >
@@ -285,6 +313,32 @@ export const UserManagementPage: React.FC = () => {
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 rows={4}
               />
+            </div>
+          )}
+
+           {actionType === 'unblock' && (
+            <p className="text-sm text-gray-600">
+              This user account will be reactivated. They will be able to buy, sell, and message other students.
+            </p>
+          )}
+
+          {actionType === 'block' && (
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800 font-medium">
+                ⚠️ This will deactivate the user. They will be unable to list items, wishlist items, write reviews, or message any student.
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Deactivation Reason
+                </label>
+                <textarea
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder="Enter reason for deactivation..."
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={4}
+                />
+              </div>
             </div>
           )}
 

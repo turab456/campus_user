@@ -91,11 +91,15 @@ export const ListingDetailsPage: React.FC = () => {
       showToast('Please sign in to save this listing.', 'warning');
       return;
     }
-    await toggleSave(book.id);
-    showToast(
-      saved ? 'Removed from saved items' : 'Saved to wishlist',
-      'success'
-    );
+    try {
+      await toggleSave(book.id);
+      showToast(
+        saved ? 'Removed from saved items' : 'Saved to wishlist',
+        'success'
+      );
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update wishlist.', 'danger');
+    }
   };
 
   const handleContactSeller = async () => {
@@ -115,9 +119,9 @@ export const ListingDetailsPage: React.FC = () => {
       const chat = await api.createOrGetChat(book.id, user.id);
       showToast('Chat thread opened with seller', 'success');
       navigate('/messages', { state: { activeChatId: chat.id } });
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      showToast('Failed to start conversation. Please try again.', 'danger');
+      showToast(err.message || 'Failed to start conversation. Please try again.', 'danger');
     } finally {
       setIsContacting(false);
     }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, GraduationCap, MapPin, Star, BookOpen, ShieldAlert } from 'lucide-react';
+import { Calendar, GraduationCap, MapPin, Star, BookOpen, ShieldAlert, CheckCircle, AlertTriangle } from 'lucide-react';
 import { backendApi as api } from '../services/backendApi';
 import type { Book, User, Review } from '../types';
 import { BookCard } from '../components/BookCard';
@@ -250,78 +250,154 @@ export const ProfilePage: React.FC = () => {
           )}
       </section>
 
-      {/* Danger Zone Warning Banner */}
-      {isOwnProfile && (user.spamScore! > 0 || user.scamScore! > 0 || user.blocked || user.flagged) && (
-        <section className="bg-red-50 border border-red-200 rounded-2xl p-5 md:p-6 shadow-subtle flex flex-col gap-4">
-          <div className="flex items-start gap-3">
-            <ShieldAlert className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <h2 className="text-sm font-bold text-red-800">Warning: Your Account is in the Danger Zone</h2>
-              <p className="text-xs text-red-700 mt-1 leading-relaxed">
-                Our auto-moderation systems have flagged your account due to guideline violations. 
-                Repeated offenses (reaching a score of 75+) will result in automatic account suspension.
-              </p>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white border border-red-100 rounded-xl p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-textDark">Spam Score</span>
-              <div className="flex items-center gap-2">
-                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                  user.spamScore! >= 50 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                }`}>{user.spamScore}/100</span>
+      {/* Dynamic Account Status Banner */}
+      {isOwnProfile && (
+        <>
+          {/* ZONE 1: Account Suspended/Blocked */}
+          {user.blocked && (
+            <section className="bg-red-50 border border-red-200 rounded-2xl p-5 md:p-6 shadow-subtle flex flex-col gap-4">
+              <div className="flex items-start gap-3">
+                <ShieldAlert className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h2 className="text-sm font-bold text-red-800">Account Deactivated</h2>
+                  <p className="text-xs text-red-700 mt-1 leading-relaxed font-semibold">
+                    Your account is blocked due to suspicious activity. Please raise a ticket for reconsideration below.
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-textDark">Scam / Fraud Score</span>
-              <div className="flex items-center gap-2">
-                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                  user.scamScore! >= 50 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                }`}>{user.scamScore}/100</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-red-100 pt-4">
-            <div className="text-[11px] text-red-600">
-              {user.blocked ? 'Your account is currently suspended.' : 'Submit a reconsideration request if you believe this was an error.'}
-            </div>
-            <button
-              onClick={() => setIsAppealModalOpen(true)}
-              className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-colors w-fit focus:outline-none"
-            >
-              Raise Reconsideration Ticket
-            </button>
-          </div>
-
-          {/* Appeal Tickets List */}
-          {tickets.length > 0 && (
-            <div className="border-t border-red-100 pt-4 flex flex-col gap-3">
-              <h3 className="text-xs font-bold text-red-800">Your Appeal Requests</h3>
-              <div className="flex flex-col gap-2">
-                {tickets.map((ticket) => (
-                  <div key={ticket._id} className="bg-white border border-slate-200 rounded-xl p-3 text-xs text-textDark flex flex-col gap-1.5 shadow-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold text-slate-500">Appeal Date: {new Date(ticket.createdAt).toLocaleDateString()}</span>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        ticket.status === 'approved' ? 'bg-green-100 text-green-800' :
-                        ticket.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>{ticket.status.toUpperCase()}</span>
-                    </div>
-                    <p className="text-muted leading-relaxed italic">" {ticket.reason} "</p>
-                    {ticket.adminComment && (
-                      <div className="bg-slate-50 border border-slate-100 rounded-lg p-2 mt-1 text-[11px]">
-                        <span className="font-bold text-textDark">Admin Response:</span> {ticket.adminComment}
-                      </div>
-                    )}
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white border border-red-100 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-textDark">Spam Score</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-800">{user.spamScore}/100</span>
                   </div>
-                ))}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-textDark">Scam / Fraud Score</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-800">{user.scamScore}/100</span>
+                  </div>
+                </div>
               </div>
-            </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-red-100 pt-4">
+                <div className="text-[11px] text-red-600">
+                  Suspension Reason: {user.blockReason || 'Suspicious Activity flagged by Auto-moderator.'}
+                </div>
+                <button
+                  onClick={() => setIsAppealModalOpen(true)}
+                  className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-colors w-fit focus:outline-none"
+                >
+                  Raise Reconsideration Ticket
+                </button>
+              </div>
+            </section>
           )}
-        </section>
+
+          {/* ZONE 2: Danger Zone (Spam or Scam >= 50 or Flagged, but not suspended) */}
+          {!user.blocked && (user.spamScore! >= 50 || user.scamScore! >= 50 || user.flagged) && (
+            <section className="bg-amber-50 border border-amber-200 rounded-2xl p-5 md:p-6 shadow-subtle flex flex-col gap-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-6 h-6 text-amber-650 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h2 className="text-sm font-bold text-amber-850">Warning: Your Account is in the Danger Zone</h2>
+                  <p className="text-xs text-amber-700 mt-1 leading-relaxed">
+                    Our auto-moderation systems have flagged your account due to guideline violations. 
+                    Repeated offenses (reaching a score of 75+) will result in automatic account deactivation.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white border border-amber-100 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-textDark">Spam Score</span>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                      user.spamScore! >= 50 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+                    }`}>{user.spamScore}/100</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-textDark">Scam / Fraud Score</span>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                      user.scamScore! >= 50 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+                    }`}>{user.scamScore}/100</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-amber-100 pt-4">
+                <div className="text-[11px] text-amber-600">
+                  Please keep your scores below the threshold.
+                </div>
+                <button
+                  onClick={() => setIsAppealModalOpen(true)}
+                  className="bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-colors w-fit focus:outline-none"
+                >
+                  Raise Reconsideration Ticket
+                </button>
+              </div>
+            </section>
+          )}
+
+          {/* ZONE 3: Safe Zone (Scores < 50 and not suspended/flagged) */}
+          {!user.blocked && !user.flagged && user.spamScore! < 50 && user.scamScore! < 50 && (
+            <section className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 md:p-6 shadow-subtle flex flex-col gap-4">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h2 className="text-sm font-bold text-emerald-800">You are in the Safe Zone</h2>
+                  <p className="text-xs text-emerald-700 mt-1 leading-relaxed">
+                    Your account is in excellent standing! Thank you for maintaining compliance with campus guidelines and keeping the marketplace safe.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white border border-emerald-100 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-textDark">Spam Score</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-green-150 text-green-800">{user.spamScore || 0}/100</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-textDark">Scam / Fraud Score</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-green-150 text-green-800">{user.scamScore || 0}/100</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+        </>
+      )}
+
+      {isOwnProfile && tickets.length > 0 && (
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 md:p-6 shadow-subtle flex flex-col gap-3">
+          <h3 className="text-xs font-bold text-slate-800">Your Appeal Requests</h3>
+          <div className="flex flex-col gap-2">
+            {tickets.map((ticket) => (
+              <div key={ticket._id} className="bg-white border border-slate-200 rounded-xl p-3 text-xs text-textDark flex flex-col gap-1.5 shadow-sm">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-slate-500">Appeal Date: {new Date(ticket.createdAt).toLocaleDateString()}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    ticket.status === 'approved' ? 'bg-green-100 text-green-800' :
+                    ticket.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                    'bg-yellow-100 text-yellow-800'
+                  }`}>{ticket.status.toUpperCase()}</span>
+                </div>
+                <p className="text-muted leading-relaxed italic">" {ticket.reason} "</p>
+                {ticket.adminComment && (
+                  <div className="bg-slate-50 border border-slate-100 rounded-lg p-2 mt-1 text-[11px]">
+                    <span className="font-bold text-textDark">Admin Response:</span> {ticket.adminComment}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Tabs list (Listings / Reviews) */}

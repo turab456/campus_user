@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Bell, Check, CheckCheck, MessageSquare, ShieldAlert, AlertTriangle, Ban, Package, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { backendApi as api } from '../services/backendApi';
+import { useAuth } from '../context/AuthContext';
 
 interface Notification {
   _id: string;
@@ -15,6 +16,7 @@ interface Notification {
 }
 
 export const NotificationBell: React.FC = () => {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -174,6 +176,14 @@ export const NotificationBell: React.FC = () => {
 
             {/* List */}
             <div className="overflow-y-auto flex-1">
+              {user?.blocked && (
+                <div className="bg-red-50 border-b border-red-200 px-4 py-3 flex items-start gap-2.5">
+                  <Ban className="w-5 h-5 text-red-650 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 text-[11px] text-red-800 leading-snug font-medium">
+                    Your account is blocked due to suspicious activity. Please raise a ticket for reconsideration in the profile section.
+                  </div>
+                </div>
+              )}
               {loading ? (
                 <div className="flex items-center justify-center py-10">
                   <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />

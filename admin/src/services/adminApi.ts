@@ -68,6 +68,12 @@ export const adminApi = {
   unflagUser: (userId: string) =>
     api.post(`/admin/users/${userId}/unflag`),
 
+  blockUser: (userId: string, reason: string) =>
+    api.post(`/admin/users/${userId}/block`, { reason }),
+  
+  unblockUser: (userId: string) =>
+    api.post(`/admin/users/${userId}/unblock`),
+
   // Listing Management
   getAllListings: (page = 1, limit = 10, filter = 'all') =>
     api.get(`/admin/listings?page=${page}&limit=${limit}&filter=${filter}`),

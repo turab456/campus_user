@@ -5,7 +5,7 @@ import { BookCard } from '../components/BookCard';
 import { BottomSheet } from '../components/BottomSheet';
 import { backendApi as api } from '../services/backendApi';
 import type { Book, BookCondition, SearchFilters } from '../types';
-import { CATEGORIES, CONDITIONS, SORT_OPTIONS, COLLEGES } from '../constants';
+import { CATEGORIES, CONDITIONS, SORT_OPTIONS } from '../constants';
 import { CardSkeleton } from '../components/SkeletonLoader';
 import { EmptyState } from '../components/EmptyState';
 
@@ -22,7 +22,7 @@ export const SearchPage: React.FC = () => {
     condition: (searchParams.get('condition')?.split(',') as BookCondition[])?.filter(Boolean) || [],
     minPrice: Number(searchParams.get('minPrice')) || 0,
     maxPrice: Number(searchParams.get('maxPrice')) || 5000,
-    college: searchParams.get('college') || '',
+
     sort: searchParams.get('sort') || 'recent'
   });
 
@@ -37,7 +37,7 @@ export const SearchPage: React.FC = () => {
         if (filters.condition.length > 0) queryParams.condition = filters.condition.join(',');
         if (filters.minPrice > 0) queryParams.minPrice = String(filters.minPrice);
         if (filters.maxPrice < 5000) queryParams.maxPrice = String(filters.maxPrice);
-        if (filters.college) queryParams.college = filters.college;
+
         if (filters.sort !== 'recent') queryParams.sort = filters.sort;
         
         setSearchParams(queryParams);
@@ -60,7 +60,6 @@ export const SearchPage: React.FC = () => {
       ...prev,
       query: searchParams.get('query') || '',
       category: searchParams.get('category') || 'all',
-      college: searchParams.get('college') || '',
     }));
   }, [searchParams]);
 
@@ -105,21 +104,6 @@ export const SearchPage: React.FC = () => {
           <option value="all">All Categories</option>
           {CATEGORIES.map(cat => (
             <option key={cat.id} value={cat.id}>{cat.name}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* College Selection */}
-      <div>
-        <h4 className="font-bold text-xs text-textDark mb-3 uppercase tracking-wider">Campus / College</h4>
-        <select
-          value={filters.college}
-          onChange={(e) => setFilters(prev => ({ ...prev, college: e.target.value }))}
-          className="w-full bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
-        >
-          <option value="">All Campuses</option>
-          {COLLEGES.map(col => (
-            <option key={col} value={col}>{col.split(',')[0]}</option>
           ))}
         </select>
       </div>

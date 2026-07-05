@@ -217,9 +217,9 @@ export const CreateListingPage: React.FC = () => {
       await api.createListing(listingData);
       showToast('Successfully published listing!', 'success');
       navigate('/my-listings');
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      showToast('Failed to post listing. Please try again.', 'danger');
+      showToast(err.message || 'Failed to post listing. Please try again.', 'danger');
     }
   };
 

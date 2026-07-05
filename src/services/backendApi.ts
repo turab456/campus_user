@@ -40,7 +40,7 @@ const mapUser = (user: any): User => {
   };
 };
 
-const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://campus-be-qkrx.onrender.com';
 
 let currentAccessToken: string | null = null;
 let unauthorizedCallback: (() => void) | null = null;
@@ -194,6 +194,10 @@ export const backendApi = {
     });
   },
 
+  async verifyEmail(token: string, id: string) {
+    return get<{ success: boolean; message: string }>('/api/auth/verify-email', { token, id });
+  },
+
   async logout() {
     try {
       await post('/api/auth/logout', {});
@@ -210,9 +214,18 @@ export const backendApi = {
 
   // Listings
   async getBooks(filters?: Partial<SearchFilters>) {
+    // Build params using the field names the backend expects
+    const params: Record<string, string> = {};
+    if (filters?.query) params.search = filters.query;
+    if (filters?.category && filters.category !== 'all') params.category = filters.category;
+    if (filters?.condition && filters.condition.length > 0) params.condition = filters.condition.join(',');
+    if (filters?.minPrice && filters.minPrice > 0) params.minPrice = String(filters.minPrice);
+    if (filters?.maxPrice && filters.maxPrice < 5000) params.maxPrice = String(filters.maxPrice);
+    if (filters?.sort && filters.sort !== 'recent') params.sort = filters.sort;
+
     return get<{ success: boolean; listings: any[] }>(
       '/api/listings/search',
-      filters || {}
+      params
     ).then((r) => r.listings.map(mapListing)).catch(async (error) => {
       if (error && error.isHttpError) throw error;
       // Fallback to mock if backend not ready
@@ -222,6 +235,7 @@ export const backendApi = {
       return books;
     });
   },
+
   async getBookById(id: string) {
     return get<{ success: boolean; listing: any }>(`/api/listings/${id}`).then((r) => mapListing(r.listing)).catch(async (error) => {
       if (error && error.isHttpError) throw error;

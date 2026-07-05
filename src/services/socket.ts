@@ -1,7 +1,7 @@
 // src/services/socket.ts
 import { io, Socket } from 'socket.io-client';
 
-const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || 'https://campus-be-qkrx.onrender.com';
 
 let socket: Socket | null = null;
 

@@ -45,6 +45,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       );
     } catch (err) {
       console.error('Failed to toggle save', err);
+      throw err;
     }
   };
 
