@@ -68,6 +68,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
+      if (user) {
+        const token = localStorage.getItem(`fcm_token_${user.id}`);
+        if (token) {
+          await backendApi.removeFcmToken(token).catch(err => console.warn('Failed to remove FCM token on logout', err));
+          localStorage.removeItem(`fcm_token_${user.id}`);
+        }
+      }
       await backendApi.logout();
     } catch (err) {
       console.error('Logout failed', err);
