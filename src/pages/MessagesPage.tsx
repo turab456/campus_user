@@ -266,7 +266,7 @@ export const MessagesPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-1 min-h-0 bg-white overflow-hidden shadow-subtle border-0 rounded-none mt-0 md:border md:border-borderCustom md:rounded-2xl md:-mt-2">
+    <div className="flex flex-1 min-h-0 h-full bg-white overflow-hidden shadow-subtle border-0 rounded-none mt-0 md:border md:border-borderCustom md:rounded-2xl md:-mt-2">
       {/* Sidebar: Conversation List */}
       <aside className={`w-full md:w-80 border-r border-borderCustom flex flex-col flex-shrink-0 ${
         showThreadOnMobile ? 'hidden md:flex' : 'flex'

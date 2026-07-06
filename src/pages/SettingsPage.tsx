@@ -2,13 +2,20 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { usePWA } from '../hooks/usePWA';
-import { User, ShieldCheck, Laptop, PhoneCall, Sparkles } from 'lucide-react';
+import { User, ShieldCheck, Laptop, PhoneCall, Sparkles, Bell } from 'lucide-react';
 import { COLLEGES, DEPARTMENTS, SEMESTERS } from '../constants';
+import { messaging, isConfigured } from '../services/firebase';
+import { getToken } from 'firebase/messaging';
+import { default as api } from '../services/backendApi';
 
 export const SettingsPage: React.FC = () => {
   const { user, updateProfile } = useAuth();
   const { showToast } = useToast();
   const { isInstallable, isStandalone, installApp } = usePWA();
+
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission>(
+    typeof Notification !== 'undefined' ? Notification.permission : 'default'
+  );
 
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -49,6 +56,52 @@ export const SettingsPage: React.FC = () => {
       showToast('App installed successfully!', 'success');
     } else {
       showToast('Installation cancelled or failed.', 'warning');
+    }
+  };
+
+  const handleEnableNotifications = async () => {
+    if (typeof Notification === 'undefined') {
+      showToast('Notifications are not supported on this browser', 'warning');
+      return;
+    }
+
+    try {
+      const permission = await Notification.requestPermission();
+      setNotifPermission(permission);
+
+      if (permission === 'granted') {
+        if (isConfigured && messaging) {
+          const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+          if (vapidKey) {
+            const swUrl = `/firebase-messaging-sw.js` +
+              `?apiKey=${encodeURIComponent(import.meta.env.VITE_FIREBASE_API_KEY || '')}` +
+              `&messagingSenderId=${encodeURIComponent(import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '')}` +
+              `&projectId=${encodeURIComponent(import.meta.env.VITE_FIREBASE_PROJECT_ID || '')}` +
+              `&appId=${encodeURIComponent(import.meta.env.VITE_FIREBASE_APP_ID || '')}` +
+              `&authDomain=${encodeURIComponent(import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '')}` +
+              `&storageBucket=${encodeURIComponent(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '')}`;
+
+            const registration = await navigator.serviceWorker.register(swUrl);
+            const token = await getToken(messaging, { vapidKey, serviceWorkerRegistration: registration });
+            if (token) {
+              await api.registerFcmToken(token);
+              if (user) {
+                localStorage.setItem(`fcm_token_${user.id}`, token);
+              }
+              showToast('Push notifications successfully enabled!', 'success');
+            }
+          } else {
+            showToast('Allowed, but VAPID key is missing in configuration.', 'warning');
+          }
+        } else {
+          showToast('Notifications allowed! (FCM in simulation mode)', 'success');
+        }
+      } else if (permission === 'denied') {
+        showToast('Notification permission denied. Reset browser settings to enable.', 'warning');
+      }
+    } catch (err) {
+      console.error('Error requesting notification permission:', err);
+      showToast('Failed to enable push notifications.', 'danger');
     }
   };
 
@@ -135,42 +188,96 @@ export const SettingsPage: React.FC = () => {
         </form>
 
         {/* Right Side: PWA Install Prompts & Status Panel */}
-        <aside className="bg-white border border-borderCustom rounded-2xl p-5 shadow-subtle flex flex-col gap-4">
-          <h2 className="text-sm font-bold text-textDark border-b border-borderCustom pb-2.5 flex items-center gap-1.5">
-            <Laptop className="w-4.5 h-4.5 text-primary" />
-            <span>App Installation</span>
-          </h2>
+        <div className="flex flex-col gap-6 w-full md:w-auto md:flex-shrink-0">
+          <aside className="bg-white border border-borderCustom rounded-2xl p-5 shadow-subtle flex flex-col gap-4">
+            <h2 className="text-sm font-bold text-textDark border-b border-borderCustom pb-2.5 flex items-center gap-1.5">
+              <Laptop className="w-4.5 h-4.5 text-primary" />
+              <span>App Installation</span>
+            </h2>
 
-          <div className="flex flex-col gap-3 text-xs text-muted leading-relaxed">
-            <div>
-              <span className="font-bold text-textDark block mb-0.5">PWA Installation Status</span>
-              <span className="inline-flex items-center gap-1 bg-slate-50 border border-borderCustom px-2.5 py-1 rounded-md text-[10px] font-bold text-textDark mt-1">
-                <ShieldCheck className={`w-3.5 h-3.5 ${isStandalone ? 'text-success' : 'text-slate-400'}`} />
-                <span>{isStandalone ? 'Running Standalone PWA' : 'Running in Web Browser'}</span>
-              </span>
-            </div>
-
-            <p className="mt-1">
-              Campus Marketplace supports Progressive Web App features. Install it on your device for offline catalog access, instant loading, and fullscreen student experience.
-            </p>
-
-            {isInstallable && !isStandalone && (
-              <button
-                onClick={handleInstallClick}
-                className="bg-primary hover:bg-primary-hover text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-subtle flex items-center justify-center gap-1.5 mt-2 focus:outline-none transition-colors"
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>Install Application</span>
-              </button>
-            )}
-
-            {!isInstallable && !isStandalone && (
-              <div className="bg-slate-50 border border-borderCustom p-2.5 rounded-lg text-[10px] text-muted leading-tight mt-1">
-                Tip: If installation prompts do not appear, you can manually install the app using your browser's menu (click Share/Add to Home Screen in Safari/Chrome).
+            <div className="flex flex-col gap-3 text-xs text-muted leading-relaxed">
+              <div>
+                <span className="font-bold text-textDark block mb-0.5">PWA Installation Status</span>
+                <span className="inline-flex items-center gap-1 bg-slate-50 border border-borderCustom px-2.5 py-1 rounded-md text-[10px] font-bold text-textDark mt-1">
+                  <ShieldCheck className={`w-3.5 h-3.5 ${isStandalone ? 'text-success' : 'text-slate-400'}`} />
+                  <span>{isStandalone ? 'Running Standalone PWA' : 'Running in Web Browser'}</span>
+                </span>
               </div>
-            )}
-          </div>
-        </aside>
+
+              <p className="mt-1">
+                Campus Marketplace supports Progressive Web App features. Install it on your device for offline catalog access, instant loading, and fullscreen student experience.
+              </p>
+
+              {isInstallable && !isStandalone && (
+                <button
+                  onClick={handleInstallClick}
+                  type="button"
+                  className="bg-primary hover:bg-primary-hover text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-subtle flex items-center justify-center gap-1.5 mt-2 focus:outline-none transition-colors"
+                >
+                  <Sparkles className="w-4.5 h-4.5" />
+                  <span>Install Application</span>
+                </button>
+              )}
+
+              {!isInstallable && !isStandalone && (
+                <div className="bg-slate-50 border border-borderCustom p-2.5 rounded-lg text-[10px] text-muted leading-tight mt-1">
+                  Tip: If installation prompts do not appear, you can manually install the app using your browser's menu (click Share/Add to Home Screen in Safari/Chrome).
+                </div>
+              )}
+            </div>
+          </aside>
+
+          {/* Right Side: Notification Permission Panel */}
+          <aside className="bg-white border border-borderCustom rounded-2xl p-5 shadow-subtle flex flex-col gap-4">
+            <h2 className="text-sm font-bold text-textDark border-b border-borderCustom pb-2.5 flex items-center gap-1.5">
+              <Bell className="w-4.5 h-4.5 text-primary" />
+              <span>Push Notifications</span>
+            </h2>
+
+            <div className="flex flex-col gap-3 text-xs text-muted leading-relaxed">
+              <div>
+                <span className="font-bold text-textDark block mb-0.5">Permission Status</span>
+                <span className={`inline-flex items-center gap-1 border px-2.5 py-1 rounded-md text-[10px] font-bold mt-1 ${
+                  notifPermission === 'granted'
+                    ? 'bg-green-50 border-green-200 text-green-700'
+                    : notifPermission === 'denied'
+                      ? 'bg-red-50 border-red-200 text-red-700'
+                      : 'bg-slate-50 border-borderCustom text-textDark'
+                }`}>
+                  <div className={`w-1.5 h-1.5 rounded-full ${
+                    notifPermission === 'granted'
+                      ? 'bg-green-600'
+                      : notifPermission === 'denied'
+                        ? 'bg-red-600'
+                        : 'bg-slate-400'
+                  }`} />
+                  <span>
+                    {notifPermission === 'granted'
+                      ? 'Enabled'
+                      : notifPermission === 'denied'
+                        ? 'Blocked (Reset in Browser)'
+                        : 'Not Enabled'}
+                  </span>
+                </span>
+              </div>
+
+              <p className="mt-1">
+                Receive real-time push alerts on your phone when you get chat messages, warning triggers, or account updates.
+              </p>
+
+              {notifPermission !== 'granted' && (
+                <button
+                  onClick={handleEnableNotifications}
+                  type="button"
+                  className="bg-primary hover:bg-primary-hover text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-subtle flex items-center justify-center gap-1.5 mt-2 focus:outline-none transition-colors"
+                >
+                  <Bell className="w-4.5 h-4.5" />
+                  <span>Enable Push Alerts</span>
+                </button>
+              )}
+            </div>
+          </aside>
+        </div>
       </div>
     </div>
   );
