@@ -42,11 +42,18 @@ const mapUser = (user: any): User => {
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://campus-be-qkrx.onrender.com';
 
-let currentAccessToken: string | null = null;
+let currentAccessToken: string | null = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
 let unauthorizedCallback: (() => void) | null = null;
 
 export const setAccessToken = (token: string | null) => {
   currentAccessToken = token;
+  if (typeof window !== 'undefined') {
+    if (token) {
+      localStorage.setItem('accessToken', token);
+    } else {
+      localStorage.removeItem('accessToken');
+    }
+  }
 };
 
 export const getAccessToken = () => currentAccessToken;
