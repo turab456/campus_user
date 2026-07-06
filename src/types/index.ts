@@ -77,6 +77,8 @@ export interface Chat {
     avatar: string;
     rating: number;
     college: string;
+    flagged?: boolean;
+    blocked?: boolean;
   };
   lastMessage?: string;
   lastMessageTime?: string;

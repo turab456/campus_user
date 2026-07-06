@@ -478,22 +478,28 @@ export const MessagesPage: React.FC = () => {
             </div>
 
             {/* Message Input Form */}
-            <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-borderCustom flex items-center gap-2 flex-shrink-0">
-              <input
-                type="text"
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder="Type your message here..."
-                className="flex-1 bg-background border border-borderCustom rounded-full py-2 px-4 text-xs text-textDark placeholder-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-              <button
-                type="submit"
-                disabled={!inputText.trim()}
-                className="bg-primary hover:bg-primary-hover text-white p-2.5 rounded-full transition-colors flex items-center justify-center flex-shrink-0 shadow-subtle hover:shadow focus:outline-none disabled:opacity-50"
-              >
-                <Send className="w-4 h-4" />
-              </button>
-            </form>
+            {activeChat.otherParticipant.blocked || activeChat.otherParticipant.flagged ? (
+              <div className="p-3.5 bg-red-50 border-t border-red-100 text-center text-xs font-bold text-red-600 flex-shrink-0">
+                🚫 Messaging is disabled because this user's account is suspended or under review.
+              </div>
+            ) : (
+              <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-borderCustom flex items-center gap-2 flex-shrink-0">
+                <input
+                  type="text"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder="Type your message here..."
+                  className="flex-1 bg-background border border-borderCustom rounded-full py-2 px-4 text-xs text-textDark placeholder-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+                <button
+                  type="submit"
+                  disabled={!inputText.trim()}
+                  className="bg-primary hover:bg-primary-hover text-white p-2.5 rounded-full transition-colors flex items-center justify-center flex-shrink-0 shadow-subtle hover:shadow focus:outline-none disabled:opacity-50"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </form>
+            )}
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center p-8">
