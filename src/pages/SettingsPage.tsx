@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { usePWA } from '../hooks/usePWA';
@@ -9,8 +10,9 @@ import { getToken } from 'firebase/messaging';
 import { default as api } from '../services/backendApi';
 
 export const SettingsPage: React.FC = () => {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, logout } = useAuth();
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const { isInstallable, isStandalone, installApp } = usePWA();
 
   const [notifPermission, setNotifPermission] = useState<NotificationPermission>(
@@ -56,6 +58,17 @@ export const SettingsPage: React.FC = () => {
       showToast('App installed successfully!', 'success');
     } else {
       showToast('Installation cancelled or failed.', 'warning');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      showToast('Logged out successfully', 'success');
+      navigate('/');
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to log out.', 'danger');
     }
   };
 
@@ -178,13 +191,22 @@ export const SettingsPage: React.FC = () => {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={isUpdating}
-            className="bg-primary hover:bg-primary-hover text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-subtle hover:shadow-md transition-colors mt-2 focus:outline-none disabled:opacity-50 self-start"
-          >
-            {isUpdating ? 'Saving...' : 'Save Settings'}
-          </button>
+          <div className="flex items-center gap-3 mt-2">
+            <button
+              type="submit"
+              disabled={isUpdating}
+              className="bg-primary hover:bg-primary-hover text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-subtle hover:shadow-md transition-colors focus:outline-none disabled:opacity-50"
+            >
+              {isUpdating ? 'Saving...' : 'Save Settings'}
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="border border-red-200 hover:bg-red-50 text-red-600 text-xs font-bold py-2.5 px-4 rounded-xl shadow-subtle transition-colors focus:outline-none"
+            >
+              Log Out
+            </button>
+          </div>
         </form>
 
         {/* Right Side: PWA Install Prompts & Status Panel */}
