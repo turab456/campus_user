@@ -53,7 +53,7 @@ export const useFcm = () => {
           }
 
           // Get registration token from FCM using service worker registration
-          const token = await getToken(messaging, { 
+          const token = await getToken(messaging!, { 
             vapidKey,
             serviceWorkerRegistration: registration
           });

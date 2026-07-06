@@ -22,7 +22,7 @@ export const SearchPage: React.FC = () => {
     condition: (searchParams.get('condition')?.split(',') as BookCondition[])?.filter(Boolean) || [],
     minPrice: Number(searchParams.get('minPrice')) || 0,
     maxPrice: Number(searchParams.get('maxPrice')) || 5000,
-
+    college: searchParams.get('college') || '',
     sort: searchParams.get('sort') || 'recent'
   });
 
