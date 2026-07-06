@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { BottomNav } from '../components/BottomNav';
 import { usePWA } from '../hooks/usePWA';
+import { useFcm } from '../hooks/useFcm';
 import { Info, RefreshCw, WifiOff, BookOpen, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -37,6 +38,9 @@ export const MainLayout: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
 
+  // Register FCM Web Push notifications
+  useFcm();
+
   useEffect(() => {
     if (user) {
       const socket = initSocket(user.id);
@@ -62,10 +66,16 @@ export const MainLayout: React.FC = () => {
   // Show footer only on landing page
   const hideFooter = location.pathname !== '/';
 
+  const isMessagesPage = location.pathname.startsWith('/messages');
+
   return (
-    <div className="flex flex-col min-h-screen bg-background pb-24 md:pb-0">
+    <div className={`flex flex-col bg-background ${
+      isMessagesPage ? 'h-screen overflow-hidden pb-14 md:pb-0' : 'min-h-screen pb-24 md:pb-0'
+    }`}>
       {/* Top Navigation */}
-      <Navbar />
+      <div className={isMessagesPage ? 'hidden md:block' : ''}>
+        <Navbar />
+      </div>
 
       {/* Offline Status Alert */}
       {isOffline && (
@@ -96,7 +106,9 @@ export const MainLayout: React.FC = () => {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-6">
+      <main className={`flex-1 w-full max-w-7xl mx-auto ${
+        isMessagesPage ? 'px-0 py-0 md:py-4 flex flex-col min-h-0' : 'px-4 md:px-8 py-6'
+      }`}>
         <Outlet />
       </main>
 

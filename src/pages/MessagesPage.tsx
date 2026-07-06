@@ -249,7 +249,7 @@ export const MessagesPage: React.FC = () => {
 
   if (isLoadingChats) {
     return (
-      <div className="flex h-[75vh] border border-borderCustom rounded-2xl bg-white overflow-hidden animate-pulse">
+      <div className="flex flex-1 min-h-0 border border-borderCustom rounded-2xl bg-white overflow-hidden animate-pulse">
         <div className="w-80 border-r border-borderCustom bg-slate-50 p-4 flex flex-col gap-4">
           <div className="h-6 w-24 bg-slate-200 rounded" />
           <div className="h-10 bg-slate-200 rounded-lg" />
@@ -266,7 +266,7 @@ export const MessagesPage: React.FC = () => {
   }
 
   return (
-    <div className="flex h-[75vh] border border-borderCustom rounded-2xl bg-white overflow-hidden shadow-subtle -mt-2">
+    <div className="flex flex-1 min-h-0 bg-white overflow-hidden shadow-subtle border-0 rounded-none mt-0 md:border md:border-borderCustom md:rounded-2xl md:-mt-2">
       {/* Sidebar: Conversation List */}
       <aside className={`w-full md:w-80 border-r border-borderCustom flex flex-col flex-shrink-0 ${
         showThreadOnMobile ? 'hidden md:flex' : 'flex'

@@ -416,6 +416,12 @@ export const backendApi = {
   async markAllNotificationsRead(): Promise<void> {
     await put<any>('/api/notifications/mark-all-read', {});
   },
+  async registerFcmToken(token: string): Promise<any> {
+    return post<any>('/api/users/fcm-token', { token });
+  },
+  async removeFcmToken(token: string): Promise<any> {
+    return post<any>('/api/users/fcm-token/remove', { token });
+  },
 };
 
 export default backendApi;

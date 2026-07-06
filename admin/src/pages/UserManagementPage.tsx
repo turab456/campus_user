@@ -41,14 +41,27 @@ export const UserManagementPage: React.FC = () => {
       if (actionType === 'delete') {
         await adminApi.deleteUser(selectedUser._id, reason);
         setUsers(users.filter(u => u._id !== selectedUser._id));
+        setSelectedUser(null);
       } else if (actionType === 'block') {
-        await adminApi.blockUser(selectedUser._id, reason);
-        selectedUser.blocked = true;
-        selectedUser.blockReason = reason;
+        const response = await adminApi.blockUser(selectedUser._id, reason);
+        const updatedUser = response.data.data;
+        setUsers(users.map(u => u._id === selectedUser._id ? updatedUser : u));
+        setSelectedUser(updatedUser);
       } else if (actionType === 'unblock') {
-        await adminApi.unblockUser(selectedUser._id);
-        selectedUser.blocked = false;
-        selectedUser.blockReason = undefined;
+        const response = await adminApi.unblockUser(selectedUser._id);
+        const updatedUser = response.data.data;
+        setUsers(users.map(u => u._id === selectedUser._id ? updatedUser : u));
+        setSelectedUser(updatedUser);
+      } else if (actionType === 'flag') {
+        const response = await adminApi.flagUser(selectedUser._id, reason);
+        const updatedUser = response.data.data;
+        setUsers(users.map(u => u._id === selectedUser._id ? updatedUser : u));
+        setSelectedUser(updatedUser);
+      } else if (actionType === 'unflag') {
+        const response = await adminApi.unflagUser(selectedUser._id);
+        const updatedUser = response.data.data;
+        setUsers(users.map(u => u._id === selectedUser._id ? updatedUser : u));
+        setSelectedUser(updatedUser);
       }
       setShowActionModal(false);
       setReason('');
