@@ -205,6 +205,10 @@ export const backendApi = {
     return get<{ success: boolean; message: string }>('/api/auth/verify-email', { token, id });
   },
 
+  async resendVerification(email: string) {
+    return post<{ success: boolean; message: string }>('/api/auth/resend-verification', { email });
+  },
+
   async logout() {
     try {
       await post('/api/auth/logout', {});
