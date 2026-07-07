@@ -8,6 +8,7 @@ import { Info, RefreshCw, WifiOff, BookOpen, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { initSocket, disconnectSocket } from '../services/socket';
+import { AppSetupModal } from '../components/AppSetupModal';
 
 const LinkedInIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -209,6 +210,9 @@ export const MainLayout: React.FC = () => {
 
       {/* Mobile Sticky Tab Navigation */}
       {location.pathname !== '/' && <BottomNav />}
+
+      {/* onboarding app setup modal */}
+      <AppSetupModal />
     </div>
   );
 };

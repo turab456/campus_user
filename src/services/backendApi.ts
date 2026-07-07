@@ -44,6 +44,7 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://campus-be-qkrx.onr
 
 let currentAccessToken: string | null = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
 let unauthorizedCallback: (() => void) | null = null;
+let rateLimitCallback: (() => void) | null = null;
 
 export const setAccessToken = (token: string | null) => {
   currentAccessToken = token;
@@ -60,6 +61,10 @@ export const getAccessToken = () => currentAccessToken;
 
 export const setOnUnauthorized = (cb: () => void) => {
   unauthorizedCallback = cb;
+};
+
+export const setOnRateLimit = (cb: () => void) => {
+  rateLimitCallback = cb;
 };
 
 function toQueryString(params: Record<string, any>): string {
@@ -107,6 +112,10 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
       setAccessToken(null);
       if (unauthorizedCallback) unauthorizedCallback();
     }
+  }
+
+  if (res.status === 429) {
+    if (rateLimitCallback) rateLimitCallback();
   }
 
   return res;
@@ -177,6 +186,9 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 export const backendApi = {
   setOnUnauthorized(cb: () => void) {
     setOnUnauthorized(cb);
+  },
+  setOnRateLimit(cb: () => void) {
+    setOnRateLimit(cb);
   },
   // Auth
   async login(email: string, password?: string) {

@@ -20,11 +20,51 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { VerifyEmailPage } from './pages/VerifyEmailPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
+import { useEffect, useState } from 'react';
+import { backendApi } from './services/backendApi';
+import { useToast } from './context/ToastContext';
+
+const GlobalApiHandler = () => {
+  const { showToast } = useToast();
+  const [showRateLimitModal, setShowRateLimitModal] = useState(false);
+
+  useEffect(() => {
+    backendApi.setOnRateLimit(() => {
+      setShowRateLimitModal(true);
+      showToast('Too many requests. Please wait a moment.', 'warning');
+    });
+  }, [showToast]);
+
+  return (
+    <>
+      {showRateLimitModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative">
+            <h2 className="text-xl font-bold text-textDark mb-2 flex items-center gap-2">
+              <span className="text-amber-500">⚠️</span> Slow Down
+            </h2>
+            <p className="text-sm text-muted mb-6">
+              You are making too many requests. Please wait a moment before trying again.
+            </p>
+            <button
+              onClick={() => setShowRateLimitModal(false)}
+              className="w-full bg-primary text-white font-bold py-2.5 rounded-xl hover:bg-primary/90 transition-colors"
+            >
+              Understood
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
 function App() {
   return (
     <AuthProvider>
       <WishlistProvider>
         <ToastProvider>
+          <GlobalApiHandler />
           <BrowserRouter>
             <Routes>
               {/* App Shell and General Pages */}
