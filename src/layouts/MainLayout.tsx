@@ -69,9 +69,10 @@ export const MainLayout: React.FC = () => {
   const isMessagesPage = location.pathname.startsWith('/messages');
 
   return (
-    <div className={`flex flex-col bg-background ${
-      isMessagesPage ? 'h-screen h-[100dvh] overflow-hidden pb-14 md:pb-0' : 'min-h-screen pb-24 md:pb-0'
-    }`}>
+    <div className={`flex flex-col bg-background ${isMessagesPage
+        ? 'h-screen h-[100dvh] overflow-hidden pt-[env(safe-area-inset-top)] pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pt-0 md:pb-0'
+        : 'min-h-screen pb-24 md:pb-0'
+      }`}>
       {/* Top Navigation */}
       <div className={isMessagesPage ? 'hidden md:block' : ''}>
         <Navbar />
@@ -106,9 +107,8 @@ export const MainLayout: React.FC = () => {
       )}
 
       {/* Main Content Area */}
-      <main className={`flex-1 w-full max-w-7xl mx-auto ${
-        isMessagesPage ? 'px-0 py-0 md:py-4 flex flex-col min-h-0 h-full' : 'px-4 md:px-8 py-6'
-      }`}>
+      <main className={`flex-1 w-full max-w-7xl mx-auto ${isMessagesPage ? 'px-0 py-0 md:py-4 flex flex-col min-h-0 h-full' : 'px-4 md:px-8 py-6'
+        }`}>
         <Outlet />
       </main>
 
