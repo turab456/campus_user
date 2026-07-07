@@ -3,6 +3,7 @@ import { Bell, Check, CheckCheck, MessageSquare, ShieldAlert, AlertTriangle, Ban
 import { useNavigate } from 'react-router-dom';
 import { backendApi as api } from '../services/backendApi';
 import { useAuth } from '../context/AuthContext';
+import { getSocket } from '../services/socket';
 
 interface Notification {
   _id: string;
@@ -52,6 +53,23 @@ export const NotificationBell: React.FC = () => {
     const interval = setInterval(fetchUnreadCount, 30000);
     return () => clearInterval(interval);
   }, [fetchUnreadCount]);
+
+  // Listen for real-time notifications
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    const handleNewNotification = (notif: Notification) => {
+      setNotifications(prev => [notif, ...prev]);
+      setUnreadCount(prev => prev + 1);
+    };
+
+    socket.on('notification', handleNewNotification);
+
+    return () => {
+      socket.off('notification', handleNewNotification);
+    };
+  }, []);
 
   // Fetch full list when dropdown opens
   useEffect(() => {

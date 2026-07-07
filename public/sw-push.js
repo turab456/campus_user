@@ -13,8 +13,8 @@ self.addEventListener('push', function(event) {
   const title = data.title || 'Campus Marketplace';
   const options = {
     body: data.body || '',
-    icon: data.icon || '/pwa-192x192.png',
-    badge: data.badge || '/pwa-192x192.png',
+    icon: data.icon || '/thecampx_logo.png',
+    badge: data.badge || '/thecampx_logo.png',
     data: data.data || {}
   };
 

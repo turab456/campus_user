@@ -126,10 +126,41 @@ export const MessagesPage: React.FC = () => {
       });
     };
 
+    const handleChatStatusUpdated = (data: { chatId: string, listingId: string | null, type: string }) => {
+      const applyStatusUpdate = (chat: Chat) => {
+        if (chat.id !== data.chatId) return chat;
+        const updatedChat = { ...chat };
+        switch (data.type) {
+          case 'sale_pending':
+            updatedChat.bookIsSold = false;
+            updatedChat.salePending = true;
+            updatedChat.buyerConfirmedReceipt = false;
+            break;
+          case 'sale_confirmed':
+            updatedChat.bookIsSold = true;
+            updatedChat.salePending = false;
+            updatedChat.buyerConfirmedReceipt = true;
+            break;
+          case 'sale_denied':
+          case 'sale_canceled':
+            updatedChat.bookIsSold = false;
+            updatedChat.salePending = false;
+            updatedChat.buyerConfirmedReceipt = false;
+            break;
+        }
+        return updatedChat;
+      };
+
+      setChats(prev => prev.map(applyStatusUpdate));
+      setActiveChat(prev => prev ? applyStatusUpdate(prev) : prev);
+    };
+
     socket.on('message', handleIncomingMessage);
+    socket.on('chat_status_updated', handleChatStatusUpdated);
 
     return () => {
       socket.off('message', handleIncomingMessage);
+      socket.off('chat_status_updated', handleChatStatusUpdated);
     };
   }, [activeChat]);
 
