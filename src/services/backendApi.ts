@@ -427,11 +427,14 @@ export const backendApi = {
   async markAllNotificationsRead(): Promise<void> {
     await put<any>('/api/notifications/mark-all-read', {});
   },
-  async registerFcmToken(token: string): Promise<any> {
-    return post<any>('/api/users/fcm-token', { token });
+  async getVapidPublicKey(): Promise<string> {
+    return get<{ success: boolean; publicKey: string }>('/api/users/vapid-public-key').then(r => r.publicKey);
   },
-  async removeFcmToken(token: string): Promise<any> {
-    return post<any>('/api/users/fcm-token/remove', { token });
+  async subscribePush(subscription: any): Promise<any> {
+    return post<any>('/api/users/push-subscription', { subscription });
+  },
+  async unsubscribePush(endpoint: string): Promise<any> {
+    return post<any>('/api/users/push-subscription/remove', { endpoint });
   },
 };
 

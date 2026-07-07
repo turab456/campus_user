@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { BottomNav } from '../components/BottomNav';
 import { usePWA } from '../hooks/usePWA';
-import { useFcm } from '../hooks/useFcm';
+import { useWebPush } from '../hooks/useWebPush';
 import { Info, RefreshCw, WifiOff, BookOpen, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -38,8 +38,8 @@ export const MainLayout: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
 
-  // Register FCM Web Push notifications
-  useFcm();
+  // Register Web Push notifications
+  useWebPush();
 
   useEffect(() => {
     if (user) {

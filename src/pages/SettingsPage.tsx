@@ -5,8 +5,6 @@ import { useToast } from '../context/ToastContext';
 import { usePWA } from '../hooks/usePWA';
 import { User, ShieldCheck, Laptop, PhoneCall, Sparkles, Bell } from 'lucide-react';
 import { COLLEGES, DEPARTMENTS, SEMESTERS } from '../constants';
-import { messaging, isConfigured } from '../services/firebase';
-import { getToken } from 'firebase/messaging';
 import { default as api } from '../services/backendApi';
 
 export const SettingsPage: React.FC = () => {
@@ -83,31 +81,55 @@ export const SettingsPage: React.FC = () => {
       setNotifPermission(permission);
 
       if (permission === 'granted') {
-        if (isConfigured && messaging) {
-          const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
-          if (vapidKey) {
-            const swUrl = `/firebase-messaging-sw.js` +
-              `?apiKey=${encodeURIComponent(import.meta.env.VITE_FIREBASE_API_KEY || '')}` +
-              `&messagingSenderId=${encodeURIComponent(import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '')}` +
-              `&projectId=${encodeURIComponent(import.meta.env.VITE_FIREBASE_PROJECT_ID || '')}` +
-              `&appId=${encodeURIComponent(import.meta.env.VITE_FIREBASE_APP_ID || '')}` +
-              `&authDomain=${encodeURIComponent(import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '')}` +
-              `&storageBucket=${encodeURIComponent(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '')}`;
+        let vapidKey: string;
+        try {
+          vapidKey = await api.getVapidPublicKey();
+        } catch (err) {
+          showToast('Failed to retrieve push credentials from server.', 'danger');
+          return;
+        }
 
-            const registration = await navigator.serviceWorker.register(swUrl);
-            const token = await getToken(messaging, { vapidKey, serviceWorkerRegistration: registration });
-            if (token) {
-              await api.registerFcmToken(token);
+        if (vapidKey && !vapidKey.includes('placeholder')) {
+          const registration = await navigator.serviceWorker.ready;
+          let subscription = await registration.pushManager.getSubscription();
+
+          const urlBase64ToUint8Array = (base64String: string) => {
+            const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+              outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+          };
+
+          if (!subscription) {
+            subscription = await registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(vapidKey)
+            });
+          }
+
+          if (subscription) {
+            const keys = subscription.toJSON().keys;
+            if (keys && keys.p256dh && keys.auth) {
+              const payload = {
+                endpoint: subscription.endpoint,
+                keys: {
+                  p256dh: keys.p256dh,
+                  auth: keys.auth
+                }
+              };
+              await api.subscribePush(payload);
               if (user) {
-                localStorage.setItem(`fcm_token_${user.id}`, token);
+                localStorage.setItem(`push_endpoint_${user.id}`, subscription.endpoint);
               }
               showToast('Push notifications successfully enabled!', 'success');
             }
-          } else {
-            showToast('Allowed, but VAPID key is missing in configuration.', 'warning');
           }
         } else {
-          showToast('Notifications allowed! (FCM in simulation mode)', 'success');
+          showToast('Allowed, but Web Push VAPID key is missing.', 'warning');
         }
       } else if (permission === 'denied') {
         showToast('Notification permission denied. Reset browser settings to enable.', 'warning');

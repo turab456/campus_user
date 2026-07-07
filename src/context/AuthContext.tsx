@@ -69,10 +69,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     try {
       if (user) {
-        const token = localStorage.getItem(`fcm_token_${user.id}`);
-        if (token) {
-          await backendApi.removeFcmToken(token).catch(err => console.warn('Failed to remove FCM token on logout', err));
-          localStorage.removeItem(`fcm_token_${user.id}`);
+        const endpoint = localStorage.getItem(`push_endpoint_${user.id}`);
+        if (endpoint) {
+          await backendApi.unsubscribePush(endpoint).catch(err => console.warn('Failed to remove Push subscription on logout', err));
+          localStorage.removeItem(`push_endpoint_${user.id}`);
         }
       }
       await backendApi.logout();
