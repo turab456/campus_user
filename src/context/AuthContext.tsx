@@ -44,6 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const loggedInUser = await backendApi.login(email, password);
       setUser(loggedInUser);
+      sessionStorage.removeItem('setup_modal_dismissed');
       return true;
     } catch (err) {
       console.error('Login failed', err);
@@ -80,6 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Logout failed', err);
     } finally {
       setUser(null);
+      sessionStorage.removeItem('setup_modal_dismissed');
     }
   };
 

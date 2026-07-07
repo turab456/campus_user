@@ -29,7 +29,7 @@ export const AppSetupModal: React.FC = () => {
       return;
     }
 
-    const needsNotifications = permission === 'default';
+    const needsNotifications = permission !== 'granted';
     const needsPwa = isInstallable && !isStandalone && localStorage.getItem('pwa_installed') !== 'true';
 
     // Open if there is something pending to setup
@@ -86,7 +86,7 @@ export const AppSetupModal: React.FC = () => {
   };
 
   // If there are no actionable toggles to show, just don't render
-  const showNotificationSection = permission === 'default';
+  const showNotificationSection = permission !== 'granted';
   const showPwaSection = isInstallable && !isStandalone && localStorage.getItem('pwa_installed') !== 'true';
 
   if (!showNotificationSection && !showPwaSection) {
