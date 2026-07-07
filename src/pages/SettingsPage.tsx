@@ -124,6 +124,7 @@ export const SettingsPage: React.FC = () => {
               await api.subscribePush(payload);
               if (user) {
                 localStorage.setItem(`push_endpoint_${user.id}`, subscription.endpoint);
+                localStorage.setItem(`push_vapid_key_${user.id}`, vapidKey);
               }
               showToast('Push notifications successfully enabled!', 'success');
             }

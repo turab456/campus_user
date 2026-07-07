@@ -58,6 +58,16 @@ export const useWebPush = () => {
         // 4. Get or create push subscription
         let subscription = await registration.pushManager.getSubscription();
         
+        if (subscription) {
+          const savedVapidKey = localStorage.getItem(`push_vapid_key_${user.id}`);
+          if (savedVapidKey !== vapidKey) {
+            console.log('[Web Push Client] VAPID key changed, renewing subscription...');
+            await subscription.unsubscribe();
+            subscription = null;
+            localStorage.removeItem(`push_endpoint_${user.id}`);
+          }
+        }
+        
         if (!subscription) {
           console.log('[Web Push Client] Creating new push subscription...');
           subscription = await registration.pushManager.subscribe({
@@ -81,9 +91,11 @@ export const useWebPush = () => {
             };
 
             const savedEndpoint = localStorage.getItem(`push_endpoint_${user.id}`);
-            if (savedEndpoint !== subscription.endpoint) {
+            const savedVapidKey = localStorage.getItem(`push_vapid_key_${user.id}`);
+            if (savedEndpoint !== subscription.endpoint || savedVapidKey !== vapidKey) {
               await api.subscribePush(payload);
               localStorage.setItem(`push_endpoint_${user.id}`, subscription.endpoint);
+              localStorage.setItem(`push_vapid_key_${user.id}`, vapidKey);
               console.log('[Web Push Client] Subscription successfully registered on the backend.');
             }
           }
