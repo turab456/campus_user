@@ -151,7 +151,18 @@ export const ListingDetailsPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-8 items-start">
+      {/* Full Width Warning Banner for Risky Listings */}
+      {book.status === 'risky' && (
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl flex items-start gap-3">
+          <span className="text-xl leading-none">⚠️</span>
+          <div>
+            <h4 className="font-bold text-sm">Proceed with Caution</h4>
+            <p className="text-xs mt-0.5">This listing has been flagged by our community or auto-moderation systems. We recommend meeting in person at a safe campus location and avoiding advance digital payments.</p>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col md:flex-row gap-8 items-start w-full">
         {/* Left Column: Image Gallery */}
         <div className="flex-1 w-full flex flex-col gap-4">
           <div className="bg-slate-50 border border-borderCustom rounded-2xl overflow-hidden aspect-[4/3] relative flex items-center justify-center">

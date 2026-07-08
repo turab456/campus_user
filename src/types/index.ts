@@ -45,7 +45,7 @@ export interface Book {
   createdAt: string;
   isFeatured: boolean;
   isPopular: boolean;
-  status: 'active' | 'sold' | 'pending';
+  status: 'active' | 'sold' | 'pending' | 'risky';
   salePending?: boolean;
   sellerSpamScore?: number;
   sellerScamScore?: number;

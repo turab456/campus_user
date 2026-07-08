@@ -113,7 +113,7 @@ export const HomePage: React.FC = () => {
               <div className="flex items-center gap-2 mb-5">
                 <MapPin className="w-5 h-5 text-primary" />
                 <div>
-                  <h2 className="text-base md:text-lg font-bold text-textDark leading-tight">Available on Your Campus</h2>
+                  <h2 className="text-base md:text-lg font-bold text-textDark leading-tight">Available Near By You</h2>
                   <p className="text-[10px] text-muted truncate mt-0.5 max-w-sm md:max-w-md">{user.college}</p>
                 </div>
               </div>

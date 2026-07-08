@@ -47,12 +47,12 @@ export const NotificationBell: React.FC = () => {
     }
   }, []);
 
-  // Poll unread count every 30 seconds
+  // Fetch unread count on mount only (real-time updates handled by socket)
   useEffect(() => {
-    fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
-  }, [fetchUnreadCount]);
+    if (user) {
+      fetchUnreadCount();
+    }
+  }, [fetchUnreadCount, user]);
 
   // Listen for real-time notifications
   useEffect(() => {
