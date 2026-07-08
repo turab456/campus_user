@@ -104,6 +104,7 @@ export const Navbar: React.FC = () => {
                 className="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary/25 rounded-full p-0.5"
               >
                 <img
+                  key={user.avatar}
                   src={user.avatar}
                   alt={user.name}
                   className="w-8 h-8 rounded-full border border-borderCustom object-cover"
@@ -173,6 +174,7 @@ export const Navbar: React.FC = () => {
           {user ? (
             <Link to="/profile" className="flex items-center">
               <img
+                key={user.avatar}
                 src={user.avatar}
                 alt={user.name}
                 className="w-7 h-7 rounded-full border border-borderCustom object-cover"

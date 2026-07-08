@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { usePWA } from '../hooks/usePWA';
-import { User, ShieldCheck, Laptop, PhoneCall, Sparkles, Bell } from 'lucide-react';
+import { User, ShieldCheck, Laptop, PhoneCall, Sparkles, Bell, Pencil } from 'lucide-react';
 import { COLLEGES, DEPARTMENTS, SEMESTERS } from '../constants';
 import { default as api } from '../services/backendApi';
 import { AddressForm } from '../components/AddressForm';
 import type { AddressFormData } from '../components/AddressForm';
 
 export const SettingsPage: React.FC = () => {
-  const { user, updateProfile, logout } = useAuth();
+  const { user, isLoading, updateProfile, logout } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
   const { isInstallable, isStandalone, installApp } = usePWA();
@@ -20,23 +20,45 @@ export const SettingsPage: React.FC = () => {
   );
 
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    college: user?.college || '',
-    department: user?.department || '',
-    semester: user?.semester || 1,
-    avatar: user?.avatar || '',
+    name: '',
+    college: '',
+    department: '',
+    semester: 1,
+    avatar: '',
   });
 
   const [address, setAddress] = useState<AddressFormData>({
-    addressLine: user?.addressLine || '',
-    city: user?.city || '',
-    state: user?.state || '',
-    pincode: user?.pincode || '',
-    country: user?.country || 'India',
-    coordinates: user?.coordinates || null,
+    addressLine: '',
+    city: '',
+    state: '',
+    pincode: '',
+    country: 'India',
+    countryCode: 'IN',
+    coordinates: null,
   });
   
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // Sync form when user profile loads or updates after save
+  useEffect(() => {
+    if (!user) return;
+    setFormData({
+      name: user.name || '',
+      college: user.college || '',
+      department: user.department || '',
+      semester: user.semester || 1,
+      avatar: user.avatar || '',
+    });
+    setAddress({
+      addressLine: user.addressLine || '',
+      city: user.city || '',
+      state: user.state || '',
+      pincode: user.pincode || '',
+      country: user.country || 'India',
+      countryCode: '',
+      coordinates: user.coordinates || null,
+    });
+  }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,6 +182,23 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="max-w-2xl mx-auto flex flex-col gap-6">
+        <div className="h-8 w-48 bg-slate-100 rounded-lg animate-pulse" />
+        <div className="h-64 bg-slate-100 rounded-2xl animate-pulse" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="max-w-2xl mx-auto text-center py-12">
+        <p className="text-sm text-muted">Please log in to manage your account settings.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto flex flex-col gap-6">
       <div>
@@ -172,14 +211,45 @@ export const SettingsPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="md:col-span-2 bg-white border border-borderCustom rounded-2xl p-5 md:p-6 shadow-subtle flex flex-col gap-4">
           <h2 className="text-sm font-bold text-textDark border-b border-borderCustom pb-2.5">Student Credentials</h2>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-bold text-textDark uppercase tracking-wider">Full Name</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
-            />
+          <div className="flex flex-col md:flex-row gap-5 md:items-center">
+            {/* Avatar Section */}
+            <div className="relative w-16 h-16 flex-shrink-0">
+              <img
+                key={formData.avatar}
+                src={formData.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=800&auto=format&fit=crop&q=80'}
+                alt="Profile Avatar"
+                className="w-16 h-16 rounded-full object-cover border-2 border-borderCustom"
+              />
+              <label className="absolute -bottom-1 -right-1 flex items-center justify-center w-6 h-6 bg-primary text-white rounded-full shadow cursor-pointer hover:bg-primary-hover transition-colors">
+                <Pencil className="w-3 h-3" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setFormData(prev => ({ ...prev, avatar: reader.result as string }));
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </label>
+            </div>
+
+            {/* Full Name Section */}
+            <div className="flex flex-col gap-1 flex-1">
+              <label className="text-xs font-bold text-textDark uppercase tracking-wider">Full Name</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                className="bg-background border border-borderCustom rounded-lg p-2.5 pr-8 truncate text-xs text-textDark focus:border-primary focus:outline-none w-full"
+              />
+            </div>
           </div>
 
           <div className="flex flex-col gap-1">
@@ -187,7 +257,7 @@ export const SettingsPage: React.FC = () => {
             <select
               value={formData.college}
               onChange={(e) => setFormData(prev => ({ ...prev, college: e.target.value }))}
-              className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+              className="bg-background border border-borderCustom rounded-lg p-2.5 pr-8 truncate text-xs text-textDark focus:border-primary focus:outline-none"
             >
               {COLLEGES.map(c => (
                 <option key={c} value={c}>{c}</option>
@@ -196,12 +266,12 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col justify-end gap-1 h-full">
               <label className="text-xs font-bold text-textDark uppercase tracking-wider">Department</label>
               <select
                 value={formData.department}
                 onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
-                className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                className="bg-background border border-borderCustom rounded-lg p-2.5 pr-8 truncate text-xs text-textDark focus:border-primary focus:outline-none"
               >
                 {DEPARTMENTS.map(d => (
                   <option key={d} value={d}>{d}</option>
@@ -209,12 +279,12 @@ export const SettingsPage: React.FC = () => {
               </select>
             </div>
 
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col justify-end gap-1 h-full">
               <label className="text-xs font-bold text-textDark uppercase tracking-wider">Current Semester</label>
               <select
                 value={formData.semester}
                 onChange={(e) => setFormData(prev => ({ ...prev, semester: Number(e.target.value) }))}
-                className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                className="bg-background border border-borderCustom rounded-lg p-2.5 pr-8 truncate text-xs text-textDark focus:border-primary focus:outline-none"
               >
                 {SEMESTERS.map(s => (
                   <option key={s} value={s}>Semester {s}</option>
@@ -223,15 +293,7 @@ export const SettingsPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-bold text-textDark uppercase tracking-wider">Profile Avatar Image Link</label>
-            <input
-              type="text"
-              value={formData.avatar}
-              onChange={(e) => setFormData(prev => ({ ...prev, avatar: e.target.value }))}
-              className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
-            />
-          </div>
+
 
           {/* Address Section */}
           <div className="pt-2 border-t border-borderCustom">

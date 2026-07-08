@@ -42,8 +42,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password?: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      const loggedInUser = await backendApi.login(email, password);
-      setUser(loggedInUser);
+      await backendApi.login(email, password);
+      const profile = await backendApi.getUserProfile();
+      setUser(profile);
       sessionStorage.removeItem('setup_modal_dismissed');
       return true;
     } catch (err) {

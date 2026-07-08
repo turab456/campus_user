@@ -28,6 +28,7 @@ export const AppSetupModal: React.FC = () => {
     state: '',
     pincode: '',
     country: 'India',
+    countryCode: 'IN',
     coordinates: null,
   });
   const [userCollege, setUserCollege] = useState('');
@@ -44,6 +45,7 @@ export const AppSetupModal: React.FC = () => {
         state: user.state || '',
         pincode: user.pincode || '',
         country: user.country || 'India',
+        countryCode: '',
         coordinates: user.coordinates || null,
       });
       setUserCollege(user.college || COLLEGES[0] || '');
@@ -175,7 +177,7 @@ export const AppSetupModal: React.FC = () => {
                 <select
                   value={userDepartment}
                   onChange={(e) => setUserDepartment(e.target.value)}
-                  className="bg-background border border-borderCustom rounded-lg p-2 text-xs text-textDark focus:border-primary focus:outline-none"
+                  className="bg-background border border-borderCustom rounded-lg p-2 pr-8 truncate text-xs text-textDark focus:border-primary focus:outline-none"
                 >
                   {DEPARTMENTS.map(d => (
                     <option key={d} value={d}>{d}</option>
@@ -188,7 +190,7 @@ export const AppSetupModal: React.FC = () => {
                 <select
                   value={userSemester}
                   onChange={(e) => setUserSemester(Number(e.target.value))}
-                  className="bg-background border border-borderCustom rounded-lg p-2 text-xs text-textDark focus:border-primary focus:outline-none"
+                  className="bg-background border border-borderCustom rounded-lg p-2 pr-8 truncate text-xs text-textDark focus:border-primary focus:outline-none"
                 >
                   {SEMESTERS.map(s => (
                     <option key={s} value={s}>Sem {s}</option>
