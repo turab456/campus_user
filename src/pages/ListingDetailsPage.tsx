@@ -60,7 +60,7 @@ export const ListingDetailsPage: React.FC = () => {
         setIsLoading(false);
       }
     };
-    
+
     loadBookDetails();
     setActiveImageIndex(0);
   }, [id]);
@@ -108,7 +108,7 @@ export const ListingDetailsPage: React.FC = () => {
       navigate('/login');
       return;
     }
-    
+
     if (user.id === book.sellerId) {
       showToast('This is your own listing.', 'info');
       return;
@@ -160,7 +160,7 @@ export const ListingDetailsPage: React.FC = () => {
               alt={book.title}
               className="w-full h-full object-cover"
             />
-            
+
             {/* Gallery Navigation Arrows (if multiple images exist) */}
             {book.images.length > 1 && (
               <>
@@ -187,9 +187,8 @@ export const ListingDetailsPage: React.FC = () => {
                 <button
                   key={idx}
                   onClick={() => setActiveImageIndex(idx)}
-                  className={`w-20 h-16 rounded-lg overflow-hidden border-2 bg-slate-50 focus:outline-none ${
-                    activeImageIndex === idx ? 'border-primary' : 'border-borderCustom hover:border-slate-300'
-                  }`}
+                  className={`w-20 h-16 rounded-lg overflow-hidden border-2 bg-slate-50 focus:outline-none ${activeImageIndex === idx ? 'border-primary' : 'border-borderCustom hover:border-slate-300'
+                    }`}
                 >
                   <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
                 </button>
@@ -200,7 +199,7 @@ export const ListingDetailsPage: React.FC = () => {
 
         {/* Right Column: Book details, seller info and CTAs */}
         <div className="w-full md:w-[400px] bg-white border border-borderCustom rounded-2xl p-5 md:p-6 shadow-subtle flex flex-col gap-5 sticky top-24">
-          
+
           {/* Top header: category and condition */}
           <div className="flex items-center justify-between gap-3">
             <span className="text-[10px] font-bold text-primary uppercase tracking-widest">
@@ -285,7 +284,7 @@ export const ListingDetailsPage: React.FC = () => {
               <h3 className="font-bold text-xs text-textDark uppercase tracking-wider mb-1.5">Description</h3>
               <p className="text-xs text-muted leading-relaxed whitespace-pre-line">{book.description}</p>
             </div>
-            
+
             <div className="flex flex-col gap-2.5 text-xs text-muted">
               {/* Course Info shown only for books & notes */}
               {(book.category === 'books' || book.category === 'notes') && book.department && (
@@ -322,7 +321,7 @@ export const ListingDetailsPage: React.FC = () => {
                 <div>
                   <span className="font-semibold text-textDark block">Pickup Spot</span>
                   <span className="text-[11px] block mt-0.5 leading-tight">{book.pickupLocation}</span>
-                  {book.distanceKm !== undefined && (
+                  {/* {book.distanceKm !== undefined && (
                     <span className="text-[10px] text-muted block mt-1 leading-none">
                       Distance: <strong className="text-textDark">{book.distanceKm} km away</strong>
                       {book.isNearMe && (
@@ -331,7 +330,7 @@ export const ListingDetailsPage: React.FC = () => {
                         </span>
                       )}
                     </span>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>
@@ -360,14 +359,13 @@ export const ListingDetailsPage: React.FC = () => {
                   <MessageSquare className="w-4 h-4" />
                   <span>{isContacting ? 'Opening Chat...' : 'Contact Seller'}</span>
                 </button>
-                
+
                 <button
                   onClick={handleSaveToggle}
-                  className={`w-11 h-11 rounded-lg border flex items-center justify-center shadow-subtle transition-colors focus:outline-none ${
-                    saved
-                      ? 'text-danger bg-red-50 border-red-200 hover:bg-red-100'
-                      : 'text-muted border-borderCustom hover:text-textDark hover:bg-[#F5F3EF]'
-                  }`}
+                  className={`w-11 h-11 rounded-lg border flex items-center justify-center shadow-subtle transition-colors focus:outline-none ${saved
+                    ? 'text-danger bg-red-50 border-red-200 hover:bg-red-100'
+                    : 'text-muted border-borderCustom hover:text-textDark hover:bg-[#F5F3EF]'
+                    }`}
                   title={saved ? 'Remove from saved' : 'Save to wishlist'}
                 >
                   <Heart className={`w-4 h-4 ${saved ? 'fill-current' : ''}`} />
