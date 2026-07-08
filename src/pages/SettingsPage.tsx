@@ -8,6 +8,7 @@ import { COLLEGES, DEPARTMENTS, SEMESTERS } from '../constants';
 import { default as api } from '../services/backendApi';
 import { AddressForm } from '../components/AddressForm';
 import type { AddressFormData } from '../components/AddressForm';
+import { compressAvatar } from '../utils/imageCompression';
 
 export const SettingsPage: React.FC = () => {
   const { user, isLoading, updateProfile, logout } = useAuth();
@@ -37,6 +38,7 @@ export const SettingsPage: React.FC = () => {
     coordinates: null,
   });
   
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Sync form when user profile loads or updates after save
@@ -49,6 +51,7 @@ export const SettingsPage: React.FC = () => {
       semester: user.semester || 1,
       avatar: user.avatar || '',
     });
+    setAvatarFile(null);
     setAddress({
       addressLine: user.addressLine || '',
       city: user.city || '',
@@ -69,8 +72,10 @@ export const SettingsPage: React.FC = () => {
     
     setIsUpdating(true);
     try {
+      const { avatar, ...profileFields } = formData;
       const success = await updateProfile({
-        ...formData,
+        ...profileFields,
+        avatarFile,
         addressLine: address.addressLine,
         city: address.city,
         state: address.state,
@@ -83,9 +88,9 @@ export const SettingsPage: React.FC = () => {
       } else {
         showToast('Failed to save settings.', 'danger');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      showToast('Failed to update settings.', 'danger');
+      showToast(err?.message || 'Failed to update settings.', 'danger');
     } finally {
       setIsUpdating(false);
     }
@@ -226,14 +231,19 @@ export const SettingsPage: React.FC = () => {
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setFormData(prev => ({ ...prev, avatar: reader.result as string }));
-                      };
-                      reader.readAsDataURL(file);
+                    if (!file) return;
+                    try {
+                      const compressed = await compressAvatar(file);
+                      setAvatarFile(compressed);
+                      setFormData((prev) => ({
+                        ...prev,
+                        avatar: URL.createObjectURL(compressed),
+                      }));
+                    } catch (err) {
+                      console.error(err);
+                      showToast('Could not process image. Try a smaller photo.', 'danger');
                     }
                   }}
                 />

@@ -8,7 +8,7 @@ interface AuthContextType {
   login: (email: string, password?: string) => Promise<boolean>;
   register: (name: string, email: string, password?: string, college?: string, department?: string, semester?: number) => Promise<boolean>;
   logout: () => Promise<void>;
-  updateProfile: (updates: Partial<User>) => Promise<boolean>;
+  updateProfile: (updates: Partial<User> & { avatarFile?: File | null }) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -86,15 +86,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const updateProfile = async (updates: Partial<User>): Promise<boolean> => {
+  const updateProfile = async (updates: Partial<User> & { avatarFile?: File | null }): Promise<boolean> => {
     if (!user) return false;
     try {
       const updated = await backendApi.updateProfile(user.id, updates);
       setUser(updated);
       return true;
-    } catch (err) {
+    } catch (err: any) {
       console.error('Update profile failed', err);
-      return false;
+      throw err;
     }
   };
 

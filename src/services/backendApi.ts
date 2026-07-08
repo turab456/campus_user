@@ -158,6 +158,21 @@ async function post<T>(path: string, body: any): Promise<T> {
   return (await res.json()) as T;
 }
 
+async function putFormData<T>(path: string, formData: FormData): Promise<T> {
+  const res = await fetchWithAuth(`${BASE_URL}${path}`, {
+    method: 'PUT',
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const error = new Error(err.message || `PUT ${path} failed with ${res.status}`);
+    (error as any).status = res.status;
+    (error as any).isHttpError = true;
+    throw error;
+  }
+  return (await res.json()) as T;
+}
+
 async function put<T>(path: string, body: any): Promise<T> {
   const res = await fetchWithAuth(`${BASE_URL}${path}`, {
     method: 'PUT',
@@ -304,9 +319,36 @@ export const backendApi = {
   async getUserProfile() {
     return get<{ success: boolean; user: any }>('/api/users/me').then((r) => mapUser(r.user));
   },
-  async updateProfile(id: string | Partial<User>, updates?: Partial<User>) {
-    const payload = updates || (id as Partial<User>);
-    return put<{ success: boolean; user: any }>('/api/users/me', payload).then((r) => mapUser(r.user));
+  async updateProfile(id: string | Partial<User>, updates?: Partial<User> & { avatarFile?: File | null }) {
+    const payload = (updates || (id as Partial<User> & { avatarFile?: File | null }));
+    const { avatarFile, avatar, ...rest } = payload;
+    const hasNewAvatar = Boolean(avatarFile || (avatar && avatar.startsWith('data:image')));
+
+    if (hasNewAvatar) {
+      const formData = new FormData();
+      if (avatarFile) {
+        formData.append('avatar', avatarFile, avatarFile.name);
+      } else if (avatar?.startsWith('data:image')) {
+        const blob = await fetch(avatar).then((r) => r.blob());
+        formData.append('avatar', blob, 'avatar.jpg');
+      }
+
+      Object.entries(rest).forEach(([key, value]) => {
+        if (value === undefined || value === null) return;
+        if (key === 'coordinates') {
+          formData.append(key, JSON.stringify(value));
+        } else {
+          formData.append(key, String(value));
+        }
+      });
+
+      return putFormData<{ success: boolean; user: any }>('/api/users/me', formData).then((r) =>
+        mapUser(r.user)
+      );
+    }
+
+    const jsonPayload = { ...rest } as Partial<User>;
+    return put<{ success: boolean; user: any }>('/api/users/me', jsonPayload).then((r) => mapUser(r.user));
   },
   async getSellerDetails(id: string) {
     const res = await get<{ success: boolean; user: any; listings: any[]; reviews: any[] }>(`/api/users/${id}`);
