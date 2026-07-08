@@ -25,6 +25,8 @@ const mapListing = (listing: any): Book => {
     sellerSpamScore: seller.spamScore || 0,
     sellerScamScore: seller.scamScore || 0,
     metadata: listing.metadata || {},
+    distanceKm: listing.distanceKm,
+    isNearMe: listing.isNearMe,
   };
 };
 
@@ -37,6 +39,11 @@ const mapUser = (user: any): User => {
     rating: user.rating || 5.0,
     reviewsCount: user.reviewsCount || 0,
     joinedDate: user.joinedDate || user.createdAt || new Date().toISOString(),
+    addressLine: user.addressLine || '',
+    city: user.city || '',
+    state: user.state || '',
+    pincode: user.pincode || '',
+    coordinates: user.coordinates,
   };
 };
 
@@ -245,6 +252,7 @@ export const backendApi = {
     if (filters?.minPrice && filters.minPrice > 0) params.minPrice = String(filters.minPrice);
     if (filters?.maxPrice && filters.maxPrice < 5000) params.maxPrice = String(filters.maxPrice);
     if (filters?.sort && filters.sort !== 'recent') params.sort = filters.sort;
+    if (filters?.nearMe) params.nearMe = String(filters.nearMe);
 
     return get<{ success: boolean; listings: any[] }>(
       '/api/listings/search',

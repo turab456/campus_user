@@ -23,7 +23,8 @@ export const SearchPage: React.FC = () => {
     minPrice: Number(searchParams.get('minPrice')) || 0,
     maxPrice: Number(searchParams.get('maxPrice')) || 5000,
     college: searchParams.get('college') || '',
-    sort: searchParams.get('sort') || 'recent'
+    sort: searchParams.get('sort') || 'recent',
+    nearMe: searchParams.get('nearMe') === 'true'
   });
 
   // Trigger search on filter changes or URL updates
@@ -39,9 +40,10 @@ export const SearchPage: React.FC = () => {
         if (filters.maxPrice < 5000) queryParams.maxPrice = String(filters.maxPrice);
 
         if (filters.sort !== 'recent') queryParams.sort = filters.sort;
+        if (filters.nearMe) queryParams.nearMe = 'true';
         
         setSearchParams(queryParams);
-
+ 
         const data = await api.getBooks(filters);
         setBooks(data);
       } catch (err) {
@@ -50,16 +52,17 @@ export const SearchPage: React.FC = () => {
         setIsLoading(false);
       }
     };
-
+ 
     fetchFilteredListings();
   }, [filters, setSearchParams]);
-
+ 
   // Handle URL change externally (e.g. from navbar search)
   useEffect(() => {
     setFilters(prev => ({
       ...prev,
       query: searchParams.get('query') || '',
       category: searchParams.get('category') || 'all',
+      nearMe: searchParams.get('nearMe') === 'true'
     }));
   }, [searchParams]);
 
@@ -86,7 +89,8 @@ export const SearchPage: React.FC = () => {
       minPrice: 0,
       maxPrice: 5000,
       college: '',
-      sort: 'recent'
+      sort: 'recent',
+      nearMe: false
     });
     setIsFilterSheetOpen(false);
   };
@@ -151,6 +155,31 @@ export const SearchPage: React.FC = () => {
             );
           })}
         </div>
+      </div>
+
+      {/* Near Me Toggle */}
+      <div>
+        <h4 className="font-bold text-xs text-textDark mb-3 uppercase tracking-wider">Location</h4>
+        <label className="flex items-center gap-3 cursor-pointer select-none group">
+          <div
+            onClick={() => setFilters(prev => ({ ...prev, nearMe: !prev.nearMe }))}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+              filters.nearMe ? 'bg-primary' : 'bg-slate-200 group-hover:bg-slate-300'
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                filters.nearMe ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </div>
+          <div>
+            <span className="text-xs font-semibold text-textDark flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 text-primary" /> Near Me
+            </span>
+            <p className="text-[10px] text-muted leading-tight mt-0.5">Sellers within 10 km of you</p>
+          </div>
+        </label>
       </div>
 
       {/* Clear Button */}
@@ -231,6 +260,14 @@ export const SearchPage: React.FC = () => {
             <span className="bg-slate-100 border border-borderCustom text-textDark text-[10px] font-semibold pl-2.5 pr-1.5 py-1 rounded-md flex items-center gap-1">
               <span>Category: {CATEGORIES.find(c => c.id === filters.category)?.name}</span>
               <button onClick={() => setFilters(prev => ({ ...prev, category: 'all' }))} className="p-0.5 rounded-full hover:bg-slate-200">
+                <X className="w-2.5 h-2.5" />
+              </button>
+            </span>
+          )}
+          {filters.nearMe && (
+            <span className="bg-slate-100 border border-borderCustom text-textDark text-[10px] font-semibold pl-2.5 pr-1.5 py-1 rounded-md flex items-center gap-1">
+              <span>Location: Near Me</span>
+              <button onClick={() => setFilters(prev => ({ ...prev, nearMe: false }))} className="p-0.5 rounded-full hover:bg-slate-200">
                 <X className="w-2.5 h-2.5" />
               </button>
             </span>

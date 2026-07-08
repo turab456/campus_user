@@ -14,6 +14,11 @@ export interface User {
   flagged?: boolean;
   blocked?: boolean;
   blockReason?: string;
+  addressLine?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  coordinates?: { lat: number; lng: number };
 }
 
 export type BookCondition = 'New' | 'Like New' | 'Very Good' | 'Good' | 'Acceptable';
@@ -44,6 +49,8 @@ export interface Book {
   sellerSpamScore?: number;
   sellerScamScore?: number;
   metadata?: Record<string, any>;
+  distanceKm?: number;
+  isNearMe?: boolean;
 }
 
 export interface Review {
@@ -96,4 +103,5 @@ export interface SearchFilters {
   maxPrice: number;
   college: string;
   sort: string;
+  nearMe: boolean;
 }

@@ -23,6 +23,10 @@ export const SettingsPage: React.FC = () => {
     department: user?.department || '',
     semester: user?.semester || 1,
     avatar: user?.avatar || '',
+    addressLine: user?.addressLine || '',
+    city: user?.city || '',
+    state: user?.state || '',
+    pincode: user?.pincode || '',
   });
   
   const [isUpdating, setIsUpdating] = useState(false);
@@ -212,6 +216,59 @@ export const SettingsPage: React.FC = () => {
               onChange={(e) => setFormData(prev => ({ ...prev, avatar: e.target.value }))}
               className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
             />
+          </div>
+
+          {/* Address Section */}
+          <div className="pt-2 border-t border-borderCustom">
+            <h2 className="text-sm font-bold text-textDark pb-2.5 flex items-center gap-1.5 mb-3">
+              <span className="text-primary">📍</span> Address Details
+            </h2>
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-textDark uppercase tracking-wider">Address Line</label>
+                <input
+                  type="text"
+                  placeholder="Apartment, Street address, etc."
+                  value={formData.addressLine}
+                  onChange={(e) => setFormData(prev => ({ ...prev, addressLine: e.target.value }))}
+                  className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-textDark uppercase tracking-wider">City</label>
+                  <input
+                    type="text"
+                    placeholder="City"
+                    value={formData.city}
+                    onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                    className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-textDark uppercase tracking-wider">State</label>
+                  <input
+                    type="text"
+                    placeholder="State"
+                    value={formData.state}
+                    onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
+                    className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-textDark uppercase tracking-wider">Pincode / Postal Code</label>
+                <input
+                  type="text"
+                  placeholder="Pincode"
+                  value={formData.pincode}
+                  onChange={(e) => setFormData(prev => ({ ...prev, pincode: e.target.value }))}
+                  className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center gap-3 mt-2">

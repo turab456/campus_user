@@ -3,19 +3,48 @@ import { useAuth } from '../context/AuthContext';
 import { usePWA } from '../hooks/usePWA';
 import { useWebPush } from '../hooks/useWebPush';
 import { Modal } from './Modal';
-import { Bell, Smartphone } from 'lucide-react';
+import { Bell, Smartphone, MapPin, User as UserIcon } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import { COLLEGES, DEPARTMENTS, SEMESTERS } from '../constants';
 
 export const AppSetupModal: React.FC = () => {
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const { showToast } = useToast();
   const { isInstallable, isStandalone, installApp } = usePWA();
   const { permission, requestPushPermission } = useWebPush();
+  
   const [isOpen, setIsOpen] = useState(false);
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(permission === 'granted');
   const [isPwaInstalled, setIsPwaInstalled] = useState(
     isStandalone || localStorage.getItem('pwa_installed') === 'true'
   );
+
+  // Form State
+  const [addressLine, setAddressLine] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [pincode, setPincode] = useState('');
+  const [userCollege, setUserCollege] = useState('');
+  const [userDepartment, setUserDepartment] = useState('');
+  const [userSemester, setUserSemester] = useState(1);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Populate form details when user is loaded
+  useEffect(() => {
+    if (user) {
+      setAddressLine(user.addressLine || '');
+      setCity(user.city || '');
+      setState(user.state || '');
+      setPincode(user.pincode || '');
+      setUserCollege(user.college || COLLEGES[0] || '');
+      setUserDepartment(user.department || DEPARTMENTS[0] || '');
+      setUserSemester(user.semester || 1);
+    }
+  }, [user]);
+
+  const needsAddress = user ? (!user.city || !user.pincode) : false;
+  const needsNotifications = permission !== 'granted';
+  const needsPwa = isInstallable && !isStandalone && localStorage.getItem('pwa_installed') !== 'true';
 
   // Check if we should display the modal
   useEffect(() => {
@@ -29,14 +58,11 @@ export const AppSetupModal: React.FC = () => {
       return;
     }
 
-    const needsNotifications = permission !== 'granted';
-    const needsPwa = isInstallable && !isStandalone && localStorage.getItem('pwa_installed') !== 'true';
-
     // Open if there is something pending to setup
-    if (needsNotifications || needsPwa) {
+    if (needsAddress || needsNotifications || needsPwa) {
       setIsOpen(true);
     }
-  }, [user, permission, isInstallable, isStandalone]);
+  }, [user, permission, isInstallable, isStandalone, needsAddress, needsNotifications, needsPwa]);
 
   // Synchronize state when hook permissions update
   useEffect(() => {
@@ -48,7 +74,7 @@ export const AppSetupModal: React.FC = () => {
   }, [isStandalone]);
 
   const handleNotificationToggle = async () => {
-    if (isNotificationsEnabled) return; // Cannot turn off directly from PWA UI (must be settings)
+    if (isNotificationsEnabled) return;
     
     try {
       const result = await requestPushPermission();
@@ -80,95 +106,240 @@ export const AppSetupModal: React.FC = () => {
     }
   };
 
+  const handleSaveAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!city.trim() || !pincode.trim() || !addressLine.trim() || !state.trim()) {
+      showToast('Please fill out all address fields.', 'warning');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const success = await updateProfile({
+        addressLine,
+        city,
+        state,
+        pincode,
+        college: userCollege,
+        department: userDepartment,
+        semester: userSemester
+      });
+      if (success) {
+        showToast('Profile and address updated!', 'success');
+      } else {
+        showToast('Failed to update address.', 'danger');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Error saving profile changes.', 'danger');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleClose = () => {
     sessionStorage.setItem('setup_modal_dismissed', 'true');
     setIsOpen(false);
   };
 
-  // If there are no actionable toggles to show, just don't render
-  const showNotificationSection = permission !== 'granted';
-  const showPwaSection = isInstallable && !isStandalone && localStorage.getItem('pwa_installed') !== 'true';
-
-  if (!showNotificationSection && !showPwaSection) {
-    return null;
-  }
+  if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Complete App Setup" maxWidth="sm">
-      <div className="flex flex-col gap-5">
-        <p className="text-xs text-muted leading-relaxed">
-          Enhance your Campus Marketplace experience by configuring push notifications and installing the PWA.
-        </p>
+    <Modal isOpen={isOpen} onClose={handleClose} title={needsAddress ? "Complete Profile & Address" : "Complete App Setup"} maxWidth="sm">
+      {needsAddress ? (
+        <form onSubmit={handleSaveAddress} className="flex flex-col gap-4">
+          <p className="text-xs text-muted leading-relaxed">
+            Please complete your student profile and enter your address. This helps us calculate distances for campus pickups and match you with nearby sellers.
+          </p>
 
-        <div className="flex flex-col gap-4">
-          {/* Notification Prompt */}
-          {showNotificationSection && (
-            <div className="flex items-center justify-between border border-borderCustom rounded-xl p-4 bg-slate-50/50">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
-                  <Bell className="w-5 h-5" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-textDark">Push Notifications</span>
-                  <span className="text-[10px] text-muted">Receive alerts on chat & orders</span>
-                </div>
-              </div>
-              
-              {/* Toggle Switch */}
-              <button
-                onClick={handleNotificationToggle}
-                disabled={isNotificationsEnabled}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                  isNotificationsEnabled ? 'bg-success cursor-default' : 'bg-slate-200 hover:bg-slate-300'
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    isNotificationsEnabled ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
-              </button>
-            </div>
-          )}
-
-          {/* Add to Homescreen Prompt */}
-          {showPwaSection && (
-            <div className="flex items-center justify-between border border-borderCustom rounded-xl p-4 bg-slate-50/50">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
-                  <Smartphone className="w-5 h-5" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-textDark">Add to Homescreen</span>
-                  <span className="text-[10px] text-muted">Install PWA for instant access</span>
-                </div>
+          <div className="flex flex-col gap-3">
+            <h4 className="text-xs font-bold text-textDark border-b border-borderCustom pb-1 flex items-center gap-1.5">
+              <UserIcon className="w-4 h-4 text-primary" />
+              <span>Student Details</span>
+            </h4>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-textDark uppercase">Department</label>
+                <select
+                  value={userDepartment}
+                  onChange={(e) => setUserDepartment(e.target.value)}
+                  className="bg-background border border-borderCustom rounded-lg p-2 text-xs text-textDark focus:border-primary focus:outline-none"
+                >
+                  {DEPARTMENTS.map(d => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
               </div>
 
-              {/* Toggle Switch */}
-              <button
-                onClick={handlePwaInstallToggle}
-                disabled={isPwaInstalled}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                  isPwaInstalled ? 'bg-success cursor-default' : 'bg-slate-200 hover:bg-slate-300'
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    isPwaInstalled ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
-              </button>
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-textDark uppercase">Semester</label>
+                <select
+                  value={userSemester}
+                  onChange={(e) => setUserSemester(Number(e.target.value))}
+                  className="bg-background border border-borderCustom rounded-lg p-2 text-xs text-textDark focus:border-primary focus:outline-none"
+                >
+                  {SEMESTERS.map(s => (
+                    <option key={s} value={s}>Sem {s}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-          )}
+
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold text-textDark uppercase">College Campus</label>
+              <select
+                value={userCollege}
+                onChange={(e) => setUserCollege(e.target.value)}
+                className="bg-background border border-borderCustom rounded-lg p-2 text-xs text-textDark focus:border-primary focus:outline-none"
+              >
+                {COLLEGES.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
+            <h4 className="text-xs font-bold text-textDark border-b border-borderCustom pb-1 mt-2 flex items-center gap-1.5">
+              <MapPin className="w-4 h-4 text-primary" />
+              <span>Address Details</span>
+            </h4>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold text-textDark uppercase">Address Line</label>
+              <input
+                type="text"
+                placeholder="Apartment, Street address, etc."
+                value={addressLine}
+                onChange={(e) => setAddressLine(e.target.value)}
+                className="bg-background border border-borderCustom rounded-lg p-2 text-xs text-textDark focus:border-primary focus:outline-none"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-textDark uppercase">City</label>
+                <input
+                  type="text"
+                  placeholder="City"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="bg-background border border-borderCustom rounded-lg p-2 text-xs text-textDark focus:border-primary focus:outline-none"
+                  required
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-textDark uppercase">State</label>
+                <input
+                  type="text"
+                  placeholder="State"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  className="bg-background border border-borderCustom rounded-lg p-2 text-xs text-textDark focus:border-primary focus:outline-none"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold text-textDark uppercase">Pincode / Postal Code</label>
+              <input
+                type="text"
+                placeholder="Pincode"
+                value={pincode}
+                onChange={(e) => setPincode(e.target.value)}
+                className="bg-background border border-borderCustom rounded-lg p-2 text-xs text-textDark focus:border-primary focus:outline-none"
+                required
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isSaving}
+            className="w-full bg-primary hover:bg-primary/95 text-white font-bold py-2.5 rounded-xl text-xs transition-colors shadow-subtle focus:outline-none disabled:opacity-50 mt-2"
+          >
+            {isSaving ? 'Saving details...' : 'Save & Continue'}
+          </button>
+        </form>
+      ) : (
+        <div className="flex flex-col gap-5">
+          <p className="text-xs text-muted leading-relaxed">
+            Enhance your Campus Marketplace experience by configuring push notifications and installing the PWA.
+          </p>
+
+          <div className="flex flex-col gap-4">
+            {/* Notification Prompt */}
+            {needsNotifications && (
+              <div className="flex items-center justify-between border border-borderCustom rounded-xl p-4 bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
+                    <Bell className="w-5 h-5" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-textDark">Push Notifications</span>
+                    <span className="text-[10px] text-muted">Receive alerts on chat & orders</span>
+                  </div>
+                </div>
+                
+                {/* Toggle Switch */}
+                <button
+                  onClick={handleNotificationToggle}
+                  disabled={isNotificationsEnabled}
+                  type="button"
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                    isNotificationsEnabled ? 'bg-success cursor-default' : 'bg-slate-200 hover:bg-slate-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isNotificationsEnabled ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            )}
+
+            {/* Add to Homescreen Prompt */}
+            {needsPwa && (
+              <div className="flex items-center justify-between border border-borderCustom rounded-xl p-4 bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
+                    <Smartphone className="w-5 h-5" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-textDark">Add to Homescreen</span>
+                    <span className="text-[10px] text-muted">Install PWA for instant access</span>
+                  </div>
+                </div>
+
+                {/* Toggle Switch */}
+                <button
+                  onClick={handlePwaInstallToggle}
+                  disabled={isPwaInstalled}
+                  type="button"
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                    isPwaInstalled ? 'bg-success cursor-default' : 'bg-slate-200 hover:bg-slate-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isPwaInstalled ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={handleClose}
+            className="w-full bg-primary hover:bg-primary/95 text-white font-bold py-2.5 rounded-xl text-xs transition-colors shadow-subtle focus:outline-none"
+          >
+            Done
+          </button>
         </div>
-
-        <button
-          onClick={handleClose}
-          className="w-full bg-primary hover:bg-primary/95 text-white font-bold py-2.5 rounded-xl text-xs transition-colors shadow-subtle focus:outline-none"
-        >
-          Done
-        </button>
-      </div>
+      )}
     </Modal>
   );
 };

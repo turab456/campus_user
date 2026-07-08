@@ -166,6 +166,19 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
             <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
             <span className="truncate" title={book.college}>{book.college.split(',')[0]}</span>
           </div>
+          {book.distanceKm !== undefined && (
+            <div className="flex items-center gap-1.5 mt-1">
+              {book.isNearMe ? (
+                <span className="inline-flex items-center gap-1 bg-green-50 border border-green-200 text-green-700 text-[9px] font-bold px-2 py-0.5 rounded-full">
+                  <MapPin className="w-2.5 h-2.5" /> Near You · {book.distanceKm} km
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 bg-slate-50 border border-slate-200 text-slate-500 text-[9px] font-medium px-2 py-0.5 rounded-full">
+                  <MapPin className="w-2.5 h-2.5" /> {book.distanceKm} km away
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </Link>
