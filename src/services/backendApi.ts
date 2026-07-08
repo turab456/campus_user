@@ -43,6 +43,7 @@ const mapUser = (user: any): User => {
     city: user.city || '',
     state: user.state || '',
     pincode: user.pincode || '',
+    country: user.country || '',
     coordinates: user.coordinates,
   };
 };

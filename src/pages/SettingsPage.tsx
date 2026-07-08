@@ -6,6 +6,8 @@ import { usePWA } from '../hooks/usePWA';
 import { User, ShieldCheck, Laptop, PhoneCall, Sparkles, Bell } from 'lucide-react';
 import { COLLEGES, DEPARTMENTS, SEMESTERS } from '../constants';
 import { default as api } from '../services/backendApi';
+import { AddressForm } from '../components/AddressForm';
+import type { AddressFormData } from '../components/AddressForm';
 
 export const SettingsPage: React.FC = () => {
   const { user, updateProfile, logout } = useAuth();
@@ -23,10 +25,15 @@ export const SettingsPage: React.FC = () => {
     department: user?.department || '',
     semester: user?.semester || 1,
     avatar: user?.avatar || '',
+  });
+
+  const [address, setAddress] = useState<AddressFormData>({
     addressLine: user?.addressLine || '',
     city: user?.city || '',
     state: user?.state || '',
     pincode: user?.pincode || '',
+    country: user?.country || 'India',
+    coordinates: user?.coordinates || null,
   });
   
   const [isUpdating, setIsUpdating] = useState(false);
@@ -40,7 +47,15 @@ export const SettingsPage: React.FC = () => {
     
     setIsUpdating(true);
     try {
-      const success = await updateProfile(formData);
+      const success = await updateProfile({
+        ...formData,
+        addressLine: address.addressLine,
+        city: address.city,
+        state: address.state,
+        pincode: address.pincode,
+        country: address.country,
+        ...(address.coordinates ? { coordinates: address.coordinates } : {}),
+      });
       if (success) {
         showToast('Settings saved successfully!', 'success');
       } else {
@@ -223,52 +238,7 @@ export const SettingsPage: React.FC = () => {
             <h2 className="text-sm font-bold text-textDark pb-2.5 flex items-center gap-1.5 mb-3">
               <span className="text-primary">📍</span> Address Details
             </h2>
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-textDark uppercase tracking-wider">Address Line</label>
-                <input
-                  type="text"
-                  placeholder="Apartment, Street address, etc."
-                  value={formData.addressLine}
-                  onChange={(e) => setFormData(prev => ({ ...prev, addressLine: e.target.value }))}
-                  className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-textDark uppercase tracking-wider">City</label>
-                  <input
-                    type="text"
-                    placeholder="City"
-                    value={formData.city}
-                    onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                    className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-textDark uppercase tracking-wider">State</label>
-                  <input
-                    type="text"
-                    placeholder="State"
-                    value={formData.state}
-                    onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
-                    className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-textDark uppercase tracking-wider">Pincode / Postal Code</label>
-                <input
-                  type="text"
-                  placeholder="Pincode"
-                  value={formData.pincode}
-                  onChange={(e) => setFormData(prev => ({ ...prev, pincode: e.target.value }))}
-                  className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
-                />
-              </div>
-            </div>
+            <AddressForm value={address} onChange={setAddress} />
           </div>
 
           <div className="flex items-center gap-3 mt-2">

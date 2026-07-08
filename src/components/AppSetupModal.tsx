@@ -3,9 +3,11 @@ import { useAuth } from '../context/AuthContext';
 import { usePWA } from '../hooks/usePWA';
 import { useWebPush } from '../hooks/useWebPush';
 import { Modal } from './Modal';
-import { Bell, Smartphone, MapPin, User as UserIcon } from 'lucide-react';
+import { Bell, Smartphone, User as UserIcon } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { COLLEGES, DEPARTMENTS, SEMESTERS } from '../constants';
+import { AddressForm } from './AddressForm';
+import type { AddressFormData } from './AddressForm';
 
 export const AppSetupModal: React.FC = () => {
   const { user, updateProfile } = useAuth();
@@ -19,23 +21,31 @@ export const AppSetupModal: React.FC = () => {
     isStandalone || localStorage.getItem('pwa_installed') === 'true'
   );
 
-  // Form State
-  const [addressLine, setAddressLine] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [pincode, setPincode] = useState('');
+  // Address form state (single object)
+  const [address, setAddress] = useState<AddressFormData>({
+    addressLine: '',
+    city: '',
+    state: '',
+    pincode: '',
+    country: 'India',
+    coordinates: null,
+  });
   const [userCollege, setUserCollege] = useState('');
   const [userDepartment, setUserDepartment] = useState('');
   const [userSemester, setUserSemester] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Populate form details when user is loaded
+  // Populate form from user data
   useEffect(() => {
     if (user) {
-      setAddressLine(user.addressLine || '');
-      setCity(user.city || '');
-      setState(user.state || '');
-      setPincode(user.pincode || '');
+      setAddress({
+        addressLine: user.addressLine || '',
+        city: user.city || '',
+        state: user.state || '',
+        pincode: user.pincode || '',
+        country: user.country || 'India',
+        coordinates: user.coordinates || null,
+      });
       setUserCollege(user.college || COLLEGES[0] || '');
       setUserDepartment(user.department || DEPARTMENTS[0] || '');
       setUserSemester(user.semester || 1);
@@ -108,7 +118,7 @@ export const AppSetupModal: React.FC = () => {
 
   const handleSaveAddress = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!city.trim() || !pincode.trim() || !addressLine.trim() || !state.trim()) {
+    if (!address.city.trim() || !address.pincode.trim() || !address.addressLine.trim() || !address.state.trim()) {
       showToast('Please fill out all address fields.', 'warning');
       return;
     }
@@ -116,13 +126,15 @@ export const AppSetupModal: React.FC = () => {
     setIsSaving(true);
     try {
       const success = await updateProfile({
-        addressLine,
-        city,
-        state,
-        pincode,
+        addressLine: address.addressLine,
+        city: address.city,
+        state: address.state,
+        pincode: address.pincode,
+        country: address.country,
         college: userCollege,
         department: userDepartment,
-        semester: userSemester
+        semester: userSemester,
+        ...(address.coordinates ? { coordinates: address.coordinates } : {}),
       });
       if (success) {
         showToast('Profile and address updated!', 'success');
@@ -199,59 +211,15 @@ export const AppSetupModal: React.FC = () => {
             </div>
 
             <h4 className="text-xs font-bold text-textDark border-b border-borderCustom pb-1 mt-2 flex items-center gap-1.5">
-              <MapPin className="w-4 h-4 text-primary" />
+              <span>📍</span>
               <span>Address Details</span>
             </h4>
 
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] font-bold text-textDark uppercase">Address Line</label>
-              <input
-                type="text"
-                placeholder="Apartment, Street address, etc."
-                value={addressLine}
-                onChange={(e) => setAddressLine(e.target.value)}
-                className="bg-background border border-borderCustom rounded-lg p-2 text-xs text-textDark focus:border-primary focus:outline-none"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-textDark uppercase">City</label>
-                <input
-                  type="text"
-                  placeholder="City"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="bg-background border border-borderCustom rounded-lg p-2 text-xs text-textDark focus:border-primary focus:outline-none"
-                  required
-                />
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-textDark uppercase">State</label>
-                <input
-                  type="text"
-                  placeholder="State"
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  className="bg-background border border-borderCustom rounded-lg p-2 text-xs text-textDark focus:border-primary focus:outline-none"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] font-bold text-textDark uppercase">Pincode / Postal Code</label>
-              <input
-                type="text"
-                placeholder="Pincode"
-                value={pincode}
-                onChange={(e) => setPincode(e.target.value)}
-                className="bg-background border border-borderCustom rounded-lg p-2 text-xs text-textDark focus:border-primary focus:outline-none"
-                required
-              />
-            </div>
+            <AddressForm
+              value={address}
+              onChange={setAddress}
+              compact
+            />
           </div>
 
           <button

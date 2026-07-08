@@ -18,6 +18,7 @@ export interface User {
   city?: string;
   state?: string;
   pincode?: string;
+  country?: string;
   coordinates?: { lat: number; lng: number };
 }
 
