@@ -254,7 +254,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
                 addressLine:
                   [get('street_number')?.long_name, get('route')?.long_name]
                     .filter(Boolean).join(' ') ||
-                  results[0].formatted_address.split(',')[0],
+                  results[0].formatted_address?.split(',')[0] || '',
                 city: get('locality')?.long_name || get('postal_town')?.long_name || '',
                 state: get('administrative_area_level_1')?.long_name || '',
                 pincode: get('postal_code')?.long_name || '',
@@ -284,7 +284,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
             return {
               addressLine:
                 [a.house_number, a.road || a.suburb || ''].filter(Boolean).join(', ') ||
-                data.display_name.split(',')[0],
+                data.display_name?.split(',')[0] || '',
               city: a.city || a.town || a.village || a.county || '',
               state: a.state || '',
               pincode: a.postcode || '',

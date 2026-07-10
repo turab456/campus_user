@@ -164,7 +164,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
           </div>
           <div className="flex items-center gap-1.5 mt-0.5">
             <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
-            <span className="truncate" title={book.college}>{book.college.split(',')[0]}</span>
+            <span className="truncate" title={book.college}>{book.college?.split(',')[0] || 'Unknown'}</span>
           </div>
           {book.distanceKm !== undefined && (
             <div className="flex items-center gap-1.5 mt-1">

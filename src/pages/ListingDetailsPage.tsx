@@ -266,7 +266,7 @@ export const ListingDetailsPage: React.FC = () => {
                 <div className="flex items-center gap-1.5 mt-0.5 text-xs text-muted">
                   <span className="font-semibold text-warning">&#9733; {book.sellerRating.toFixed(1)}</span>
                   <span>&middot;</span>
-                  <span className="truncate">{book.college.split(',')[0]}</span>
+                  <span className="truncate">{book.college?.split(',')[0] || 'Unknown'}</span>
                 </div>
               </div>
             </Link>

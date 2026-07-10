@@ -389,7 +389,7 @@ export const MessagesPage: React.FC = () => {
                     <div className="flex items-center gap-1 text-[10px] text-muted mt-0.5">
                       <span className="font-semibold text-warning">&#9733; {activeChat.otherParticipant.rating.toFixed(1)}</span>
                       <span>&middot;</span>
-                      <span className="truncate">{activeChat.otherParticipant.college.split(',')[0]}</span>
+                      <span className="truncate">{activeChat.otherParticipant.college?.split(',')[0] || 'Unknown'}</span>
                     </div>
                   </div>
                 </div>

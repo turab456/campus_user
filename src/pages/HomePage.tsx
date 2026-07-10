@@ -45,8 +45,8 @@ export const HomePage: React.FC = () => {
 
   const getNearbyBooks = () => {
     if (!user) return books.slice(0, 3);
-    const userCollegeWord = user.college.split(',')[0].toLowerCase();
-    return books.filter(b => b.college.toLowerCase().includes(userCollegeWord) && b.sellerId !== user.id);
+    const userCollegeWord = user?.college?.split(',')[0]?.toLowerCase() || '';
+    return books.filter(b => b.college && b.college.toLowerCase().includes(userCollegeWord) && b.sellerId !== user.id);
   };
 
   const recentBooks = getFilteredBooks()

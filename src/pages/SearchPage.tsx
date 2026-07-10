@@ -274,7 +274,7 @@ export const SearchPage: React.FC = () => {
           )}
           {filters.college && (
             <span className="bg-slate-100 border border-borderCustom text-textDark text-[10px] font-semibold pl-2.5 pr-1.5 py-1 rounded-md flex items-center gap-1">
-              <span>Campus: {filters.college.split(',')[0]}</span>
+              <span>Campus: {filters.college?.split(',')[0] || 'Unknown'}</span>
               <button onClick={() => setFilters(prev => ({ ...prev, college: '' }))} className="p-0.5 rounded-full hover:bg-slate-200">
                 <X className="w-2.5 h-2.5" />
               </button>
