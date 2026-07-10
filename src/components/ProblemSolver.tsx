@@ -29,7 +29,7 @@ export const ProblemSolver: React.FC = () => {
             <span>Search Math...</span>
           </div>
           <div className="flex gap-1">
-            <span className="bg-[#DBEAFE] text-[#2563EB] text-[8px] font-bold px-1.5 py-0.5 rounded-md">Sem 3</span>
+            <span className="bg-primary-light text-primary text-[8px] font-bold px-1.5 py-0.5 rounded-md">Sem 3</span>
             <span className="bg-white border border-[#E5E7EB] text-muted text-[8px] font-bold px-1.5 py-0.5 rounded-md">RVCE</span>
           </div>
         </div>
@@ -41,13 +41,13 @@ export const ProblemSolver: React.FC = () => {
       solution: "Verified student profiles help you buy with confidence.",
       visual: (
         <div className="bg-white border border-[#E5E7EB] rounded-xl p-2.5 w-full max-w-[180px] flex items-center gap-2 shadow-subtle transition-transform duration-200 group-hover:scale-102">
-          <div className="w-8 h-8 rounded-full bg-[#DBEAFE] text-[#2563EB] font-bold flex items-center justify-center text-xs flex-shrink-0">
+          <div className="w-8 h-8 rounded-full bg-primary-light text-primary font-bold flex items-center justify-center text-xs flex-shrink-0">
             JD
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1">
               <span className="text-[10px] font-bold text-textDark truncate">John Doe</span>
-              <ShieldCheck className="w-3.5 h-3.5 text-[#2563EB] flex-shrink-0" />
+              <ShieldCheck className="w-3.5 h-3.5 text-primary flex-shrink-0" />
             </div>
             <p className="text-[8px] text-muted truncate">RV College</p>
           </div>
@@ -82,7 +82,7 @@ export const ProblemSolver: React.FC = () => {
           <div className="bg-white border border-[#E5E7EB] text-[8px] text-textDark p-1.5 rounded-lg rounded-tl-none self-start max-w-[85%] leading-tight shadow-2xs">
             Is the book available?
           </div>
-          <div className="bg-[#DBEAFE] text-[#2563EB] text-[8px] p-1.5 rounded-lg rounded-tr-none self-end max-w-[85%] leading-tight shadow-2xs">
+          <div className="bg-primary-light text-primary text-[8px] p-1.5 rounded-lg rounded-tr-none self-end max-w-[85%] leading-tight shadow-2xs">
             Yes, let's meet tomorrow!
           </div>
         </div>
@@ -132,7 +132,7 @@ export const ProblemSolver: React.FC = () => {
           Real Problems Students Face Every Semester
         </h2>
         <p className="text-xs text-muted mt-3 leading-relaxed">
-          Thousands of students struggle to find affordable books, trustworthy sellers, and quick responses. Campus Marketplace solves these everyday problems in one place.
+          Thousands of students struggle to find affordable books, trustworthy sellers, and quick responses. RevoShelf solves these everyday problems in one place.
         </p>
       </div>
 

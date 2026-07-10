@@ -12,7 +12,7 @@ export default defineConfig({
       injectRegister: 'auto',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg', 'robots.txt'],
       manifest: {
-        name: 'Campus Marketplace',
+        name: 'RevoShelf',
         short_name: 'CampusMarket',
         description: 'Buy and sell used books and other student essentials directly with verified students.',
         theme_color: '#0D5C4D',

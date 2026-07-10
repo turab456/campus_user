@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { User, Mail, Lock, GraduationCap, MapPin, ArrowRight } from 'lucide-react';
-import { COLLEGES, DEPARTMENTS, SEMESTERS } from '../constants';
+
 
 export const RegisterPage: React.FC = () => {
   const { register } = useAuth();
@@ -14,18 +14,15 @@ export const RegisterPage: React.FC = () => {
     name: '',
     email: '',
     password: '',
-    college: '',
-    department: '',
-    semester: 1,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { name, email, password, college, department, semester } = formData;
+    const { name, email, password } = formData;
 
-    if (!name.trim() || !email.trim() || !password.trim() || !college || !department) {
+    if (!name.trim() || !email.trim() || !password.trim()) {
       showToast('Please fill all required fields.', 'warning');
       return;
     }
@@ -37,7 +34,7 @@ export const RegisterPage: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      await register(name, email, password, college, department, semester);
+      await register(name, email, password);
       showToast('Registration successful! Please check your email to verify your account.', 'success');
       navigate('/login');
     } catch (err: any) {
@@ -95,52 +92,6 @@ export const RegisterPage: React.FC = () => {
               onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
               className="w-full bg-[#F5F3EF] border border-borderCustom rounded-[10px] py-2.5 pl-9 pr-4 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
             />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-bold text-textDark uppercase tracking-wider">College Campus *</label>
-          <div className="relative flex items-center">
-            <MapPin className="w-4 h-4 text-muted absolute left-3 pointer-events-none" />
-            <select
-              value={formData.college}
-              onChange={(e) => setFormData(prev => ({ ...prev, college: e.target.value }))}
-              className="w-full bg-[#F5F3EF] border border-borderCustom rounded-[10px] py-2.5 pl-9 pr-4 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
-            >
-              <option value="">Select College</option>
-              {COLLEGES.map(c => (
-                <option key={c} value={c}>{c.split(',')[0]}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-bold text-textDark uppercase tracking-wider">Dept *</label>
-            <select
-              value={formData.department}
-              onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
-              className="w-full bg-[#F5F3EF] border border-borderCustom rounded-[10px] py-2.5 px-3 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
-            >
-              <option value="">Select Dept</option>
-              {DEPARTMENTS.map(d => (
-                <option key={d} value={d}>{d}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-bold text-textDark uppercase tracking-wider">Semester *</label>
-            <select
-              value={formData.semester}
-              onChange={(e) => setFormData(prev => ({ ...prev, semester: Number(e.target.value) }))}
-              className="w-full bg-[#F5F3EF] border border-borderCustom rounded-[10px] py-2.5 px-3 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
-            >
-              {SEMESTERS.map(s => (
-                <option key={s} value={s}>Sem {s}</option>
-              ))}
-            </select>
           </div>
         </div>
 

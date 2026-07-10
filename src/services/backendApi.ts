@@ -1,6 +1,6 @@
 // src/services/backendApi.ts
 /**
- * Wrapper around the backend REST API for the Campus Marketplace.
+ * Wrapper around the backend REST API for the RevoShelf.
  * Uses the Fetch API with `credentials: 'include'` for refresh tokens.
  * Handles automatic access token injection and refresh on 401s.
  */
@@ -225,14 +225,11 @@ export const backendApi = {
     return mapUser(res.user);
   },
 
-  async register(name: string, email: string, password?: string, college?: string, department?: string, semester?: number) {
+  async register(name: string, email: string, password?: string) {
     return post<{ success: boolean; message: string }>('/api/auth/register', {
       name,
       email,
-      password: password || 'password123',
-      college,
-      department,
-      semester
+      password: password || 'password123'
     });
   },
 

@@ -8,10 +8,16 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#2563EB', // Primary Blue
-          hover: '#1D4ED8',
-          active: '#1E40AF',
-          light: '#DBEAFE',
+          DEFAULT: '#038F78', // Primary Teal/Green
+          hover: '#027a66',
+          active: '#026655',
+          light: '#ccf2eb',
+        },
+        secondary: {
+          DEFAULT: '#00244B', // Secondary Dark Blue
+          hover: '#001a36',
+          active: '#001021',
+          light: '#cce0f5',
         },
         background: '#FAF8F5', // Primary Background
         backgroundSec: '#F5F3EF', // Secondary Background

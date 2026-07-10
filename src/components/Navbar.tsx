@@ -4,6 +4,7 @@ import { Search, Heart, MessageSquare, Plus, User as UserIcon, LogOut, Settings,
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import { NotificationBell } from './NotificationBell';
+import logoUrl from '../assets/logo.svg';
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
@@ -24,17 +25,15 @@ export const Navbar: React.FC = () => {
 
 
   return (
-    <nav className="bg-[#FAF8F5] border-b border-borderCustom sticky top-0 z-40 px-4 md:px-8 py-3">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+    <nav className="bg-[#FAF8F5] border-b border-borderCustom sticky top-0 z-40 px-4 md:px-8 h-16 md:h-[72px] flex items-center">
+      <div className="w-full max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 flex-shrink-0">
-          <div className="bg-primary p-1.5 rounded-lg flex items-center justify-center text-white">
-            <BookOpen className="w-5 h-5" />
-          </div>
-          <div className="hidden md:block">
-            <span className="font-bold text-lg text-textDark tracking-tight leading-none block">Campus Marketplace</span>
-            <span className="text-[10px] text-muted font-bold tracking-widest uppercase block mt-1">Buy • Sell • Save</span>
-          </div>
+        <Link to="/" className="flex items-center flex-shrink-0">
+          <img 
+            src={logoUrl}
+            alt="RevoShelf" 
+            className="w-auto object-contain h-[28px] min-[361px]:h-[32px] md:h-[36px] lg:h-[40px]" 
+          />
         </Link>
 
         {/* Desktop Search Bar */}

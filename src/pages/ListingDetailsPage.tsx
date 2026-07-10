@@ -281,7 +281,7 @@ export const ListingDetailsPage: React.FC = () => {
                   ⚠️ Seller Trust Warning
                 </p>
                 <p className="text-[10px] text-red-600 leading-snug mt-1">
-                  This seller has received multiple community reports. Any transaction between you and this seller is at your own risk and is <strong>not the responsibility of Campus Marketplace</strong>. We recommend exercising extra caution before proceeding.
+                  This seller has received multiple community reports. Any transaction between you and this seller is at your own risk and is <strong>not the responsibility of RevoShelf</strong>. We recommend exercising extra caution before proceeding.
                 </p>
               </div>
             </div>

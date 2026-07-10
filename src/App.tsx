@@ -19,6 +19,16 @@ import { RegisterPage } from './pages/RegisterPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { VerifyEmailPage } from './pages/VerifyEmailPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { HowItWorksPage } from './pages/HowItWorksPage';
+import { HelpCenterPage } from './pages/HelpCenterPage';
+import { FaqPage } from './pages/FaqPage';
+import { ContactUsPage } from './pages/ContactUsPage';
+import { SafetyTipsPage } from './pages/SafetyTipsPage';
+import { ReportIssuePage } from './pages/ReportIssuePage';
+import { AboutUsPage } from './pages/AboutUsPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsConditionsPage } from './pages/TermsConditionsPage';
+import { CommunityGuidelinesPage } from './pages/CommunityGuidelinesPage';
 
 import { useEffect, useState } from 'react';
 import { backendApi } from './services/backendApi';
@@ -80,6 +90,18 @@ function App() {
                 <Route path="/wishlist" element={<WishlistPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/messages" element={<MessagesPage />} />
+                
+                {/* Static Pages */}
+                <Route path="/how-it-works" element={<HowItWorksPage />} />
+                <Route path="/help-center" element={<HelpCenterPage />} />
+                <Route path="/faq" element={<FaqPage />} />
+                <Route path="/contact-us" element={<ContactUsPage />} />
+                <Route path="/safety-tips" element={<SafetyTipsPage />} />
+                <Route path="/report-issue" element={<ReportIssuePage />} />
+                <Route path="/about" element={<AboutUsPage />} />
+                <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                <Route path="/terms" element={<TermsConditionsPage />} />
+                <Route path="/community-guidelines" element={<CommunityGuidelinesPage />} />
               </Route>
 
               {/* Centered Auth Layout Pages */}

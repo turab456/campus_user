@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { usePWA } from '../hooks/usePWA';
-import { User, ShieldCheck, Laptop, PhoneCall, Sparkles, Bell, Pencil } from 'lucide-react';
-import { COLLEGES, DEPARTMENTS, SEMESTERS } from '../constants';
+import { ShieldCheck, Laptop, Sparkles, Bell, Pencil } from 'lucide-react';
 import { default as api } from '../services/backendApi';
 import { AddressForm } from '../components/AddressForm';
 import type { AddressFormData } from '../components/AddressForm';
 import { compressAvatar } from '../utils/imageCompression';
+
+const EDUCATION_LEVELS = ['School', 'PUC', 'Diploma', 'Undergraduate (UG)', 'Postgraduate (PG)'];
 
 export const SettingsPage: React.FC = () => {
   const { user, isLoading, updateProfile, logout } = useAuth();
@@ -22,11 +23,12 @@ export const SettingsPage: React.FC = () => {
 
   const [formData, setFormData] = useState({
     name: '',
-    college: '',
-    department: '',
-    semester: 1,
+    institutionName: '',
+    educationLevel: '',
     avatar: '',
   });
+
+  const [academicDetails, setAcademicDetails] = useState<Record<string, any>>({});
 
   const [address, setAddress] = useState<AddressFormData>({
     addressLine: '',
@@ -46,11 +48,11 @@ export const SettingsPage: React.FC = () => {
     if (!user) return;
     setFormData({
       name: user.name || '',
-      college: user.college || '',
-      department: user.department || '',
-      semester: user.semester || 1,
+      institutionName: user.institutionName || '',
+      educationLevel: user.educationLevel || '',
       avatar: user.avatar || '',
     });
+    setAcademicDetails(user.academicDetails || {});
     setAvatarFile(null);
     setAddress({
       addressLine: user.addressLine || '',
@@ -72,9 +74,10 @@ export const SettingsPage: React.FC = () => {
     
     setIsUpdating(true);
     try {
-      const { avatar, ...profileFields } = formData;
+      const { avatar: _avatar, ...profileFields } = formData;
       const success = await updateProfile({
         ...profileFields,
+        academicDetails,
         avatarFile,
         addressLine: address.addressLine,
         city: address.city,
@@ -131,6 +134,7 @@ export const SettingsPage: React.FC = () => {
         try {
           vapidKey = await api.getVapidPublicKey();
         } catch (err) {
+          console.error('Failed to get vapid key:', err);
           showToast('Failed to retrieve push credentials from server.', 'danger');
           return;
         }
@@ -141,7 +145,7 @@ export const SettingsPage: React.FC = () => {
 
           const urlBase64ToUint8Array = (base64String: string) => {
             const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
             const rawData = window.atob(base64);
             const outputArray = new Uint8Array(rawData.length);
             for (let i = 0; i < rawData.length; ++i) {
@@ -185,6 +189,10 @@ export const SettingsPage: React.FC = () => {
       console.error('Error requesting notification permission:', err);
       showToast('Failed to enable push notifications.', 'danger');
     }
+  };
+
+  const updateAcademicDetail = (key: string, value: string) => {
+    setAcademicDetails((prev) => ({ ...prev, [key]: value }));
   };
 
   if (isLoading) {
@@ -263,46 +271,175 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-bold text-textDark uppercase tracking-wider">University / College Campus</label>
+            <label className="text-xs font-bold text-textDark uppercase tracking-wider">Institution Name</label>
+            <input
+              type="text"
+              placeholder="e.g. RV College of Engineering"
+              value={formData.institutionName}
+              onChange={(e) => setFormData(prev => ({ ...prev, institutionName: e.target.value }))}
+              className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none w-full"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-bold text-textDark uppercase tracking-wider">Education Level</label>
             <select
-              value={formData.college}
-              onChange={(e) => setFormData(prev => ({ ...prev, college: e.target.value }))}
-              className="bg-background border border-borderCustom rounded-lg p-2.5 pr-8 truncate text-xs text-textDark focus:border-primary focus:outline-none"
+              value={formData.educationLevel}
+              onChange={(e) => setFormData(prev => ({ ...prev, educationLevel: e.target.value }))}
+              className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
             >
-              {COLLEGES.map(c => (
-                <option key={c} value={c}>{c}</option>
+              <option value="">Select Level</option>
+              {EDUCATION_LEVELS.map(level => (
+                <option key={level} value={level}>{level}</option>
               ))}
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col justify-end gap-1 h-full">
-              <label className="text-xs font-bold text-textDark uppercase tracking-wider">Department</label>
-              <select
-                value={formData.department}
-                onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
-                className="bg-background border border-borderCustom rounded-lg p-2.5 pr-8 truncate text-xs text-textDark focus:border-primary focus:outline-none"
-              >
-                {DEPARTMENTS.map(d => (
-                  <option key={d} value={d}>{d}</option>
-                ))}
-              </select>
+          {/* Dynamic Academic Fields Based on Education Level */}
+          {formData.educationLevel === 'School' && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-textDark uppercase tracking-wider">Class</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 10th"
+                  value={academicDetails.class || ''}
+                  onChange={(e) => updateAcademicDetail('class', e.target.value)}
+                  className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-textDark uppercase tracking-wider">Board</label>
+                <input
+                  type="text"
+                  placeholder="e.g. CBSE"
+                  value={academicDetails.board || ''}
+                  onChange={(e) => updateAcademicDetail('board', e.target.value)}
+                  className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                />
+              </div>
             </div>
+          )}
 
-            <div className="flex flex-col justify-end gap-1 h-full">
-              <label className="text-xs font-bold text-textDark uppercase tracking-wider">Current Semester</label>
-              <select
-                value={formData.semester}
-                onChange={(e) => setFormData(prev => ({ ...prev, semester: Number(e.target.value) }))}
-                className="bg-background border border-borderCustom rounded-lg p-2.5 pr-8 truncate text-xs text-textDark focus:border-primary focus:outline-none"
-              >
-                {SEMESTERS.map(s => (
-                  <option key={s} value={s}>Semester {s}</option>
-                ))}
-              </select>
+          {formData.educationLevel === 'PUC' && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-textDark uppercase tracking-wider">Stream</label>
+                <input
+                  type="text"
+                  placeholder="e.g. PCMB"
+                  value={academicDetails.stream || ''}
+                  onChange={(e) => updateAcademicDetail('stream', e.target.value)}
+                  className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-textDark uppercase tracking-wider">Year</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 2nd Year"
+                  value={academicDetails.year || ''}
+                  onChange={(e) => updateAcademicDetail('year', e.target.value)}
+                  className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                />
+              </div>
             </div>
-          </div>
+          )}
 
+          {formData.educationLevel === 'Diploma' && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-textDark uppercase tracking-wider">Course</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Mechanical"
+                  value={academicDetails.course || ''}
+                  onChange={(e) => updateAcademicDetail('course', e.target.value)}
+                  className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-textDark uppercase tracking-wider">Year/Sem</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 3rd Sem"
+                  value={academicDetails.yearOrSem || ''}
+                  onChange={(e) => updateAcademicDetail('yearOrSem', e.target.value)}
+                  className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                />
+              </div>
+            </div>
+          )}
+
+          {formData.educationLevel === 'Undergraduate (UG)' && (
+            <div className="grid grid-cols-3 gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-textDark uppercase tracking-wider">Degree</label>
+                <input
+                  type="text"
+                  placeholder="e.g. B.Tech"
+                  value={academicDetails.degree || ''}
+                  onChange={(e) => updateAcademicDetail('degree', e.target.value)}
+                  className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-textDark uppercase tracking-wider">Branch</label>
+                <input
+                  type="text"
+                  placeholder="e.g. CSE"
+                  value={academicDetails.branch || ''}
+                  onChange={(e) => updateAcademicDetail('branch', e.target.value)}
+                  className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-textDark uppercase tracking-wider">Sem</label>
+                <input
+                  type="number"
+                  placeholder="e.g. 5"
+                  value={academicDetails.semester || ''}
+                  onChange={(e) => updateAcademicDetail('semester', e.target.value)}
+                  className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                />
+              </div>
+            </div>
+          )}
+
+          {formData.educationLevel === 'Postgraduate (PG)' && (
+            <div className="grid grid-cols-3 gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-textDark uppercase tracking-wider">Degree</label>
+                <input
+                  type="text"
+                  placeholder="e.g. M.Tech"
+                  value={academicDetails.degree || ''}
+                  onChange={(e) => updateAcademicDetail('degree', e.target.value)}
+                  className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-textDark uppercase tracking-wider">Specialization</label>
+                <input
+                  type="text"
+                  placeholder="e.g. AI"
+                  value={academicDetails.specialization || ''}
+                  onChange={(e) => updateAcademicDetail('specialization', e.target.value)}
+                  className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-textDark uppercase tracking-wider">Sem</label>
+                <input
+                  type="number"
+                  placeholder="e.g. 2"
+                  value={academicDetails.semester || ''}
+                  onChange={(e) => updateAcademicDetail('semester', e.target.value)}
+                  className="bg-background border border-borderCustom rounded-lg p-2.5 text-xs text-textDark focus:border-primary focus:outline-none"
+                />
+              </div>
+            </div>
+          )}
 
 
           {/* Address Section */}
@@ -349,7 +486,7 @@ export const SettingsPage: React.FC = () => {
               </div>
 
               <p className="mt-1">
-                Campus Marketplace supports Progressive Web App features. Install it on your device for offline catalog access, instant loading, and fullscreen student experience.
+                RevoShelf supports Progressive Web App features. Install it on your device for offline catalog access, instant loading, and fullscreen student experience.
               </p>
 
               {isInstallable && !isStandalone && (

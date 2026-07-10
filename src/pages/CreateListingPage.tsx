@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, ChevronLeft, Plus, Image as ImageIcon, CheckCircle, Info } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Plus, CheckCircle, Info } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { backendApi as api } from '../services/backendApi';
 import type { BookCondition } from '../types';
 import { CATEGORIES, CONDITIONS, DEPARTMENTS, SEMESTERS } from '../constants';
+
+const EDUCATION_LEVELS = ['School', 'PUC', 'Diploma', 'Undergraduate (UG)', 'Postgraduate (PG)'];
 
 // Simulated default images that the student can choose from
 const MOCK_UPLOAD_PRESETS = [
@@ -28,8 +30,7 @@ interface CustomField {
 const CATEGORY_FIELDS_CONFIG: Record<string, CustomField[]> = {
   books: [
     { key: 'author', label: 'Author *', type: 'text', placeholder: 'e.g. Adel Sedra, Kenneth C. Smith', required: true },
-    { key: 'department', label: 'Course Department *', type: 'select', options: DEPARTMENTS, required: true },
-    { key: 'semester', label: 'Semester *', type: 'select', options: SEMESTERS.map(s => `Semester ${s}`), required: true }
+    { key: 'edition', label: 'Edition', type: 'text', placeholder: 'e.g. 7th Edition' }
   ],
   notes: [
     { key: 'author', label: 'Created By / Teacher *', type: 'text', placeholder: 'e.g. Dr. H.S. Sharma', required: true },
@@ -91,6 +92,20 @@ export const CreateListingPage: React.FC = () => {
     metadata: {} as Record<string, any>
   });
 
+  // Pre-fill education level from user profile if available, when category becomes books
+  React.useEffect(() => {
+    if (formData.category === 'books' && user && formData.metadata.educationLevel === undefined) {
+      setFormData(prev => ({
+        ...prev,
+        metadata: {
+          ...prev.metadata,
+          educationLevel: user.educationLevel || '',
+          ...user.academicDetails
+        }
+      }));
+    }
+  }, [formData.category, formData.metadata.educationLevel, user]);
+
   const handleMetadataChange = (key: string, value: any) => {
     setFormData(prev => ({
       ...prev,
@@ -137,6 +152,12 @@ export const CreateListingPage: React.FC = () => {
           }
         }
       });
+      
+      if (formData.category === 'books') {
+        if (!formData.metadata.educationLevel) {
+          errs.educationLevel = 'Education Level is required';
+        }
+      }
     }
     
     if (currentStep === 3) {
@@ -193,8 +214,8 @@ export const CreateListingPage: React.FC = () => {
     try {
       const isBookOrNote = formData.category === 'books' || formData.category === 'notes';
       const authorVal = isBookOrNote ? (formData.metadata.author || '') : '';
-      const deptVal = isBookOrNote ? (formData.metadata.department || '') : '';
-      const semVal = isBookOrNote ? Number(formData.metadata.semester?.replace('Semester ', '') || 1) : undefined;
+      const deptVal = isBookOrNote ? (formData.metadata.department || formData.metadata.branch || '') : '';
+      const semVal = isBookOrNote ? Number(String(formData.metadata.semester || '').replace('Semester ', '') || 1) : undefined;
 
       const listingData = {
         title: formData.title,
@@ -208,7 +229,7 @@ export const CreateListingPage: React.FC = () => {
         department: deptVal,
         semester: semVal,
         pickupLocation: formData.pickupLocation,
-        college: user.college,
+        college: user.institutionName || user.college || '',
         isFeatured: false,
         isPopular: false,
         metadata: formData.metadata
@@ -361,6 +382,170 @@ export const CreateListingPage: React.FC = () => {
             );
           })}
 
+          {formData.category === 'books' && (
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-textDark uppercase tracking-wider">Education Level *</label>
+                <select
+                  value={formData.metadata.educationLevel || ''}
+                  onChange={(e) => handleMetadataChange('educationLevel', e.target.value)}
+                  className="bg-[#F5F3EF] border border-borderCustom rounded-[10px] py-2.5 pl-2.5 pr-8 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
+                >
+                  <option value="">Select Level</option>
+                  {EDUCATION_LEVELS.map(level => (
+                    <option key={level} value={level}>{level}</option>
+                  ))}
+                </select>
+                {errors.educationLevel && <p className="text-[10px] text-danger font-semibold mt-0.5">{errors.educationLevel}</p>}
+              </div>
+
+              {formData.metadata.educationLevel === 'School' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-textDark uppercase tracking-wider">Class</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 10th"
+                      value={formData.metadata.class || ''}
+                      onChange={(e) => handleMetadataChange('class', e.target.value)}
+                      className="bg-[#F5F3EF] border border-borderCustom rounded-[10px] p-2.5 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-textDark uppercase tracking-wider">Board</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. CBSE"
+                      value={formData.metadata.board || ''}
+                      onChange={(e) => handleMetadataChange('board', e.target.value)}
+                      className="bg-[#F5F3EF] border border-borderCustom rounded-[10px] p-2.5 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {formData.metadata.educationLevel === 'PUC' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-textDark uppercase tracking-wider">Stream</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. PCMB"
+                      value={formData.metadata.stream || ''}
+                      onChange={(e) => handleMetadataChange('stream', e.target.value)}
+                      className="bg-[#F5F3EF] border border-borderCustom rounded-[10px] p-2.5 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-textDark uppercase tracking-wider">Year</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 2nd Year"
+                      value={formData.metadata.year || ''}
+                      onChange={(e) => handleMetadataChange('year', e.target.value)}
+                      className="bg-[#F5F3EF] border border-borderCustom rounded-[10px] p-2.5 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {formData.metadata.educationLevel === 'Diploma' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-textDark uppercase tracking-wider">Course</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Mechanical"
+                      value={formData.metadata.course || ''}
+                      onChange={(e) => handleMetadataChange('course', e.target.value)}
+                      className="bg-[#F5F3EF] border border-borderCustom rounded-[10px] p-2.5 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-textDark uppercase tracking-wider">Year/Sem</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 3rd Sem"
+                      value={formData.metadata.yearOrSem || ''}
+                      onChange={(e) => handleMetadataChange('yearOrSem', e.target.value)}
+                      className="bg-[#F5F3EF] border border-borderCustom rounded-[10px] p-2.5 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {formData.metadata.educationLevel === 'Undergraduate (UG)' && (
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-textDark uppercase tracking-wider">Degree</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. B.Tech"
+                      value={formData.metadata.degree || ''}
+                      onChange={(e) => handleMetadataChange('degree', e.target.value)}
+                      className="bg-[#F5F3EF] border border-borderCustom rounded-[10px] p-2.5 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-textDark uppercase tracking-wider">Branch</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. CSE"
+                      value={formData.metadata.branch || ''}
+                      onChange={(e) => handleMetadataChange('branch', e.target.value)}
+                      className="bg-[#F5F3EF] border border-borderCustom rounded-[10px] p-2.5 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-textDark uppercase tracking-wider">Sem</label>
+                    <input
+                      type="number"
+                      placeholder="e.g. 5"
+                      value={formData.metadata.semester || ''}
+                      onChange={(e) => handleMetadataChange('semester', e.target.value)}
+                      className="bg-[#F5F3EF] border border-borderCustom rounded-[10px] p-2.5 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {formData.metadata.educationLevel === 'Postgraduate (PG)' && (
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-textDark uppercase tracking-wider">Degree</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. M.Tech"
+                      value={formData.metadata.degree || ''}
+                      onChange={(e) => handleMetadataChange('degree', e.target.value)}
+                      className="bg-[#F5F3EF] border border-borderCustom rounded-[10px] p-2.5 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-textDark uppercase tracking-wider">Specialization</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. AI"
+                      value={formData.metadata.specialization || ''}
+                      onChange={(e) => handleMetadataChange('specialization', e.target.value)}
+                      className="bg-[#F5F3EF] border border-borderCustom rounded-[10px] p-2.5 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-textDark uppercase tracking-wider">Sem</label>
+                    <input
+                      type="number"
+                      placeholder="e.g. 2"
+                      value={formData.metadata.semester || ''}
+                      onChange={(e) => handleMetadataChange('semester', e.target.value)}
+                      className="bg-[#F5F3EF] border border-borderCustom rounded-[10px] p-2.5 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="flex flex-col gap-1">
             <label className="text-xs font-bold text-textDark uppercase tracking-wider">Description (Optional)</label>
             <textarea
@@ -465,7 +650,7 @@ export const CreateListingPage: React.FC = () => {
           <div className="bg-[#F5F3EF] border border-borderCustom p-3.5 rounded-xl flex gap-2.5 mt-2">
             <Info className="w-5 h-5 text-primary flex-shrink-0" />
             <p className="text-[11px] text-muted leading-tight">
-              Your college (<strong className="text-textDark font-bold">{user?.college.split(',')[0]}</strong>) will be displayed on the listing. Other students can search or coordinate trades from anywhere.
+              Your institution (<strong className="text-textDark font-bold">{user?.institutionName?.split(',')[0] || user?.college?.split(',')[0] || 'Unknown'}</strong>) will be displayed on the listing. Other students can search or coordinate trades from anywhere.
             </p>
           </div>
         </div>
@@ -510,10 +695,15 @@ export const CreateListingPage: React.FC = () => {
               </div>
               
               {/* Category specific specs */}
-              {(formData.category === 'books' || formData.category === 'notes') ? (
+              {(formData.category === 'notes') ? (
                 <div>
                   <span className="font-bold text-textDark block">Course Info</span>
                   <span className="block mt-0.5">{formData.metadata.semester || 'N/A'} &middot; {formData.metadata.department || 'N/A'}</span>
+                </div>
+              ) : formData.category === 'books' ? (
+                <div>
+                  <span className="font-bold text-textDark block">Academic Info</span>
+                  <span className="block mt-0.5">{formData.metadata.educationLevel || 'N/A'}</span>
                 </div>
               ) : (
                 <div>

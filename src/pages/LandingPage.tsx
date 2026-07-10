@@ -82,7 +82,7 @@ export const LandingPage: React.FC = () => {
     },
     {
       q: "Are there any listing fees or commissions?",
-      a: "No! Campus Marketplace is completely free for college students. There are no fees to post, and we do not take any commissions from transactions."
+      a: "No! RevoShelf is completely free for college students. There are no fees to post, and we do not take any commissions from transactions."
     },
     {
       q: "Can I sell things other than books?",

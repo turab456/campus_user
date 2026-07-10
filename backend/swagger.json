@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Campus Marketplace API",
+    "title": "RevoShelf API",
     "version": "1.0.0",
-    "description": "API documentation for the Campus Marketplace backend"
+    "description": "API documentation for the RevoShelf backend"
   },
   "servers": [
     {

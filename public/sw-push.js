@@ -10,7 +10,7 @@ self.addEventListener('push', function(event) {
     }
   }
 
-  const title = data.title || 'Campus Marketplace';
+  const title = data.title || 'RevoShelf';
   const options = {
     body: data.body || '',
     icon: data.icon || '/thecampx_logo.png',

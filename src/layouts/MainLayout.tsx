@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { BottomNav } from '../components/BottomNav';
+import logoUrl from '../assets/logo.svg';
 import { usePWA } from '../hooks/usePWA';
 import { useWebPush } from '../hooks/useWebPush';
 import { Info, RefreshCw, WifiOff, BookOpen, Mail } from 'lucide-react';
@@ -71,8 +72,8 @@ export const MainLayout: React.FC = () => {
 
   return (
     <div className={`flex flex-col bg-background ${isMessagesPage
-        ? 'h-screen h-[100dvh] overflow-hidden pt-[env(safe-area-inset-top)] pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pt-0 md:pb-0'
-        : 'min-h-screen pb-24 md:pb-0'
+      ? 'h-screen h-[100dvh] overflow-hidden pt-[env(safe-area-inset-top)] pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pt-0 md:pb-0'
+      : 'min-h-screen pb-24 md:pb-0'
       }`}>
       {/* Top Navigation */}
       <div className={isMessagesPage ? 'hidden md:block' : ''}>
@@ -94,7 +95,7 @@ export const MainLayout: React.FC = () => {
             <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
             <div>
               <h4 className="font-bold text-sm">App Update Available</h4>
-              <p className="text-xs text-white/90 mt-0.5">A new version of Campus Marketplace is ready with enhancements.</p>
+              <p className="text-xs text-white/90 mt-0.5">A new version of RevoShelf is ready with enhancements.</p>
             </div>
           </div>
           <button
@@ -119,12 +120,9 @@ export const MainLayout: React.FC = () => {
           <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
             {/* Column 1 */}
             <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-2">
-                <div className="bg-primary p-1.5 rounded-lg text-white">
-                  <BookOpen className="w-4 h-4" />
-                </div>
-                <span className="font-bold text-sm text-textDark tracking-tight">Campus Marketplace</span>
-              </div>
+              <Link to="/" className="flex items-center">
+                <img src={logoUrl} alt="RevoShelf" className="h-[28px] w-auto object-contain" />
+              </Link>
               <p className="text-xs text-textSec leading-relaxed">
                 Buy and sell used books with students from your college. Safe, affordable, and campus-focused.
               </p>
@@ -149,7 +147,7 @@ export const MainLayout: React.FC = () => {
                 <Link to="/home" className="hover:text-primary hover:underline transition-colors">Browse Books</Link>
                 <Link to="/create-listing" className="hover:text-primary hover:underline transition-colors">Sell a Book</Link>
                 <Link to="/home" className="hover:text-primary hover:underline transition-colors">Categories</Link>
-                <Link to="/#how-it-works" className="hover:text-primary hover:underline transition-colors">How It Works</Link>
+                <Link to="/how-it-works" className="hover:text-primary hover:underline transition-colors">How It Works</Link>
                 <Link to="/home" className="hover:text-primary hover:underline transition-colors">Recently Added</Link>
               </div>
             </div>
@@ -158,11 +156,11 @@ export const MainLayout: React.FC = () => {
             <div className="flex flex-col gap-3">
               <h4 className="text-xs font-bold text-textDark uppercase tracking-wider">Support</h4>
               <div className="flex flex-col gap-2 text-xs text-textSec">
-                <Link to="/about" className="hover:text-primary hover:underline transition-colors">Help Center</Link>
-                <Link to="/#faq" className="hover:text-primary hover:underline transition-colors">Frequently Asked Questions</Link>
-                <Link to="/about" className="hover:text-primary hover:underline transition-colors">Contact Us</Link>
-                <Link to="/about" className="hover:text-primary hover:underline transition-colors">Safety Tips</Link>
-                <Link to="/about" className="hover:text-primary hover:underline transition-colors">Report an Issue</Link>
+                <Link to="/help-center" className="hover:text-primary hover:underline transition-colors">Help Center</Link>
+                <Link to="/faq" className="hover:text-primary hover:underline transition-colors">Frequently Asked Questions</Link>
+                <Link to="/contact-us" className="hover:text-primary hover:underline transition-colors">Contact Us</Link>
+                <Link to="/safety-tips" className="hover:text-primary hover:underline transition-colors">Safety Tips</Link>
+                <Link to="/report-issue" className="hover:text-primary hover:underline transition-colors">Report an Issue</Link>
               </div>
             </div>
 
@@ -173,7 +171,7 @@ export const MainLayout: React.FC = () => {
                 <Link to="/about" className="hover:text-primary hover:underline transition-colors">About Us</Link>
                 <Link to="/privacy" className="hover:text-primary hover:underline transition-colors">Privacy Policy</Link>
                 <Link to="/terms" className="hover:text-primary hover:underline transition-colors">Terms & Conditions</Link>
-                <Link to="/terms" className="hover:text-primary hover:underline transition-colors">Community Guidelines</Link>
+                <Link to="/community-guidelines" className="hover:text-primary hover:underline transition-colors">Community Guidelines</Link>
               </div>
             </div>
           </div>
@@ -181,7 +179,7 @@ export const MainLayout: React.FC = () => {
           <div className="max-w-7xl mx-auto mt-10 pt-8 border-t border-borderCustom flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="text-center md:text-left">
               <p className="text-[11px] text-muted">
-                &copy; {new Date().getFullYear()} Campus Marketplace.
+                &copy; {new Date().getFullYear()} RevoShelf.
               </p>
               <p className="text-[10px] text-muted mt-0.5">
                 Helping students save money every semester.

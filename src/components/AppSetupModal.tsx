@@ -235,7 +235,7 @@ export const AppSetupModal: React.FC = () => {
       ) : (
         <div className="flex flex-col gap-5">
           <p className="text-xs text-muted leading-relaxed">
-            Enhance your Campus Marketplace experience by configuring push notifications and installing the PWA.
+            Enhance your RevoShelf experience by configuring push notifications and installing the PWA.
           </p>
 
           <div className="flex flex-col gap-4">

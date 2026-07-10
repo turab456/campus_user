@@ -6,7 +6,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password?: string) => Promise<boolean>;
-  register: (name: string, email: string, password?: string, college?: string, department?: string, semester?: number) => Promise<boolean>;
+  register: (name: string, email: string, password?: string) => Promise<boolean>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<User> & { avatarFile?: File | null }) => Promise<boolean>;
 }
@@ -55,10 +55,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (name: string, email: string, password?: string, college?: string, department?: string, semester?: number): Promise<boolean> => {
+  const register = async (name: string, email: string, password?: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      await backendApi.register(name, email, password, college, department, semester);
+      await backendApi.register(name, email, password);
       return true;
     } catch (err) {
       console.error('Register failed', err);

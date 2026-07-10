@@ -32,7 +32,7 @@ export const AdminLoginPage: React.FC = () => {
             <AlertCircle size={32} className="text-blue-600" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>
-          <p className="text-gray-600 mt-2">Campus Marketplace Administration</p>
+          <p className="text-gray-600 mt-2">RevoShelf Administration</p>
         </div>
 
         {error && <Alert type="error" message={error} />}

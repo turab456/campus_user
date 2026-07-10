@@ -6,7 +6,7 @@ interface BadgeProps {
 
 export const Badge: React.FC<BadgeProps> = ({ children }) => {
   return (
-    <span className="inline-block bg-[#DBEAFE] text-[#2563EB] text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider mb-4 cursor-default">
+    <span className="inline-block bg-primary-light text-primary text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider mb-4 cursor-default">
       {children}
     </span>
   );
