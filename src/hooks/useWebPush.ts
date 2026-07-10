@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { backendApi as api } from '../services/backendApi';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { safeGetItem, safeSetItem, safeRemoveItem } from '../utils/storage';
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -21,14 +22,14 @@ export const useWebPush = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
   const [permission, setPermission] = useState<NotificationPermission>(
-    typeof window !== 'undefined' ? Notification.permission : 'default'
+    typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default'
   );
 
   const setupPushNotifications = useCallback(async (forceRequest = false) => {
     if (!user) return;
 
     try {
-      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
         console.warn('[Web Push Client] Push notifications are not supported by this browser.');
         return;
       }
@@ -71,12 +72,12 @@ export const useWebPush = () => {
       let subscription = await registration.pushManager.getSubscription();
       
       if (subscription) {
-        const savedVapidKey = localStorage.getItem(`push_vapid_key_${user.id}`);
+        const savedVapidKey = safeGetItem(`push_vapid_key_${user.id}`);
         if (savedVapidKey !== vapidKey) {
           console.log('[Web Push Client] VAPID key changed, renewing subscription...');
           await subscription.unsubscribe();
           subscription = null;
-          localStorage.removeItem(`push_endpoint_${user.id}`);
+          safeRemoveItem(`push_endpoint_${user.id}`);
         }
       }
       
@@ -102,12 +103,12 @@ export const useWebPush = () => {
             }
           };
 
-          const savedEndpoint = localStorage.getItem(`push_endpoint_${user.id}`);
-          const savedVapidKey = localStorage.getItem(`push_vapid_key_${user.id}`);
+          const savedEndpoint = safeGetItem(`push_endpoint_${user.id}`);
+          const savedVapidKey = safeGetItem(`push_vapid_key_${user.id}`);
           if (savedEndpoint !== subscription.endpoint || savedVapidKey !== vapidKey) {
             await api.subscribePush(payload);
-            localStorage.setItem(`push_endpoint_${user.id}`, subscription.endpoint);
-            localStorage.setItem(`push_vapid_key_${user.id}`, vapidKey);
+            safeSetItem(`push_endpoint_${user.id}`, subscription.endpoint);
+            safeSetItem(`push_vapid_key_${user.id}`, vapidKey);
             console.log('[Web Push Client] Subscription successfully registered on the backend.');
           }
         }
@@ -119,8 +120,11 @@ export const useWebPush = () => {
 
   const requestPushPermission = useCallback(async () => {
     await setupPushNotifications(true);
-    setPermission(Notification.permission);
-    return Notification.permission;
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setPermission(Notification.permission);
+      return Notification.permission;
+    }
+    return 'default' as NotificationPermission;
   }, [setupPushNotifications]);
 
   useEffect(() => {

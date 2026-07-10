@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { safeGetItem, safeRemoveItem } from '../utils/storage';
 import type { User } from '../types';
 import { backendApi } from '../services/backendApi';
 
@@ -71,10 +72,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     try {
       if (user) {
-        const endpoint = localStorage.getItem(`push_endpoint_${user.id}`);
+        const endpoint = safeGetItem(`push_endpoint_${user.id}`);
         if (endpoint) {
           await backendApi.unsubscribePush(endpoint).catch(err => console.warn('Failed to remove Push subscription on logout', err));
-          localStorage.removeItem(`push_endpoint_${user.id}`);
+          safeRemoveItem(`push_endpoint_${user.id}`);
         }
       }
       await backendApi.logout();

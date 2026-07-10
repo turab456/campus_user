@@ -7,6 +7,7 @@ import { ShieldCheck, Laptop, Sparkles, Bell, Pencil } from 'lucide-react';
 import { default as api } from '../services/backendApi';
 import { AddressForm } from '../components/AddressForm';
 import type { AddressFormData } from '../components/AddressForm';
+import { safeSetItem } from '../utils/storage';
 import { compressAvatar } from '../utils/imageCompression';
 
 const EDUCATION_LEVELS = ['School', 'PUC', 'Diploma', 'Undergraduate (UG)', 'Postgraduate (PG)'];
@@ -18,7 +19,7 @@ export const SettingsPage: React.FC = () => {
   const { isInstallable, isStandalone, installApp } = usePWA();
 
   const [notifPermission, setNotifPermission] = useState<NotificationPermission>(
-    typeof Notification !== 'undefined' ? Notification.permission : 'default'
+    typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default'
   );
 
   const [formData, setFormData] = useState({
@@ -120,7 +121,7 @@ export const SettingsPage: React.FC = () => {
   };
 
   const handleEnableNotifications = async () => {
-    if (typeof Notification === 'undefined') {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
       showToast('Notifications are not supported on this browser', 'warning');
       return;
     }
@@ -173,8 +174,8 @@ export const SettingsPage: React.FC = () => {
               };
               await api.subscribePush(payload);
               if (user) {
-                localStorage.setItem(`push_endpoint_${user.id}`, subscription.endpoint);
-                localStorage.setItem(`push_vapid_key_${user.id}`, vapidKey);
+                safeSetItem(`push_endpoint_${user.id}`, subscription.endpoint);
+                safeSetItem(`push_vapid_key_${user.id}`, vapidKey);
               }
               showToast('Push notifications successfully enabled!', 'success');
             }

@@ -5,6 +5,7 @@
  * Handles automatic access token injection and refresh on 401s.
  */
 
+import { safeGetItem, safeSetItem, safeRemoveItem } from '../utils/storage';
 import * as mockDB from './mockData';
 import type { Book, User, Review, Chat, Message, SearchFilters } from '../types';
 
@@ -50,7 +51,7 @@ const mapUser = (user: any): User => {
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://campus-be-qkrx.onrender.com';
 
-let currentAccessToken: string | null = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+let currentAccessToken: string | null = safeGetItem('accessToken');
 let unauthorizedCallback: (() => void) | null = null;
 let rateLimitCallback: (() => void) | null = null;
 
@@ -58,9 +59,9 @@ export const setAccessToken = (token: string | null) => {
   currentAccessToken = token;
   if (typeof window !== 'undefined') {
     if (token) {
-      localStorage.setItem('accessToken', token);
+      safeSetItem('accessToken', token);
     } else {
-      localStorage.removeItem('accessToken');
+      safeRemoveItem('accessToken');
     }
   }
 };

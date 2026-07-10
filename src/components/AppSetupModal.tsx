@@ -7,6 +7,7 @@ import { Bell, Smartphone, User as UserIcon } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { COLLEGES, DEPARTMENTS, SEMESTERS } from '../constants';
 import { AddressForm } from './AddressForm';
+import { safeGetItem, safeSetItem } from '../utils/storage';
 import type { AddressFormData } from './AddressForm';
 
 export const AppSetupModal: React.FC = () => {
@@ -18,7 +19,7 @@ export const AppSetupModal: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(permission === 'granted');
   const [isPwaInstalled, setIsPwaInstalled] = useState(
-    isStandalone || localStorage.getItem('pwa_installed') === 'true'
+    isStandalone || safeGetItem('pwa_installed') === 'true'
   );
 
   // Address form state (single object)
@@ -56,7 +57,7 @@ export const AppSetupModal: React.FC = () => {
 
   const needsAddress = user ? (!user.city || !user.pincode) : false;
   const needsNotifications = permission !== 'granted';
-  const needsPwa = isInstallable && !isStandalone && localStorage.getItem('pwa_installed') !== 'true';
+  const needsPwa = isInstallable && !isStandalone && safeGetItem('pwa_installed') !== 'true';
 
   // Check if we should display the modal
   useEffect(() => {
@@ -82,7 +83,7 @@ export const AppSetupModal: React.FC = () => {
   }, [permission]);
 
   useEffect(() => {
-    setIsPwaInstalled(isStandalone || localStorage.getItem('pwa_installed') === 'true');
+    setIsPwaInstalled(isStandalone || safeGetItem('pwa_installed') === 'true');
   }, [isStandalone]);
 
   const handleNotificationToggle = async () => {
@@ -109,7 +110,7 @@ export const AppSetupModal: React.FC = () => {
       const success = await installApp();
       if (success) {
         setIsPwaInstalled(true);
-        localStorage.setItem('pwa_installed', 'true');
+        safeSetItem('pwa_installed', 'true');
         showToast('App added to Home Screen!', 'success');
       }
     } catch (err) {

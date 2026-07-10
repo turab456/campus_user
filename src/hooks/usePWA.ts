@@ -13,16 +13,15 @@ interface BeforeInstallPromptEvent extends Event {
 export const usePWA = () => {
   const [isInstallable, setIsInstallable] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [swUpdateAvailable, setSwUpdateAvailable] = useState(false);
 
   useEffect(() => {
     // Detect standalone mode
     const checkStandalone = () => {
-      const isMql = window.matchMedia('(display-mode: standalone)').matches;
-      // @ts-ignore
-      const isNav = navigator.standalone === true;
+      const isMql = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(display-mode: standalone)').matches : false;
+      const isNav = typeof navigator !== 'undefined' && 'standalone' in navigator ? (navigator as any).standalone === true : false;
       setIsStandalone(isMql || isNav);
     };
 
