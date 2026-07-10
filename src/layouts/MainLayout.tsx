@@ -196,7 +196,7 @@ export const MainLayout: React.FC = () => {
               <a href="https://github.com" target="_blank" rel="noreferrer" className="text-muted hover:text-primary transition-colors" aria-label="GitHub">
                 <GithubIcon className="w-4 h-4" />
               </a>
-              <a href="mailto:support@campusmarketplace.com" className="text-muted hover:text-primary transition-colors" aria-label="Email">
+              <a href="mailto:support@revoshelf.com" className="text-muted hover:text-primary transition-colors" aria-label="Email">
                 <Mail className="w-4 h-4" />
               </a>
             </div>

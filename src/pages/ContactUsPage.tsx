@@ -17,7 +17,7 @@ export const ContactUsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 flex flex-col lg:flex-row gap-12 lg:gap-20">
-        
+
         {/* Left Col: Info */}
         <div className="flex-1 lg:pt-8">
           <h1 className="text-3xl md:text-4xl font-bold text-textDark tracking-tight mb-4">
@@ -35,7 +35,7 @@ export const ContactUsPage: React.FC = () => {
               <div>
                 <h3 className="font-bold text-textDark mb-1">Support</h3>
                 <p className="text-sm text-textSec mb-1">For help with your account, listings, or general issues.</p>
-                <a href="mailto:support@campusmarketplace.com" className="text-primary hover:underline text-sm font-medium">support@campusmarketplace.com</a>
+                <a href="mailto:support@revoshelf.com" className="text-primary hover:underline text-sm font-medium">support@revoshelf.com</a>
               </div>
             </div>
 
@@ -72,7 +72,7 @@ export const ContactUsPage: React.FC = () => {
                 </div>
                 <h3 className="text-2xl font-bold text-textDark mb-2">Message Sent!</h3>
                 <p className="text-textSec mb-6">Thank you for reaching out. We will get back to you shortly.</p>
-                <button 
+                <button
                   onClick={() => setIsSubmitted(false)}
                   className="text-primary hover:underline font-medium"
                 >
@@ -91,7 +91,7 @@ export const ContactUsPage: React.FC = () => {
                     <input type="text" required className="w-full bg-[#FAF8F5] border border-borderCustom rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Doe" />
                   </div>
                 </div>
-                
+
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-textDark">University Email</label>
                   <input type="email" required className="w-full bg-[#FAF8F5] border border-borderCustom rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="jane@university.edu" />

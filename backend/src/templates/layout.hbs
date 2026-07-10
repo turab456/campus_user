@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,12 +14,14 @@
             color: #18181b;
             -webkit-font-smoothing: antialiased;
         }
+
         .wrapper {
             width: 100%;
             table-layout: fixed;
             background-color: #f4f4f5;
             padding-bottom: 60px;
         }
+
         .main {
             background-color: #ffffff;
             margin: 0 auto;
@@ -30,11 +33,14 @@
             margin-top: 40px;
             overflow: hidden;
         }
+
         .header {
-            background-color: #038F78;
+            background-color: #ffffff;
             padding: 30px;
             text-align: center;
+            border-bottom: 1px solid #e4e4e7;
         }
+
         .header h1 {
             color: #ffffff;
             margin: 0;
@@ -42,20 +48,24 @@
             font-weight: 700;
             letter-spacing: -0.025em;
         }
+
         .content {
             padding: 40px 30px;
             background-color: #ffffff;
         }
+
         .footer {
             text-align: center;
             padding: 30px;
             color: #71717a;
             font-size: 13px;
         }
+
         .footer a {
             color: #038F78;
             text-decoration: none;
         }
+
         .button {
             display: inline-block;
             background-color: #038F78;
@@ -70,15 +80,18 @@
             text-align: center;
             transition: background-color 0.2s;
         }
+
         .button:hover {
             background-color: #027a66;
         }
+
         p {
             line-height: 1.6;
             margin: 0 0 16px;
             color: #3f3f46;
             font-size: 16px;
         }
+
         h2 {
             color: #18181b;
             font-size: 20px;
@@ -88,13 +101,15 @@
         }
     </style>
 </head>
+
 <body>
     <center class="wrapper">
         <table class="main" width="100%">
             <!-- Header -->
             <tr>
                 <td class="header">
-                    <h1>RevoShelf</h1>
+                    <img src="{{frontendUrl}}/logo.svg" alt="RevoShelf Logo"
+                        style="height: 40px; width: auto; display: inline-block;" />
                 </td>
             </tr>
             <!-- Content -->
@@ -105,12 +120,14 @@
             </tr>
             <!-- Optional Footer inside card -->
         </table>
-        
+
         <!-- Outer Footer -->
         <div class="footer">
             <p>&copy; 2026 RevoShelf. All rights reserved.</p>
-            <p>If you have any questions, contact us at <a href="mailto:support@campusmarketplace.com">support@campusmarketplace.com</a></p>
+            <p>If you have any questions, contact us at <a href="mailto:support@revoshelf.com">support@revoshelf.com</a>
+            </p>
         </div>
     </center>
 </body>
+
 </html>
