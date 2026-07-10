@@ -20,6 +20,9 @@ export interface User {
   pincode?: string;
   country?: string;
   coordinates?: { lat: number; lng: number };
+  institutionName?: string;
+  educationLevel?: string;
+  academicDetails?: Record<string, any>;
 }
 
 export type BookCondition = 'New' | 'Like New' | 'Very Good' | 'Good' | 'Acceptable';

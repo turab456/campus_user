@@ -14,6 +14,7 @@ const templateCache = {};
  */
 const renderTemplate = (templateName, context) => {
   try {
+    const extendedContext = { ...context, frontendUrl: process.env.CLIENT_URL || 'http://localhost:5173' };
     const layoutPath = path.join(__dirname, '../templates/layout.hbs');
     const templatePath = path.join(__dirname, `../templates/${templateName}.hbs`);
 
@@ -30,10 +31,10 @@ const renderTemplate = (templateName, context) => {
     }
 
     // Render the specific template body
-    const bodyHtml = templateCache[templateName](context);
+    const bodyHtml = templateCache[templateName](extendedContext);
 
     // Render the final layout with the body content
-    const finalHtml = templateCache.layout({ ...context, body: bodyHtml });
+    const finalHtml = templateCache.layout({ ...extendedContext, body: bodyHtml });
 
     return finalHtml;
   } catch (error) {

@@ -10,10 +10,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg', 'robots.txt'],
+      includeAssets: ['favicon.svg', 'robots.txt'],
       manifest: {
         name: 'RevoShelf',
-        short_name: 'CampusMarket',
+        short_name: 'RevoShelf',
         description: 'Buy and sell used books and other student essentials directly with verified students.',
         theme_color: '#0D5C4D',
         background_color: '#FAF6F0',
@@ -22,19 +22,9 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
+            src: 'favicon.svg',
+            sizes: '192x192 512x512',
+            type: 'image/svg+xml',
             purpose: 'any maskable'
           }
         ]
