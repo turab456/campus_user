@@ -15,7 +15,7 @@ const mapListing = (listing: any): Book => {
   return {
     ...listing,
     id: listing._id || listing.id,
-    status: listing.isSold ? 'sold' : (listing.salePending ? 'pending' : (listing.status || 'active')),
+    status: listing.isSold ? 'sold' : (listing.salePending ? 'pending' : 'active'),
     category: typeof listing.category === 'object' && listing.category !== null
       ? (listing.category.name ? listing.category.name.toLowerCase().replace(/ /g, '-') : '')
       : listing.category,
@@ -51,19 +51,16 @@ const mapUser = (user: any): User => {
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://campus-be-qkrx.onrender.com';
 
-let currentAccessToken: string | null = safeGetItem('accessToken');
+// Access token is stored ONLY in memory — never in localStorage.
+// This prevents XSS attacks from stealing the token.
+// The refresh token persists in an HttpOnly cookie managed by the backend.
+let currentAccessToken: string | null = null;
 let unauthorizedCallback: (() => void) | null = null;
 let rateLimitCallback: (() => void) | null = null;
 
 export const setAccessToken = (token: string | null) => {
+  // Store ONLY in memory — never persist to localStorage
   currentAccessToken = token;
-  if (typeof window !== 'undefined') {
-    if (token) {
-      safeSetItem('accessToken', token);
-    } else {
-      safeRemoveItem('accessToken');
-    }
-  }
 };
 
 export const getAccessToken = () => currentAccessToken;
@@ -148,6 +145,21 @@ async function post<T>(path: string, body: any): Promise<T> {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const error = new Error(err.message || `POST ${path} failed with ${res.status}`);
+    (error as any).status = res.status;
+    (error as any).isHttpError = true;
+    throw error;
+  }
+  return (await res.json()) as T;
+}
+
+async function postFormData<T>(path: string, formData: FormData): Promise<T> {
+  const res = await fetchWithAuth(`${BASE_URL}${path}`, {
+    method: 'POST',
+    body: formData,
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -276,7 +288,7 @@ export const backendApi = {
       // Fallback to mock if backend not ready
       await delay(350);
       let books = mockDB.getStoredBooks();
-      books = books.filter(b => b.status === 'active');
+      books = books.filter(b => b.status === 'active' || b.status === 'sold');
       return books;
     });
   },
@@ -289,9 +301,15 @@ export const backendApi = {
     });
   },
   async createListing(listingData: any) {
+    if (listingData instanceof FormData) {
+      return postFormData<{ success: boolean; listing: any }>('/api/listings', listingData).then((r) => mapListing(r.listing));
+    }
     return post<{ success: boolean; listing: any }>('/api/listings', listingData).then((r) => mapListing(r.listing));
   },
   async updateListing(id: string, updates: any) {
+    if (updates instanceof FormData) {
+      return putFormData<{ success: boolean; listing: any }>(`/api/listings/${id}`, updates).then((r) => mapListing(r.listing));
+    }
     return put<{ success: boolean; listing: any }>(`/api/listings/${id}`, updates).then((r) => mapListing(r.listing));
   },
   async markAsSold(id: string, buyerId?: string) {
@@ -477,10 +495,10 @@ export const backendApi = {
   async getNotifications(page = 1, limit = 20): Promise<{ notifications: any[]; unreadCount: number; pagination: any }> {
     return get<any>('/api/notifications', { page, limit });
   },
-  async getUnreadNotificationCount(): Promise<number> {
-    return get<{ success: boolean; unreadCount: number }>('/api/notifications/unread-count')
-      .then(r => r.unreadCount)
-      .catch(() => 0);
+  async getUnreadNotificationCount(): Promise<{ unreadCount: number; unreadChatCount: number }> {
+    return get<{ success: boolean; unreadCount: number; unreadChatCount: number }>('/api/notifications/unread-count')
+      .then(r => ({ unreadCount: r.unreadCount, unreadChatCount: r.unreadChatCount || 0 }))
+      .catch(() => ({ unreadCount: 0, unreadChatCount: 0 }));
   },
   async markNotificationRead(notificationId: string): Promise<void> {
     await put<any>(`/api/notifications/${notificationId}/read`, {});

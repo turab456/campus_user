@@ -7,7 +7,7 @@ import { NotificationBell } from './NotificationBell';
 import logoUrl from '../assets/logo.svg';
 
 export const Navbar: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, unreadChatCount } = useAuth();
   const { savedBookIds } = useWishlist();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -81,6 +81,11 @@ export const Navbar: React.FC = () => {
               >
                 <MessageSquare className="w-4 h-4" />
                 <span>Chats</span>
+                {unreadChatCount > 0 && (
+                  <span className="bg-danger text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center absolute -top-2.5 -right-2">
+                    {unreadChatCount}
+                  </span>
+                )}
               </Link>
 
               <NotificationBell />
@@ -189,6 +194,11 @@ export const Navbar: React.FC = () => {
               <NotificationBell />
               <Link to="/messages" className="text-muted hover:text-textDark p-1.5 rounded-full relative" title="Chats">
                 <MessageSquare className="w-5 h-5" />
+                {unreadChatCount > 0 && (
+                  <span className="bg-danger text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center absolute top-0 right-0 border border-white">
+                    {unreadChatCount}
+                  </span>
+                )}
               </Link>
             </>
           )}

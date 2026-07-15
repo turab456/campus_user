@@ -9,6 +9,7 @@ import { HomePage } from './pages/HomePage';
 import { SearchPage } from './pages/SearchPage';
 import { ListingDetailsPage } from './pages/ListingDetailsPage';
 import { CreateListingPage } from './pages/CreateListingPage';
+import { EditListingPage } from './pages/EditListingPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { MyListingsPage } from './pages/MyListingsPage';
 import { WishlistPage } from './pages/WishlistPage';
@@ -84,6 +85,7 @@ function App() {
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/book/:id" element={<ListingDetailsPage />} />
                 <Route path="/create-listing" element={<CreateListingPage />} />
+                <Route path="/edit-listing/:id" element={<EditListingPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/seller/:id" element={<ProfilePage />} />
                 <Route path="/my-listings" element={<MyListingsPage />} />

@@ -1,6 +1,6 @@
 // src/services/socket.ts
 import { io, Socket } from 'socket.io-client';
-import { safeGetItem } from '../utils/storage';
+import { getAccessToken } from './backendApi';
 
 const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || 'https://campus-be-qkrx.onrender.com';
 
@@ -18,8 +18,8 @@ export const initSocket = (userId: string): Socket => {
 
   socket.on('connect', () => {
     console.log('[Socket] Connected to server');
-    // Send JWT token for authenticated socket registration
-    const token = safeGetItem('accessToken');
+    // Send in-memory JWT token for authenticated socket registration
+    const token = getAccessToken();
     socket?.emit('register', { userId, token });
   });
 

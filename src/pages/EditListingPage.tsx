@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronRight, ChevronLeft, Plus, CheckCircle, Info, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -71,10 +71,12 @@ const CATEGORY_FIELDS_CONFIG: Record<string, CustomField[]> = {
   ]
 };
 
-export const CreateListingPage: React.FC = () => {
+export const EditListingPage: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const [loading, setLoading] = useState(true);
   
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -92,6 +94,33 @@ export const CreateListingPage: React.FC = () => {
     pickupLocation: '',
     metadata: {} as Record<string, any>
   });
+
+  useEffect(() => {
+    if (!id) return;
+    const fetchListing = async () => {
+      try {
+        const listing = await api.getBookById(id);
+        if (listing) {
+          setFormData({
+            category: listing.category || '',
+            title: listing.title || '',
+            condition: (listing.condition as BookCondition) || 'Good',
+            description: listing.description || '',
+            images: listing.images || [],
+            price: String(listing.price || ''),
+            originalPrice: String(listing.originalPrice || ''),
+            pickupLocation: listing.pickupLocation || '',
+            metadata: listing.metadata || {}
+          });
+        }
+      } catch (err) {
+        showToast('Failed to load listing', 'danger');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchListing();
+  }, [id, showToast]);
 
   // Pre-fill education level from user profile if available, when category becomes books
   React.useEffect(() => {
@@ -266,8 +295,8 @@ export const CreateListingPage: React.FC = () => {
         payload.append('images', file);
       });
 
-      await api.createListing(payload);
-      showToast('Successfully published listing!', 'success');
+      await api.updateListing(id!, payload);
+      showToast('Successfully updated listing!', 'success');
       navigate('/my-listings');
     } catch (err: any) {
       console.error(err);
@@ -287,11 +316,19 @@ export const CreateListingPage: React.FC = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <div className="max-w-2xl mx-auto flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto bg-white border border-borderCustom rounded-2xl p-5 md:p-8 shadow-subtle my-2">
       {/* Title */}
       <div className="mb-6 text-center">
-        <h1 className="text-xl md:text-2xl font-extrabold text-textDark tracking-tight">Create a Listing</h1>
+        <h1 className="text-xl md:text-2xl font-extrabold text-textDark tracking-tight">Edit Listing</h1>
         <p className="text-xs text-muted mt-1.5">Step {step} of 5: {
           ['Choose Category', 'Fill Book Details', 'Choose Photos', 'Pricing & Location', 'Review & Publish'][step - 1]
         }</p>
@@ -618,6 +655,26 @@ export const CreateListingPage: React.FC = () => {
                 </div>
               );
             })}
+
+            {/* Show previously uploaded real files (Cloudinary URLs) */}
+            {formData.images.filter(url => !MOCK_UPLOAD_PRESETS.includes(url)).map((url, idx) => (
+              <div key={`existing-${idx}`} className="aspect-square rounded-xl overflow-hidden border-2 border-primary relative group">
+                <img src={url} alt={`Existing ${idx}`} className="w-full h-full object-cover bg-white" />
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setFormData(prev => ({
+                      ...prev,
+                      images: prev.images.filter(img => img !== url)
+                    }));
+                  }}
+                  className="absolute top-1.5 right-1.5 bg-danger/90 text-white rounded-full p-1.5 shadow-sm hover:bg-danger transition-colors opacity-0 group-hover:opacity-100"
+                  title="Remove Photo"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
 
             {/* Show preset mocks if there's room */}
             {MOCK_UPLOAD_PRESETS.map((url, idx) => {

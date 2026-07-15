@@ -10,6 +10,8 @@ interface AuthContextType {
   register: (name: string, email: string, password?: string) => Promise<boolean>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<User> & { avatarFile?: File | null }) => Promise<boolean>;
+  unreadChatCount: number;
+  setUnreadChatCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,6 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
 
   useEffect(() => {
     backendApi.setOnUnauthorized(() => {
@@ -30,6 +33,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // try to refresh it if the first call fails with 401.
         const profile = await backendApi.getUserProfile();
         setUser(profile);
+        try {
+          const counts = await backendApi.getUnreadNotificationCount();
+          setUnreadChatCount(counts.unreadChatCount);
+        } catch (e) {
+          // ignore
+        }
       } catch (err) {
         // Normal if not logged in
         console.log('Not logged in on load');
@@ -46,6 +55,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await backendApi.login(email, password);
       const profile = await backendApi.getUserProfile();
       setUser(profile);
+      try {
+        const counts = await backendApi.getUnreadNotificationCount();
+        setUnreadChatCount(counts.unreadChatCount);
+      } catch (e) {
+        // ignore
+      }
       sessionStorage.removeItem('setup_modal_dismissed');
       return true;
     } catch (err) {
@@ -100,7 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, logout, updateProfile, unreadChatCount, setUnreadChatCount }}>
       {children}
     </AuthContext.Provider>
   );

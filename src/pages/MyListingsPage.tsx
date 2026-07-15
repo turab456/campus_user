@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, CheckCircle, Trash2, Tag, Archive } from 'lucide-react';
+import { BookOpen, CheckCircle, Trash2, Tag, Archive, Edit } from 'lucide-react';
 import { backendApi as api } from '../services/backendApi';
 import type { Book } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -147,6 +147,14 @@ export const MyListingsPage: React.FC = () => {
             <CheckCircle className="w-3.5 h-3.5" />
             <span>Mark Sold</span>
           </button>
+          
+          <Link
+            to={`/edit-listing/${book.id}`}
+            className="bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors p-2 rounded-lg flex items-center justify-center focus:outline-none"
+            title="Edit Listing"
+          >
+            <Edit className="w-4 h-4" />
+          </Link>
           
           <button
             onClick={() => handleDeleteListing(book.id, book.title)}

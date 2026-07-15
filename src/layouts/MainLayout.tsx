@@ -37,7 +37,7 @@ const GithubIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export const MainLayout: React.FC = () => {
   const { swUpdateAvailable, isOffline, reloadApp } = usePWA();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, setUnreadChatCount } = useAuth();
   const { showToast } = useToast();
 
   // Register Web Push notifications
@@ -57,13 +57,20 @@ export const MainLayout: React.FC = () => {
         }
       });
 
+      socket.on('message', (data: any) => {
+        const isMessagesPage = window.location.pathname.startsWith('/messages');
+        if (!isMessagesPage) {
+          setUnreadChatCount(prev => prev + 1);
+        }
+      });
+
       return () => {
         disconnectSocket();
       };
     } else {
       disconnectSocket();
     }
-  }, [user, showToast]);
+  }, [user, showToast, setUnreadChatCount]);
 
   // Show footer only on landing page
   const hideFooter = location.pathname !== '/';
