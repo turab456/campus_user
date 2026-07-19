@@ -73,7 +73,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
   return (
     <Link
       to={`/book/${book.id}`}
-      className="group block bg-white border border-borderCustom rounded-xl overflow-hidden hover:shadow-subtle hover:-translate-y-0.5 transition-all duration-150 relative"
+      className="group flex flex-col h-full bg-white border border-borderCustom rounded-xl overflow-hidden hover:shadow-subtle hover:-translate-y-0.5 transition-all duration-150 relative"
     >
       {/* Save Button */}
       {(!user || user.id !== book.sellerId) && (
@@ -91,7 +91,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
       )}
 
       {/* Image container */}
-      <div className="relative aspect-[4/3] bg-[#FAF8F5] overflow-hidden border-b border-borderCustom">
+      <div className="relative aspect-[4/3] bg-[#FAF8F5] overflow-hidden border-b border-borderCustom flex-shrink-0">
         <img
           src={book.images[0]}
           alt={book.title}
@@ -120,65 +120,79 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
       </div>
 
       {/* Content */}
-      <div className="p-3 bg-white">
-        {/* Condition & Date */}
-        <div className="flex items-center justify-between gap-2 mb-2">
-          {book.status === 'sold' ? (
-            <span className="text-[9px] font-bold px-2 py-0.5 rounded-md border bg-slate-100 text-slate-500 border-slate-200">
-              Sold
-            </span>
-          ) : (
-            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md border ${getConditionColor(book.condition)}`}>
-              {book.condition}
-            </span>
-          )}
-          <span className="text-[10px] text-muted font-medium">{formatTimeAgo(book.createdAt)}</span>
+      <div className="p-2.5 sm:p-3 bg-white flex-1 flex flex-col justify-between">
+        <div>
+          {/* Condition & Date */}
+          <div className="flex items-center justify-between gap-1 mb-1.5">
+            {book.status === 'sold' ? (
+              <span className="text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded-md border bg-slate-100 text-slate-500 border-slate-200">
+                Sold
+              </span>
+            ) : (
+              <span className={`text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${getConditionColor(book.condition)}`}>
+                {book.condition}
+              </span>
+            )}
+            <span className="text-[9px] sm:text-[10px] text-muted font-medium">{formatTimeAgo(book.createdAt)}</span>
+          </div>
+
+          {/* Title & Author */}
+          <h3 className="font-bold text-xs sm:text-sm text-[#111827] leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+            {book.title}
+          </h3>
+          <p className="text-[10px] sm:text-[11px] text-muted truncate mt-0.5">by {book.author}</p>
+
+          {/* Price Section */}
+          <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 mt-1.5">
+            <span className="text-sm sm:text-base font-bold text-textDark font-sans">₹{book.price}</span>
+            {book.originalPrice > book.price && (
+              <span className="text-[10px] sm:text-xs text-muted line-through">₹{book.originalPrice}</span>
+            )}
+            {book.originalPrice > book.price && (
+              <span className="text-[8px] sm:text-[10px] font-bold text-success bg-[#E8F5E9] border border-[#C8E6C9] px-1 rounded-sm whitespace-nowrap">
+                {Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)}% off
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Title & Author */}
-        <h3 className="font-bold text-sm text-[#111827] leading-tight line-clamp-1 group-hover:text-primary transition-colors">
-          {book.title}
-        </h3>
-        <p className="text-[11px] text-muted truncate mt-0.5">by {book.author}</p>
-
-        {/* Price Section */}
-        <div className="flex items-baseline gap-1.5 mt-2">
-          <span className="text-base font-bold text-textDark font-sans">₹{book.price}</span>
-          {book.originalPrice > book.price && (
-            <span className="text-xs text-muted line-through">₹{book.originalPrice}</span>
-          )}
-          {book.originalPrice > book.price && (
-            <span className="text-[10px] font-bold text-success ml-1 bg-[#E8F5E9] border border-[#C8E6C9] px-1 rounded-sm">
-              {Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)}% off
-            </span>
-          )}
+        {/* Mobile-only location & distance line (compact & short) */}
+        <div className="flex items-center gap-1 mt-2 text-[9px] text-muted sm:hidden">
+          <MapPin className="w-2.5 h-2.5 text-slate-400 flex-shrink-0" />
+          <span className="truncate">
+            {book.isNearMe ? 'Near You' : (book.distanceKm !== undefined ? `${book.distanceKm} km` : '')}
+            {(book.distanceKm !== undefined || book.isNearMe) ? ' · ' : ''}
+            {book.college?.split(',')[0] || 'Unknown'}
+          </span>
         </div>
 
-        <hr className="border-borderCustom my-2.5" />
+        {/* Desktop-only detailed metadata block */}
+        <div className="hidden sm:block">
+          <hr className="border-borderCustom my-2.5" />
 
-        {/* College & Semester Info */}
-        <div className="flex flex-col gap-1 text-[11px] text-muted">
-          <div className="flex items-center gap-1.5">
-            <GraduationCap className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
-            <span className="truncate">Sem {book.semester} • {book.department}</span>
-          </div>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
-            <span className="truncate" title={book.college}>{book.college?.split(',')[0] || 'Unknown'}</span>
-          </div>
-          {book.distanceKm !== undefined && (
-            <div className="flex items-center gap-1.5 mt-1">
-              {book.isNearMe ? (
-                <span className="inline-flex items-center gap-1 bg-green-50 border border-green-200 text-green-700 text-[9px] font-bold px-2 py-0.5 rounded-full">
-                  <MapPin className="w-2.5 h-2.5" /> Near You · {book.distanceKm} km
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 bg-slate-50 border border-slate-200 text-slate-500 text-[9px] font-medium px-2 py-0.5 rounded-full">
-                  <MapPin className="w-2.5 h-2.5" /> {book.distanceKm} km away
-                </span>
-              )}
+          <div className="flex flex-col gap-1 text-[11px] text-muted">
+            <div className="flex items-center gap-1.5">
+              <GraduationCap className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
+              <span className="truncate">Sem {book.semester} • {book.department}</span>
             </div>
-          )}
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
+              <span className="truncate" title={book.college}>{book.college?.split(',')[0] || 'Unknown'}</span>
+            </div>
+            {book.distanceKm !== undefined && (
+              <div className="flex items-center gap-1.5 mt-1">
+                {book.isNearMe ? (
+                  <span className="inline-flex items-center gap-1 bg-green-50 border border-green-200 text-green-700 text-[9px] font-bold px-2 py-0.5 rounded-full">
+                    <MapPin className="w-2.5 h-2.5" /> Near You · {book.distanceKm} km
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 bg-slate-50 border border-slate-200 text-slate-500 text-[9px] font-medium px-2 py-0.5 rounded-full">
+                    <MapPin className="w-2.5 h-2.5" /> {book.distanceKm} km away
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </Link>

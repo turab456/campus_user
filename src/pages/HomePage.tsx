@@ -102,7 +102,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {[1, 2, 3, 4].map(n => <CardSkeleton key={n} />)}
         </div>
       ) : (
@@ -117,7 +117,7 @@ export const HomePage: React.FC = () => {
                   <p className="text-[10px] text-muted truncate mt-0.5 max-w-sm md:max-w-md">{user.college}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                 {getNearbyBooks().map(book => (
                   <BookCard key={book.id} book={book} />
                 ))}
@@ -135,7 +135,7 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
             {recommendedBooks.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                 {recommendedBooks.map(book => (
                   <BookCard key={book.id} book={book} />
                 ))}
@@ -155,7 +155,7 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
             {recentBooks.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                 {recentBooks.map(book => (
                   <BookCard key={book.id} book={book} />
                 ))}

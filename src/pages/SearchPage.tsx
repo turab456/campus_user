@@ -292,7 +292,7 @@ export const SearchPage: React.FC = () => {
 
         {/* Listings Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {[1, 2, 3, 4, 5, 6].map(n => <CardSkeleton key={n} />)}
           </div>
         ) : books.length > 0 ? (
@@ -300,7 +300,7 @@ export const SearchPage: React.FC = () => {
             <div className="flex items-center justify-between text-xs text-muted mb-4">
               <span>Found {books.length} {books.length === 1 ? 'listing' : 'listings'}</span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {books.map(book => (
                 <BookCard key={book.id} book={book} />
               ))}

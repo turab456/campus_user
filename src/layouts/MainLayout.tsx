@@ -57,7 +57,7 @@ export const MainLayout: React.FC = () => {
         }
       });
 
-      socket.on('message', (data: any) => {
+      socket.on('message', () => {
         const isMessagesPage = window.location.pathname.startsWith('/messages');
         if (!isMessagesPage) {
           setUnreadChatCount(prev => prev + 1);

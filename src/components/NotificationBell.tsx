@@ -27,8 +27,8 @@ export const NotificationBell: React.FC = () => {
 
   const fetchUnreadCount = useCallback(async () => {
     try {
-      const count = await api.getUnreadNotificationCount();
-      setUnreadCount(count);
+      const data = await api.getUnreadNotificationCount();
+      setUnreadCount(data.unreadCount);
     } catch {
       // Silently fail
     }

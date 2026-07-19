@@ -42,11 +42,11 @@ export const WishlistPage: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {[1, 2, 3].map(n => <CardSkeleton key={n} />)}
         </div>
       ) : savedBooks.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {savedBooks.map(book => (
             <BookCard key={book.id} book={book} />
           ))}

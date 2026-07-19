@@ -165,7 +165,7 @@ export const LandingPage: React.FC = () => {
             <p className="text-xs text-muted mt-3 max-w-sm">Hand-picked essentials and listings popular on campus right now</p>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {featuredBooks.map(book => (
             <BookCard key={book.id} book={book} />
           ))}
@@ -219,7 +219,7 @@ export const LandingPage: React.FC = () => {
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {popularBooks.map(book => (
             <BookCard key={book.id} book={book} />
           ))}

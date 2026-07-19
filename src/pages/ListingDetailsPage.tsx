@@ -397,7 +397,7 @@ export const ListingDetailsPage: React.FC = () => {
       {similarBooks.length > 0 && (
         <section className="border-t border-borderCustom pt-10">
           <h2 className="text-base md:text-lg font-bold text-textDark mb-6">Similar Listings You Might Need</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {similarBooks.map(item => (
               <BookCard key={item.id} book={item} />
             ))}
