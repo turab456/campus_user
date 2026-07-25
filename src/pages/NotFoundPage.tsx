@@ -1,12 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HelpCircle, ArrowLeft } from 'lucide-react';
+import { SEO } from '../components/SEO';
 
 export const NotFoundPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
     <div className="text-center py-16 px-4 max-w-md mx-auto flex flex-col items-center justify-center gap-5">
+      <SEO title="Page Not Found | RevoShelf" description="The page you are looking for does not exist on RevoShelf. Go back to our campus student marketplace to browse books, notes, and hostel gear." />
       <div className="bg-slate-50 border border-borderCustom p-4 rounded-full text-slate-400">
         <HelpCircle className="w-12 h-12" />
       </div>

@@ -25,6 +25,7 @@ const mapListing = (listing: any): Book => {
     sellerRating: seller.rating || listing.sellerRating || 5.0,
     sellerSpamScore: seller.spamScore || 0,
     sellerScamScore: seller.scamScore || 0,
+    college: listing.college || seller.institutionName || seller.college || '',
     metadata: listing.metadata || {},
     distanceKm: listing.distanceKm,
     isNearMe: listing.isNearMe,
@@ -252,6 +253,14 @@ export const backendApi = {
 
   async resendVerification(email: string) {
     return post<{ success: boolean; message: string }>('/api/auth/resend-verification', { email });
+  },
+
+  async forgotPassword(email: string) {
+    return post<{ success: boolean; message: string }>('/api/auth/forgot-password', { email });
+  },
+
+  async resetPassword(token: string, password?: string) {
+    return post<{ success: boolean; message: string }>('/api/auth/reset-password', { token, password });
   },
 
   async logout() {

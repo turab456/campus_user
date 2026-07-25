@@ -8,6 +8,8 @@ import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../context/ToastContext';
 import { BookCard } from '../components/BookCard';
 import { ListingDetailSkeleton } from '../components/SkeletonLoader';
+import { SEO } from '../components/SEO';
+import { slugify } from '../utils/seoUtils';
 
 const METADATA_LABELS: Record<string, string> = {
   author: 'Author / Created By',
@@ -66,12 +68,18 @@ export const ListingDetailsPage: React.FC = () => {
   }, [id]);
 
   if (isLoading) {
-    return <ListingDetailSkeleton />;
+    return (
+      <>
+        <SEO title="Loading Listing... | RevoShelf" />
+        <ListingDetailSkeleton />
+      </>
+    );
   }
 
   if (!book) {
     return (
       <div className="text-center py-16 px-4">
+        <SEO title="Listing Not Found | RevoShelf" />
         <h2 className="text-lg font-bold text-textDark">Listing Not Found</h2>
         <p className="text-xs text-muted mt-2">The listing you are looking for might have been sold, deleted, or expired.</p>
         <button
@@ -138,8 +146,94 @@ export const ListingDetailsPage: React.FC = () => {
     }
   };
 
+  const slug = slugify(book.title);
+  const canonicalUrl = `/listing/${slug}`;
+
+  // Map condition to schema.org item conditions
+  const conditionSchemaMap: Record<string, string> = {
+    'New': 'https://schema.org/NewCondition',
+    'Like New': 'https://schema.org/UsedCondition',
+    'Very Good': 'https://schema.org/UsedCondition',
+    'Good': 'https://schema.org/UsedCondition',
+    'Acceptable': 'https://schema.org/UsedCondition',
+  };
+
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    'name': book.title,
+    'image': book.images && book.images.length > 0 ? book.images[0] : 'https://revoshelf.com/logo.svg',
+    'description': book.description || `Buy ${book.title} from verified students at affordable prices.`,
+    'offers': {
+      '@type': 'Offer',
+      'url': `https://revoshelf.com${canonicalUrl}`,
+      'priceCurrency': 'INR',
+      'price': book.price,
+      'itemCondition': conditionSchemaMap[book.condition] || 'https://schema.org/UsedCondition',
+      'availability': book.status === 'active' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'
+    }
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': 'Home',
+        'item': 'https://revoshelf.com/'
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': 'Marketplace',
+        'item': 'https://revoshelf.com/marketplace'
+      },
+      {
+        '@type': 'ListItem',
+        'position': 3,
+        'name': book.category || 'Books',
+        'item': `https://revoshelf.com/search?category=${encodeURIComponent(book.category || 'all')}`
+      },
+      {
+        '@type': 'ListItem',
+        'position': 4,
+        'name': book.title,
+        'item': `https://revoshelf.com${canonicalUrl}`
+      }
+    ]
+  };
+
+  const structuredData = [productSchema, breadcrumbSchema];
+
   return (
     <div className="flex flex-col gap-12">
+      <SEO 
+        title={`${book.title} | RevoShelf`} 
+        descriptionType="listing" 
+        descriptionDetails={book.title} 
+        image={book.images && book.images.length > 0 ? book.images[0] : undefined}
+        url={canonicalUrl}
+        type="book"
+        structuredData={structuredData}
+      />
+      
+      {/* Visual Breadcrumb Navigation (Desktop) */}
+      <nav className="hidden md:flex items-center gap-1.5 text-xs text-textSec font-medium flex-wrap -mb-6">
+        <Link to="/home" className="hover:text-primary transition-colors">Home</Link>
+        <span className="text-muted text-[10px]">/</span>
+        <Link to="/search" className="hover:text-primary transition-colors">Marketplace</Link>
+        <span className="text-muted text-[10px]">/</span>
+        <Link 
+          to={`/search?category=${encodeURIComponent(book.category.toLowerCase().replace(/ /g, '-'))}`} 
+          className="hover:text-primary transition-colors capitalize"
+        >
+          {book.category}
+        </Link>
+        <span className="text-muted text-[10px]">/</span>
+        <span className="text-textDark font-semibold truncate max-w-[250px]">{book.title}</span>
+      </nav>
       {/* Mobile Back Button (Floating style on top of gallery) */}
       <div className="md:hidden flex items-center mb-1">
         <button
@@ -169,6 +263,7 @@ export const ListingDetailsPage: React.FC = () => {
             <img
               src={book.images[activeImageIndex]}
               alt={book.title}
+              fetchPriority="high"
               className="w-full h-full object-cover"
             />
 

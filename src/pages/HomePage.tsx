@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { backendApi as api } from '../services/backendApi';
 import type { Book } from '../types';
 import { CardSkeleton } from '../components/SkeletonLoader';
+import { SEO } from '../components/SEO';
 
 export const HomePage: React.FC = () => {
   const { user } = useAuth();
@@ -59,6 +60,8 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-10">
+      <SEO title="RevoShelf | Buy & Sell College Essentials" descriptionType="home" />
+      <h1 className="sr-only">RevoShelf College Marketplace Dashboard</h1>
       {/* Search Header for Mobile/Tablet */}
       <section className="md:hidden bg-white border border-borderCustom rounded-2xl p-4 shadow-subtle -mt-2">
         <h2 className="text-sm font-bold text-textDark mb-3">What are you looking for today?</h2>

@@ -8,6 +8,7 @@ import type { Book, BookCondition, SearchFilters } from '../types';
 import { CATEGORIES, CONDITIONS, SORT_OPTIONS } from '../constants';
 import { CardSkeleton } from '../components/SkeletonLoader';
 import { EmptyState } from '../components/EmptyState';
+import { SEO } from '../components/SEO';
 
 export const SearchPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -191,9 +192,19 @@ export const SearchPage: React.FC = () => {
       </button>
     </div>
   );
+  const categoryName = filters.category !== 'all' 
+    ? (CATEGORIES.find(c => c.id === filters.category)?.name || '')
+    : '';
+  const pageTitle = categoryName ? `${categoryName} | RevoShelf` : 'Marketplace | RevoShelf';
 
   return (
     <div className="flex flex-col md:flex-row gap-6 items-start">
+      <SEO 
+        title={pageTitle} 
+        descriptionType={categoryName ? 'category' : 'marketplace'} 
+        descriptionDetails={categoryName} 
+      />
+      <h1 className="sr-only">Marketplace Search | RevoShelf</h1>
       {/* Desktop Filter Sidebar */}
       <aside className="hidden md:block w-[260px] bg-white border border-borderCustom rounded-xl p-5 sticky top-24 flex-shrink-0 max-h-[80vh] overflow-y-auto">
         <div className="flex items-center justify-between pb-3 border-b border-borderCustom mb-5">

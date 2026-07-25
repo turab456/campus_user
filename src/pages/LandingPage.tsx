@@ -9,6 +9,7 @@ import { Badge } from '../components/Badge';
 import { TrustIndicators } from '../components/TrustIndicators';
 import { HeroCollage } from '../components/HeroCollage';
 import { ProblemSolver } from '../components/ProblemSolver';
+import { SEO } from '../components/SEO';
 
 const getCategoryIcon = (iconName: string) => {
   switch (iconName) {
@@ -92,6 +93,7 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="flex flex-col -mt-2">
+      <SEO title="RevoShelf | Buy & Sell College Essentials" descriptionType="home" />
       {/* Hero Section */}
       <section className="pt-8 pb-16 grid md:grid-cols-2 gap-12 items-center">
         <div className="space-y-6">

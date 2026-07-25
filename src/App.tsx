@@ -1,4 +1,6 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
+import { SEO } from './components/SEO';
 import { AuthProvider } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { ToastProvider } from './context/ToastContext';
@@ -19,6 +21,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { VerifyEmailPage } from './pages/VerifyEmailPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { HowItWorksPage } from './pages/HowItWorksPage';
 import { HelpCenterPage } from './pages/HelpCenterPage';
@@ -70,57 +73,123 @@ const GlobalApiHandler = () => {
   );
 };
 
+const PATH_TITLES: Record<string, string> = {
+  '/': 'RevoShelf | Buy & Sell College Essentials',
+  '/home': 'RevoShelf | Buy & Sell College Essentials',
+  '/search': 'Marketplace | RevoShelf',
+  '/create-listing': 'Post a Listing | RevoShelf',
+  '/profile': 'My Profile | RevoShelf',
+  '/my-listings': 'My Listings | RevoShelf',
+  '/wishlist': 'My Wishlist | RevoShelf',
+  '/settings': 'Settings | RevoShelf',
+  '/messages': 'Messages | RevoShelf',
+  '/login': 'Login | RevoShelf',
+  '/register': 'Create Account | RevoShelf',
+  '/forgot-password': 'Forgot Password | RevoShelf',
+  '/reset-password': 'Reset Password | RevoShelf',
+  '/verify-email': 'Verify Email | RevoShelf',
+  '/how-it-works': 'How It Works | RevoShelf',
+  '/help-center': 'Help Center | RevoShelf',
+  '/faq': 'FAQ | RevoShelf',
+  '/contact-us': 'Contact Us | RevoShelf',
+  '/safety-tips': 'Safety Tips | RevoShelf',
+  '/report-issue': 'Report an Issue | RevoShelf',
+  '/about': 'About Us | RevoShelf',
+  '/privacy': 'Privacy Policy | RevoShelf',
+  '/terms': 'Terms & Conditions | RevoShelf',
+  '/community-guidelines': 'Community Guidelines | RevoShelf',
+};
+
+const PageTitleManager = () => {
+  const location = useLocation();
+  const { pathname } = location;
+
+  let title = 'RevoShelf';
+  let descType: 'home' | 'marketplace' | 'login' | 'signup' | 'profile' | 'category' | 'listing' | undefined = undefined;
+  let descDetails: string | undefined = undefined;
+
+  if (pathname.startsWith('/edit-listing/')) {
+    title = 'Edit Listing | RevoShelf';
+  } else if (pathname.startsWith('/book/')) {
+    title = 'Listing Details | RevoShelf'; // Fallback before listing loaded
+    descType = 'listing';
+  } else if (pathname.startsWith('/seller/')) {
+    title = 'Seller Profile | RevoShelf'; // Fallback before seller loaded
+    descType = 'profile';
+  } else {
+    title = PATH_TITLES[pathname] || 'RevoShelf';
+    if (pathname === '/' || pathname === '/home') {
+      descType = 'home';
+    } else if (pathname === '/search') {
+      descType = 'marketplace';
+    } else if (pathname === '/login') {
+      descType = 'login';
+    } else if (pathname === '/register') {
+      descType = 'signup';
+    } else if (pathname === '/profile') {
+      descType = 'profile';
+      descDetails = 'my account';
+    }
+  }
+
+  return <SEO title={title} descriptionType={descType} descriptionDetails={descDetails} url={pathname} />;
+};
+
 function App() {
   return (
-    <AuthProvider>
-      <WishlistProvider>
-        <ToastProvider>
-          <GlobalApiHandler />
-          <BrowserRouter>
-            <Routes>
-              {/* App Shell and General Pages */}
-              <Route element={<MainLayout />}>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/home" element={<HomePage />} />
-                <Route path="/search" element={<SearchPage />} />
-                <Route path="/book/:id" element={<ListingDetailsPage />} />
-                <Route path="/create-listing" element={<CreateListingPage />} />
-                <Route path="/edit-listing/:id" element={<EditListingPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/seller/:id" element={<ProfilePage />} />
-                <Route path="/my-listings" element={<MyListingsPage />} />
-                <Route path="/wishlist" element={<WishlistPage />} />
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/messages" element={<MessagesPage />} />
-                
-                {/* Static Pages */}
-                <Route path="/how-it-works" element={<HowItWorksPage />} />
-                <Route path="/help-center" element={<HelpCenterPage />} />
-                <Route path="/faq" element={<FaqPage />} />
-                <Route path="/contact-us" element={<ContactUsPage />} />
-                <Route path="/safety-tips" element={<SafetyTipsPage />} />
-                <Route path="/report-issue" element={<ReportIssuePage />} />
-                <Route path="/about" element={<AboutUsPage />} />
-                <Route path="/privacy" element={<PrivacyPolicyPage />} />
-                <Route path="/terms" element={<TermsConditionsPage />} />
-                <Route path="/community-guidelines" element={<CommunityGuidelinesPage />} />
-              </Route>
+    <HelmetProvider>
+      <AuthProvider>
+        <WishlistProvider>
+          <ToastProvider>
+            <GlobalApiHandler />
+            <BrowserRouter>
+              <PageTitleManager />
+              <Routes>
+                {/* App Shell and General Pages */}
+                <Route element={<MainLayout />}>
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/home" element={<HomePage />} />
+                  <Route path="/search" element={<SearchPage />} />
+                  <Route path="/book/:id" element={<ListingDetailsPage />} />
+                  <Route path="/create-listing" element={<CreateListingPage />} />
+                  <Route path="/edit-listing/:id" element={<EditListingPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/seller/:id" element={<ProfilePage />} />
+                  <Route path="/my-listings" element={<MyListingsPage />} />
+                  <Route path="/wishlist" element={<WishlistPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/messages" element={<MessagesPage />} />
+                  
+                  {/* Static Pages */}
+                  <Route path="/how-it-works" element={<HowItWorksPage />} />
+                  <Route path="/help-center" element={<HelpCenterPage />} />
+                  <Route path="/faq" element={<FaqPage />} />
+                  <Route path="/contact-us" element={<ContactUsPage />} />
+                  <Route path="/safety-tips" element={<SafetyTipsPage />} />
+                  <Route path="/report-issue" element={<ReportIssuePage />} />
+                  <Route path="/about" element={<AboutUsPage />} />
+                  <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                  <Route path="/terms" element={<TermsConditionsPage />} />
+                  <Route path="/community-guidelines" element={<CommunityGuidelinesPage />} />
+                </Route>
 
-              {/* Centered Auth Layout Pages */}
-              <Route element={<AuthLayout />}>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                <Route path="/verify-email" element={<VerifyEmailPage />} />
-              </Route>
+                {/* Centered Auth Layout Pages */}
+                <Route element={<AuthLayout />}>
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
+                  <Route path="/verify-email" element={<VerifyEmailPage />} />
+                </Route>
 
-              {/* Fallback 404 Route */}
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </BrowserRouter>
-        </ToastProvider>
-      </WishlistProvider>
-    </AuthProvider>
+                {/* Fallback 404 Route */}
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </BrowserRouter>
+          </ToastProvider>
+        </WishlistProvider>
+      </AuthProvider>
+    </HelmetProvider>
   );
 }
 

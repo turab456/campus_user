@@ -1,0 +1,17 @@
+# Robots.txt configuration for RevoShelf P2P College Marketplace
+User-agent: *
+
+# Allow search engines to crawl public pages
+Allow: /
+Allow: /marketplace
+Allow: /categories
+Allow: /listings
+
+# Block indexing of administrative, api, dynamic edit, and user session pages
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /profile/edit
+Disallow: /api
+
+# Reference dynamically generated sitemap XML
+Sitemap: https://www.revoshelf.com/sitemap.xml

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
 import { Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { backendApi as api } from '../services/backendApi';
+import { SEO } from '../components/SEO';
 
 export const ForgotPasswordPage: React.FC = () => {
   const { showToast } = useToast();
@@ -18,13 +20,12 @@ export const ForgotPasswordPage: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      // Simulate calling reset password endpoint
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await api.forgotPassword(email.trim().toLowerCase());
       setEmailSent(true);
       showToast('Reset link dispatched to your email!', 'success');
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      showToast('Failed to trigger reset email.', 'danger');
+      showToast(err.message || 'Failed to trigger reset email.', 'danger');
     } finally {
       setIsSubmitting(false);
     }
@@ -32,6 +33,8 @@ export const ForgotPasswordPage: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6">
+      <SEO title="Forgot Password | RevoShelf" />
+      <h1 className="sr-only">Forgot Password | RevoShelf</h1>
       <div className="text-center">
         <h3 className="text-lg font-bold text-textDark">Reset Password</h3>
         <p className="text-xs text-muted mt-1">Enter your registered email to receive a password reset link.</p>

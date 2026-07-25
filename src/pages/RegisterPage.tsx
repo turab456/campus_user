@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { User, Mail, Lock, GraduationCap, MapPin, ArrowRight } from 'lucide-react';
+import { User as UserIcon, Mail, Lock, GraduationCap, MapPin, ArrowRight } from 'lucide-react';
+import { SEO } from '../components/SEO';
 
 
 export const RegisterPage: React.FC = () => {
@@ -47,6 +48,8 @@ export const RegisterPage: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6">
+      <SEO title="Create Account | RevoShelf" descriptionType="signup" />
+      <h1 className="sr-only">Create Account | RevoShelf</h1>
       <div className="text-center">
         <h3 className="text-lg font-bold text-textDark">Register student account</h3>
         <p className="text-xs text-muted mt-1">Unlock peer trading and connect with students anywhere.</p>
@@ -56,7 +59,7 @@ export const RegisterPage: React.FC = () => {
         <div className="flex flex-col gap-1">
           <label className="text-[10px] font-bold text-textDark uppercase tracking-wider">Full Name *</label>
           <div className="relative flex items-center">
-            <User className="w-4 h-4 text-muted absolute left-3 pointer-events-none" />
+            <UserIcon className="w-4 h-4 text-muted absolute left-3 pointer-events-none" />
             <input
               type="text"
               placeholder="e.g. Karan Kumar"

@@ -7,6 +7,7 @@ import { BookCard } from '../components/BookCard';
 import { CardSkeleton } from '../components/SkeletonLoader';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { SEO } from '../components/SEO';
 
 export const ProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -139,6 +140,7 @@ export const ProfilePage: React.FC = () => {
   if (!profileId) {
     return (
       <div className="max-w-md mx-auto text-center py-16 px-4 flex flex-col items-center gap-4 bg-white border border-borderCustom rounded-2xl shadow-subtle my-8">
+        <SEO title="My Profile | RevoShelf" descriptionType="profile" descriptionDetails="my account" />
         <ShieldAlert className="w-12 h-12 text-primary" />
         <h2 className="text-lg font-bold text-textDark">Sign in to view your profile</h2>
         <p className="text-xs text-muted">You must be logged in to view your account details and active listings.</p>
@@ -152,6 +154,7 @@ export const ProfilePage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-6 animate-pulse max-w-4xl mx-auto py-4">
+        <SEO title="Loading Profile | RevoShelf" />
         <div className="h-40 bg-slate-200 rounded-2xl" />
         <div className="h-8 w-48 bg-slate-200 rounded" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -165,6 +168,7 @@ export const ProfilePage: React.FC = () => {
   if (!user) {
     return (
       <div className="text-center py-16 px-4">
+        <SEO title="Profile Not Found | RevoShelf" />
         <h2 className="text-lg font-bold text-textDark">Student Profile Not Found</h2>
         <p className="text-xs text-muted mt-1">This user account may have been disabled or deleted.</p>
       </div>
@@ -178,8 +182,11 @@ export const ProfilePage: React.FC = () => {
     });
   };
 
+  const pageTitle = isOwnProfile ? 'My Profile | RevoShelf' : `${user.name} | RevoShelf`;
+
   return (
     <div className="max-w-4xl mx-auto flex flex-col gap-8">
+      <SEO title={pageTitle} descriptionType="profile" descriptionDetails={isOwnProfile ? 'my account' : user.name} />
       {/* Profile Header Card */}
       <section className="bg-white border border-borderCustom rounded-2xl p-5 md:p-8 shadow-subtle flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
         <img

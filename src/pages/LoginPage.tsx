@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { backendApi } from '../services/backendApi';
+import { SEO } from '../components/SEO';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -62,6 +63,8 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6">
+      <SEO title="Login | RevoShelf" descriptionType="login" />
+      <h1 className="sr-only">Sign In | RevoShelf</h1>
       <div className="text-center">
         <h3 className="text-lg font-bold text-textDark">Sign in to your account</h3>
         <p className="text-xs text-muted mt-1">Access listings and communicate with fellow student sellers.</p>
