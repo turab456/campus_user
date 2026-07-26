@@ -93,8 +93,10 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
   if (currentAccessToken) {
     headers.set('Authorization', `Bearer ${currentAccessToken}`);
   }
-  
-  const config = { ...options, headers, credentials: 'include' as RequestCredentials };
+
+  const config = {
+    ...options, headers, credentials: 'omit' as RequestCredentials,
+  };
   let res = await fetch(url, config);
 
   if (res.status === 401) {
@@ -339,7 +341,7 @@ export const backendApi = {
   async deleteListing(id: string) {
     return del<{ success: boolean; message?: string }>(`/api/listings/${id}`).then((r) => r.success);
   },
-  
+
   // Users
   async getUserProfile() {
     return get<{ success: boolean; user: any }>('/api/users/me').then((r) => mapUser(r.user));
