@@ -14,4 +14,4 @@ Disallow: /profile/edit
 Disallow: /api
 
 # Reference dynamically generated sitemap XML
-Sitemap: https://www.revoshelf.com/sitemap.xml
+Sitemap: https://www.api.revoshelf.com/sitemap.xml
