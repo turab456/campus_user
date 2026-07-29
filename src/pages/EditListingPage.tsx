@@ -4,6 +4,7 @@ import { ChevronRight, ChevronLeft, Plus, CheckCircle, Info, Trash2 } from 'luci
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { backendApi as api } from '../services/backendApi';
+import { compressImage } from '../utils/imageCompressor';
 import type { BookCondition } from '../types';
 import { CATEGORIES, CONDITIONS, DEPARTMENTS, SEMESTERS } from '../constants';
 
@@ -240,16 +241,27 @@ export const EditListingPage: React.FC = () => {
     });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
       const remainingSlots = 3 - formData.images.length;
       const filesToAdd = newFiles.slice(0, remainingSlots);
       
-      setSelectedFiles(prev => {
-        const updated = [...prev, ...filesToAdd].slice(0, 3 - formData.images.length);
-        return updated;
-      });
+      try {
+        const compressed = await Promise.all(
+          filesToAdd.map(file => compressImage(file))
+        );
+        setSelectedFiles(prev => {
+          const updated = [...prev, ...compressed].slice(0, 3 - formData.images.length);
+          return updated;
+        });
+      } catch (err) {
+        console.error('[EditListingPage] Compression error, falling back:', err);
+        setSelectedFiles(prev => {
+          const updated = [...prev, ...filesToAdd].slice(0, 3 - formData.images.length);
+          return updated;
+        });
+      }
     }
   };
 
