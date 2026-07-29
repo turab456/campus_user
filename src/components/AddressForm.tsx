@@ -141,7 +141,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
   const [statesLoading, setStatesLoading] = useState(false);
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-  const hasValidKey = Boolean(apiKey && apiKey !== 'YOUR_GOOGLE_MAPS_API_KEY_HERE');
+  const hasValidKey = Boolean(apiKey && apiKey !== 'YOUR_GOOGLE_MAPS_API_KEY_HERE' && apiKey !== '');
 
   // Load Google Maps API
   useEffect(() => {
@@ -185,9 +185,9 @@ export const AddressForm: React.FC<AddressFormProps> = ({
         countryCode: cca2,
         coordinates: place.geometry?.location
           ? {
-              lat: place.geometry.location.lat(),
-              lng: place.geometry.location.lng(),
-            }
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng(),
+          }
           : null,
       });
     });
