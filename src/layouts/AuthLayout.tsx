@@ -1,9 +1,25 @@
 import React from 'react';
-import { Outlet, Link } from 'react-router-dom';
-import { BookOpen } from 'lucide-react';
+import { Outlet, Link, Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import logoUrl from '../assets/logo.svg';
 
 export const AuthLayout: React.FC = () => {
+  const { user, isLoading } = useAuth();
+
+  // Show a blank loading state while fetching auth token from HttpOnly cookie
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Redirect to home if user is already authenticated
+  if (user) {
+    return <Navigate to="/home" replace />;
+  }
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-center py-12 sm:px-6 lg:px-8 px-4">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
