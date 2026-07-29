@@ -105,7 +105,7 @@ const PageTitleManager = () => {
   const { pathname } = location;
 
   let title = 'RevoShelf';
-  let descType: 'home' | 'marketplace' | 'login' | 'signup' | 'profile' | 'category' | 'listing' | undefined = undefined;
+  let descType: 'home' | 'marketplace' | 'login' | 'signup' | 'profile' | 'category' | 'listing' | 'about' | 'contact' | 'faq' | 'privacy' | 'terms' | undefined = undefined;
   let descDetails: string | undefined = undefined;
 
   if (pathname.startsWith('/edit-listing/')) {
@@ -129,6 +129,16 @@ const PageTitleManager = () => {
     } else if (pathname === '/profile') {
       descType = 'profile';
       descDetails = 'my account';
+    } else if (pathname === '/about') {
+      descType = 'about';
+    } else if (pathname === '/contact-us') {
+      descType = 'contact';
+    } else if (pathname === '/faq') {
+      descType = 'faq';
+    } else if (pathname === '/privacy') {
+      descType = 'privacy';
+    } else if (pathname === '/terms') {
+      descType = 'terms';
     }
   }
 

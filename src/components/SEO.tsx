@@ -4,7 +4,7 @@ import { getMetaDescription } from '../utils/seoUtils';
 
 interface SEOProps {
   title: string;
-  descriptionType?: 'home' | 'marketplace' | 'login' | 'signup' | 'profile' | 'category' | 'listing';
+  descriptionType?: 'home' | 'marketplace' | 'login' | 'signup' | 'profile' | 'category' | 'listing' | 'about' | 'contact' | 'faq' | 'privacy' | 'terms';
   descriptionDetails?: string;
   description?: string;
   keywords?: string;
@@ -29,8 +29,8 @@ export const SEO: React.FC<SEOProps> = ({
 }) => {
   const defaultKeywords = 'marketplace, college, textbooks, notes, sell, buy, student, campus';
   
-  // Base origin for absolute URLs in metadata (using revoshelf.com domain name for canonical URLs)
-  const canonicalOrigin = 'https://revoshelf.com';
+  // Base origin for absolute URLs in metadata (using www.revoshelf.com domain name for canonical URLs)
+  const canonicalOrigin = 'https://www.revoshelf.com';
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.revoshelf.com';
   const defaultImage = `${origin}/logo.svg`;
 
@@ -39,21 +39,55 @@ export const SEO: React.FC<SEOProps> = ({
     ? getMetaDescription(descriptionType, descriptionDetails)
     : (description || getMetaDescription('default'));
 
-  // Ensure image and URL are absolute (pointing to revoshelf.com canonical domain)
+  // Ensure image and URL are absolute (pointing to www.revoshelf.com canonical domain)
   const ogImage = image
     ? (image.startsWith('http') ? image : `${origin}${image.startsWith('/') ? '' : '/'}${image}`)
     : defaultImage;
 
+  // Trim trailing slash from url if present, except for root page
+  let cleanUrlPath = url || '';
+  if (cleanUrlPath.startsWith('/')) {
+    cleanUrlPath = cleanUrlPath.substring(1);
+  }
+  if (cleanUrlPath.endsWith('/') && cleanUrlPath !== '/') {
+    cleanUrlPath = cleanUrlPath.substring(0, cleanUrlPath.length - 1);
+  }
+
   const ogUrl = url
-    ? (url.startsWith('http') ? url : `${canonicalOrigin}${url.startsWith('/') ? '' : '/'}${url}`)
+    ? (url.startsWith('http') ? url : `${canonicalOrigin}/${cleanUrlPath}`)
     : (typeof window !== 'undefined' ? window.location.href.replace(window.location.origin, canonicalOrigin) : `${canonicalOrigin}/`);
 
   const ogType = type || 'website';
 
-  // Normalize structured data to array
-  const schemas = structuredData
+  // Global Website Schema with SearchAction
+  const globalWebSiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    'name': 'RevoShelf',
+    'alternateName': 'Revo Shelf',
+    'url': 'https://www.revoshelf.com',
+    'potentialAction': {
+      '@type': 'SearchAction',
+      'target': 'https://www.revoshelf.com/search?query={search_term_string}',
+      'query-input': 'required name=search_term_string'
+    }
+  };
+
+  // Global Organization Schema
+  const globalOrganizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    'name': 'RevoShelf',
+    'url': 'https://www.revoshelf.com',
+    'logo': 'https://www.revoshelf.com/logo.png'
+  };
+
+  // Normalize structured data to array and combine with global schemas
+  const customSchemas = structuredData
     ? (Array.isArray(structuredData) ? structuredData : [structuredData])
     : [];
+  
+  const schemas = [globalWebSiteSchema, globalOrganizationSchema, ...customSchemas];
 
   return (
     <Helmet>
@@ -70,6 +104,7 @@ export const SEO: React.FC<SEOProps> = ({
       <meta property="og:description" content={metaDescription} />
       <meta property="og:image" content={ogImage} />
       <meta property="og:url" content={ogUrl} />
+      <meta property="og:site_name" content="RevoShelf" />
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />

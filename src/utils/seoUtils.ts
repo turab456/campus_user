@@ -66,6 +66,21 @@ export const getMetaDescription = (type: string, details?: string): string => {
     case 'listing':
       desc = `Buy ${details || 'college essential'} from verified students at affordable prices.`;
       break;
+    case 'about':
+      desc = 'Learn more about RevoShelf, the premier peer-to-peer campus marketplace. Discover how we connect university students to trade textbooks and study gear safely.';
+      break;
+    case 'contact':
+      desc = 'Get in touch with the RevoShelf support team. Send us your feedback, bug reports, questions, or campus partnership inquiries. We are here to support you.';
+      break;
+    case 'faq':
+      desc = 'Browse answers to frequently asked questions about RevoShelf. Find information on registration, safety guidelines, listing items, and messaging on campus.';
+      break;
+    case 'privacy':
+      desc = 'Read the RevoShelf privacy policy to understand how we protect your personal information, handle location data, and ensure a secure campus experience.';
+      break;
+    case 'terms':
+      desc = 'Review the terms and conditions for using RevoShelf. Understand user agreements, community listing rules, and safety guidelines for trading on campus.';
+      break;
     default:
       desc = 'RevoShelf is a secure peer-to-peer campus marketplace. Buy and sell textbooks, study guides, instruments, and other college essentials directly with peers.';
   }

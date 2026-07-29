@@ -7,11 +7,19 @@ Allow: /marketplace
 Allow: /categories
 Allow: /listings
 
-# Block indexing of administrative, api, dynamic edit, and user session pages
+# Block indexing of administrative, private, api, and authenticated pages
 Disallow: /admin
 Disallow: /dashboard
 Disallow: /profile/edit
 Disallow: /api
+Disallow: /login
+Disallow: /signup
+Disallow: /messages
+Disallow: /settings
+Disallow: /create-listing
+Disallow: /edit-listing
+Disallow: /wishlist
+Disallow: /my-listings
 
 # Reference dynamically generated sitemap XML
 Sitemap: https://www.revoshelf.com/sitemap.xml
