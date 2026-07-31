@@ -593,6 +593,10 @@ export const MessagesPage: React.FC = () => {
               <div className="p-3.5 bg-red-50 border-t border-red-100 text-center text-xs font-bold text-red-600 flex-shrink-0">
                 🚫 Messaging is disabled because this user's account is suspended or under review.
               </div>
+            ) : activeChat.bookIsSold ? (
+              <div className="p-3.5 bg-slate-100 border-t border-borderCustom text-center text-xs font-bold text-muted flex-shrink-0">
+                🔒 This conversation is closed because the trade has been completed.
+              </div>
             ) : (
               <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-borderCustom flex items-center gap-2 flex-shrink-0">
                 <input
