@@ -116,7 +116,7 @@ export const MainLayout: React.FC = () => {
       )}
 
       {/* Main Content Area */}
-      <main className={`flex-1 w-full max-w-7xl mx-auto ${isMessagesPage ? 'px-0 py-0 md:py-4 flex flex-col min-h-0 h-full' : 'px-4 md:px-8 py-6'
+      <main className={`flex-1 w-full max-w-7xl mx-auto ${isMessagesPage ? 'px-0 py-0 md:py-4 flex flex-col min-h-0 h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom))] md:h-full' : 'px-4 md:px-8 py-6'
         }`}>
         <Outlet />
       </main>

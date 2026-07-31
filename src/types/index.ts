@@ -87,6 +87,7 @@ export interface Chat {
     name: string;
     avatar: string;
     rating: number;
+    reviewsCount?: number;
     college: string;
     flagged?: boolean;
     blocked?: boolean;

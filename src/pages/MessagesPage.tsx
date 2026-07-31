@@ -402,9 +402,19 @@ export const MessagesPage: React.FC = () => {
                       {activeChat.otherParticipant.name}
                     </h3>
                     <div className="flex items-center gap-1 text-[10px] text-muted mt-0.5">
-                      <span className="font-semibold text-warning">&#9733; {activeChat.otherParticipant.rating.toFixed(1)}</span>
+                      {activeChat.otherParticipant.reviewsCount && activeChat.otherParticipant.reviewsCount > 0 ? (
+                        <span className="font-semibold text-warning">
+                          &#9733; {activeChat.otherParticipant.rating.toFixed(1)} ({activeChat.otherParticipant.reviewsCount})
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 font-medium">No ratings yet</span>
+                      )}
                       <span>&middot;</span>
-                      <span className="truncate">{activeChat.otherParticipant.college?.split(',')[0] || 'Unknown'}</span>
+                      <span className="truncate">
+                        {activeChat.otherParticipant.college && activeChat.otherParticipant.college !== 'N/A'
+                          ? activeChat.otherParticipant.college.split(',')[0]
+                          : 'Unknown College'}
+                      </span>
                     </div>
                   </div>
                 </div>
