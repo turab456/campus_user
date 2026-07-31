@@ -228,13 +228,17 @@ export const ProfilePage: React.FC = () => {
 
           {/* Star Rating details */}
           <div className="flex items-center justify-center sm:justify-start gap-4 mt-1 bg-slate-50 border border-borderCustom rounded-xl p-3 w-fit self-center sm:self-start">
-            <div className="flex items-center gap-1">
-              <Star className="w-4 h-4 text-warning fill-current" />
-              <span className="text-sm font-extrabold text-textDark">{user.rating.toFixed(1)}</span>
-            </div>
+            {user.reviewsCount && user.reviewsCount > 0 ? (
+              <div className="flex items-center gap-1">
+                <Star className="w-4 h-4 text-warning fill-current" />
+                <span className="text-sm font-extrabold text-textDark">{user.rating.toFixed(1)}</span>
+              </div>
+            ) : (
+              <span className="text-xs text-slate-400 font-medium">No ratings yet</span>
+            )}
             <div className="w-px h-4 bg-slate-300" />
             <div className="text-xs text-muted font-medium">
-              <span className="text-textDark font-bold">{user.reviewsCount}</span> Reviews
+              <span className="text-textDark font-bold">{user.reviewsCount || 0}</span> Reviews
             </div>
           </div>
         </div>

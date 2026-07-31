@@ -55,6 +55,7 @@ export interface Book {
   metadata?: Record<string, any>;
   distanceKm?: number;
   isNearMe?: boolean;
+  sellerReviewsCount?: number;
 }
 
 export interface Review {

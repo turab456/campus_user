@@ -359,7 +359,11 @@ export const ListingDetailsPage: React.FC = () => {
                   {book.sellerName}
                 </p>
                 <div className="flex items-center gap-1.5 mt-0.5 text-xs text-muted">
-                  <span className="font-semibold text-warning">&#9733; {book.sellerRating.toFixed(1)}</span>
+                  {book.sellerReviewsCount && book.sellerReviewsCount > 0 ? (
+                    <span className="font-semibold text-warning">&#9733; {book.sellerRating.toFixed(1)} ({book.sellerReviewsCount})</span>
+                  ) : (
+                    <span className="text-slate-400 font-medium">No ratings yet</span>
+                  )}
                   <span>&middot;</span>
                   <span className="truncate">{book.college?.split(',')[0] || 'Unknown'}</span>
                 </div>

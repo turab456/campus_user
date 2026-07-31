@@ -23,6 +23,7 @@ const mapListing = (listing: any): Book => {
     sellerName: seller.name || listing.sellerName || '',
     sellerAvatar: seller.avatarUrl || seller.avatar || listing.sellerAvatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
     sellerRating: seller.rating || listing.sellerRating || 5.0,
+    sellerReviewsCount: seller.reviewsCount || listing.sellerReviewsCount || 0,
     sellerSpamScore: seller.spamScore || 0,
     sellerScamScore: seller.scamScore || 0,
     college: listing.college || seller.institutionName || seller.college || '',
