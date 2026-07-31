@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { HelpCircle, MessageCircle, ShieldAlert, AlertTriangle, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { HelpCircle, MessageCircle, ShieldAlert, AlertTriangle, ChevronDown, ChevronUp, Loader2, Send } from 'lucide-react';
 import { backendApi as api } from '../services/backendApi';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
@@ -102,7 +102,7 @@ export const SupportPage: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-8 py-8 md:py-12 flex flex-col md:flex-row gap-8">
-      
+
       {/* Sidebar Navigation */}
       <div className="w-full md:w-64 flex-shrink-0">
         <div className="bg-white rounded-2xl border border-borderCustom p-4 sticky top-24 shadow-sm">
@@ -142,7 +142,7 @@ export const SupportPage: React.FC = () => {
 
       {/* Content Area */}
       <div className="flex-1 bg-white rounded-2xl border border-borderCustom p-6 md:p-10 shadow-sm min-h-[600px]">
-        
+
         {/* Help Center & FAQs */}
         {activeTab === 'help' && (
           <div className="animate-fade-in">
@@ -152,7 +152,7 @@ export const SupportPage: React.FC = () => {
               </div>
               <h1 className="text-2xl font-bold text-textDark">Help Center & FAQs</h1>
             </div>
-            
+
             <div className="space-y-4">
               {FAQ_ITEMS.map((item, index) => (
                 <div key={index} className="border border-borderCustom rounded-xl overflow-hidden">
@@ -177,7 +177,7 @@ export const SupportPage: React.FC = () => {
         {/* Safety Tips */}
         {activeTab === 'safety' && (
           <div className="animate-fade-in">
-             <div className="flex items-center gap-3 mb-8 pb-6 border-b border-borderCustom">
+            <div className="flex items-center gap-3 mb-8 pb-6 border-b border-borderCustom">
               <div className="bg-primary/10 p-2 rounded-lg">
                 <ShieldAlert className="w-6 h-6 text-primary" />
               </div>
@@ -185,7 +185,7 @@ export const SupportPage: React.FC = () => {
             </div>
             <div className="prose prose-slate max-w-none text-textSec">
               <p className="mb-6 text-sm">Your safety is our top priority. Please adhere to these guidelines when meeting with someone from RevoShelf.</p>
-              
+
               <ul className="space-y-4 list-disc pl-5">
                 <li><strong>Meet in Public:</strong> Always arrange to meet in well-lit, public areas on campus, such as the library, cafeteria, or student union.</li>
                 <li><strong>Bring a Friend:</strong> If you feel unsure, bring a friend along with you to the exchange.</li>
@@ -200,13 +200,13 @@ export const SupportPage: React.FC = () => {
         {/* Contact Us */}
         {activeTab === 'contact' && (
           <div className="animate-fade-in">
-             <div className="flex items-center gap-3 mb-8 pb-6 border-b border-borderCustom">
+            <div className="flex items-center gap-3 mb-8 pb-6 border-b border-borderCustom">
               <div className="bg-primary/10 p-2 rounded-lg">
                 <MessageCircle className="w-6 h-6 text-primary" />
               </div>
               <h1 className="text-2xl font-bold text-textDark">Contact Us</h1>
             </div>
-            
+
             <p className="text-sm text-textSec mb-6">
               Have a question that wasn't answered in the FAQ? Want to provide feedback? We'd love to hear from you.
             </p>
@@ -250,13 +250,13 @@ export const SupportPage: React.FC = () => {
         {/* Report an Issue */}
         {activeTab === 'report' && (
           <div className="animate-fade-in">
-             <div className="flex items-center gap-3 mb-8 pb-6 border-b border-borderCustom">
+            <div className="flex items-center gap-3 mb-8 pb-6 border-b border-borderCustom">
               <div className="bg-red-50 p-2 rounded-lg">
                 <AlertTriangle className="w-6 h-6 text-danger" />
               </div>
               <h1 className="text-2xl font-bold text-textDark">Report an Issue</h1>
             </div>
-            
+
             <p className="text-sm text-textSec mb-6">
               If you encountered a technical bug, a fraudulent user, or inappropriate content, please let us know immediately so we can take action.
             </p>
