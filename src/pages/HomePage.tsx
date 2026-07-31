@@ -60,7 +60,7 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-10">
-      <SEO title="RevoShelf | Buy & Sell College Essentials" descriptionType="home" />
+      <SEO title="RevoShelf | Peer-to-Peer Campus Marketplace" descriptionType="home" />
       <h1 className="sr-only">RevoShelf College Marketplace Dashboard</h1>
       {/* Search Header for Mobile/Tablet */}
       <section className="md:hidden bg-white border border-borderCustom rounded-2xl p-4 shadow-subtle -mt-2">

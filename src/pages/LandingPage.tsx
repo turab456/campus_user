@@ -93,7 +93,7 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="flex flex-col -mt-2">
-      <SEO title="RevoShelf | Buy & Sell College Essentials" descriptionType="home" />
+      <SEO title="RevoShelf | Peer-to-Peer Campus Marketplace" descriptionType="home" />
       {/* Hero Section */}
       <section className="pt-8 pb-16 grid md:grid-cols-2 gap-12 items-center">
         <div className="space-y-6">

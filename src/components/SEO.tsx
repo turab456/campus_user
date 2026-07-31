@@ -28,11 +28,11 @@ export const SEO: React.FC<SEOProps> = ({
   meta = [],
 }) => {
   const defaultKeywords = 'marketplace, college, textbooks, notes, sell, buy, student, campus';
-  
+
   // Base origin for absolute URLs in metadata (using www.revoshelf.com domain name for canonical URLs)
   const canonicalOrigin = 'https://www.revoshelf.com';
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.revoshelf.com';
-  const defaultImage = `${origin}/og-image.png`;
+  const defaultImage = `${origin}/logo.svg`;
 
   // Compute description using dynamic type utility or manual description / default fallback
   const metaDescription = descriptionType
@@ -86,7 +86,7 @@ export const SEO: React.FC<SEOProps> = ({
   const customSchemas = structuredData
     ? (Array.isArray(structuredData) ? structuredData : [structuredData])
     : [];
-  
+
   const schemas = [globalWebSiteSchema, globalOrganizationSchema, ...customSchemas];
 
   return (
@@ -94,7 +94,7 @@ export const SEO: React.FC<SEOProps> = ({
       <title>{title}</title>
       <meta name="description" content={metaDescription} />
       <meta name="keywords" content={keywords || defaultKeywords} />
-      
+
       {/* Canonical URL */}
       <link rel="canonical" href={ogUrl} />
 
