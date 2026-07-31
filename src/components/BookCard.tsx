@@ -162,7 +162,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
           <span className="truncate">
             {book.isNearMe ? 'Near You' : (book.distanceKm !== undefined ? `${book.distanceKm} km` : '')}
             {(book.distanceKm !== undefined || book.isNearMe) ? ' · ' : ''}
-            {book.college?.split(',')[0] || 'Unknown'}
+            {book.college && book.college !== 'N/A' ? book.college.split(',')[0] : 'Campus Community'}
           </span>
         </div>
 
@@ -171,13 +171,21 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
           <hr className="border-borderCustom my-2.5" />
 
           <div className="flex flex-col gap-1 text-[11px] text-muted">
-            <div className="flex items-center gap-1.5">
-              <GraduationCap className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
-              <span className="truncate">Sem {book.semester} • {book.department}</span>
-            </div>
+            {(book.semester || book.department) && (
+              <div className="flex items-center gap-1.5">
+                <GraduationCap className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
+                <span className="truncate">
+                  {book.semester ? `Sem ${book.semester}` : ''}
+                  {book.semester && book.department ? ' • ' : ''}
+                  {book.department || ''}
+                </span>
+              </div>
+            )}
             <div className="flex items-center gap-1.5 mt-0.5">
               <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
-              <span className="truncate" title={book.college}>{book.college?.split(',')[0] || 'Unknown'}</span>
+              <span className="truncate" title={book.college && book.college !== 'N/A' ? book.college : 'Campus Community'}>
+                {book.college && book.college !== 'N/A' ? book.college.split(',')[0] : 'Campus Community'}
+              </span>
             </div>
             {book.distanceKm !== undefined && (
               <div className="flex items-center gap-1.5 mt-1">
