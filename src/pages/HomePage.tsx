@@ -60,7 +60,7 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-10">
-      <SEO title="RevoShelf | Peer-to-Peer Campus Marketplace" descriptionType="home" />
+      <SEO title="RevoShelf | Buy & Sell College Essentials" descriptionType="home" />
       <h1 className="sr-only">RevoShelf College Marketplace Dashboard</h1>
       {/* Search Header for Mobile/Tablet */}
       <section className="md:hidden bg-white border border-borderCustom rounded-2xl p-4 shadow-subtle -mt-2">
@@ -153,7 +153,7 @@ export const HomePage: React.FC = () => {
             <div className="flex items-center gap-2 mb-5">
               <Clock className="w-5 h-5 text-primary" />
               <div>
-                  <h2 className="text-base md:text-lg font-bold text-textDark leading-tight">Recently Added</h2>
+                <h2 className="text-base md:text-lg font-bold text-textDark leading-tight">Recently Added</h2>
                 <p className="text-[10px] text-muted mt-0.5">Browse the latest materials uploaded by fellow students</p>
               </div>
             </div>

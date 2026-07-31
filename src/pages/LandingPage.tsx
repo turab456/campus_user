@@ -37,17 +37,17 @@ export const LandingPage: React.FC = () => {
     const loadBooks = async () => {
       try {
         const books = await api.getBooks();
-        
+
         let featured = books.filter(b => b.isFeatured);
         let popular = books.filter(b => b.isPopular);
-        
+
         // Fallback to active catalog items if database seeds do not mark featured/popular listings
         if (featured.length === 0) {
           featured = books.slice(0, 4);
         } else {
           featured = featured.slice(0, 4);
         }
-        
+
         if (popular.length === 0) {
           popular = books.slice(4, 8).length > 0 ? books.slice(4, 8) : books.slice(0, 4);
         } else {
@@ -93,7 +93,7 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="flex flex-col -mt-2">
-      <SEO title="RevoShelf | Peer-to-Peer Campus Marketplace" descriptionType="home" />
+      <SEO title="RevoShelf | Buy & Sell College Essentials" descriptionType="home" />
       {/* Hero Section */}
       <section className="pt-8 pb-16 grid md:grid-cols-2 gap-12 items-center">
         <div className="space-y-6">
