@@ -95,7 +95,7 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
   }
 
   const config = {
-    ...options, headers, credentials: 'omit' as RequestCredentials,
+    ...options, headers, credentials: 'include' as RequestCredentials,
   };
   let res = await fetch(url, config);
 
