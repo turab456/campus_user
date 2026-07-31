@@ -157,14 +157,16 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
         </div>
 
         {/* Mobile-only location & distance line (compact & short) */}
-        <div className="flex items-center gap-1 mt-2 text-[9px] text-muted sm:hidden">
-          <MapPin className="w-2.5 h-2.5 text-slate-400 flex-shrink-0" />
-          <span className="truncate">
-            {book.isNearMe ? 'Near You' : (book.distanceKm !== undefined ? `${book.distanceKm} km` : '')}
-            {(book.distanceKm !== undefined || book.isNearMe) ? ' · ' : ''}
-            {book.college && book.college !== 'N/A' ? book.college.split(',')[0] : 'Campus Community'}
-          </span>
-        </div>
+        {(book.isNearMe || book.distanceKm !== undefined || (book.college && book.college !== 'N/A')) && (
+          <div className="flex items-center gap-1 mt-2 text-[9px] text-muted sm:hidden">
+            <MapPin className="w-2.5 h-2.5 text-slate-400 flex-shrink-0" />
+            <span className="truncate">
+              {book.isNearMe ? 'Near You' : (book.distanceKm !== undefined ? `${book.distanceKm} km` : '')}
+              {(book.distanceKm !== undefined || book.isNearMe) && (book.college && book.college !== 'N/A') ? ' · ' : ''}
+              {book.college && book.college !== 'N/A' ? book.college.split(',')[0] : ''}
+            </span>
+          </div>
+        )}
 
         {/* Desktop-only detailed metadata block */}
         <div className="hidden sm:block">
@@ -181,12 +183,14 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
                 </span>
               </div>
             )}
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
-              <span className="truncate" title={book.college && book.college !== 'N/A' ? book.college : 'Campus Community'}>
-                {book.college && book.college !== 'N/A' ? book.college.split(',')[0] : 'Campus Community'}
-              </span>
-            </div>
+            {book.college && book.college !== 'N/A' && (
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
+                <span className="truncate" title={book.college}>
+                  {book.college.split(',')[0]}
+                </span>
+              </div>
+            )}
             {book.distanceKm !== undefined && (
               <div className="flex items-center gap-1.5 mt-1">
                 {book.isNearMe ? (
