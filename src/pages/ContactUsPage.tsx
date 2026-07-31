@@ -1,17 +1,41 @@
 import React, { useEffect, useState } from 'react';
-import { Mail, Clock, Send, MessageSquare } from 'lucide-react';
+import { Mail, Clock, Send, MessageSquare, Loader2 } from 'lucide-react';
+import { backendApi as api } from '../services/backendApi';
+import { useToast } from '../context/ToastContext';
 
 export const ContactUsPage: React.FC = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const { showToast } = useToast();
+
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [topic, setTopic] = useState('');
+  const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate submission
-    setIsSubmitted(true);
+    setIsLoading(true);
+    try {
+      await api.submitContactForm(firstName, lastName, email, topic, message);
+      setIsSubmitted(true);
+      showToast('Message sent successfully!', 'success');
+      // Reset form fields
+      setFirstName('');
+      setLastName('');
+      setEmail('');
+      setTopic('');
+      setMessage('');
+    } catch (err: any) {
+      showToast(err.message || 'Failed to send message. Please try again.', 'danger');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -46,7 +70,7 @@ export const ContactUsPage: React.FC = () => {
               <div>
                 <h3 className="font-bold text-textDark mb-1">Business Inquiries</h3>
                 <p className="text-sm text-textSec mb-1">For partnerships or campus expansion requests.</p>
-                <a href="mailto:hello@campusmarketplace.com" className="text-primary hover:underline text-sm font-medium">hello@campusmarketplace.com</a>
+                <a href="mailto:contact@revoshelf.com" className="text-primary hover:underline text-sm font-medium">contact@revoshelf.com</a>
               </div>
             </div>
 
@@ -84,37 +108,37 @@ export const ContactUsPage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-1.5">
                     <label className="text-sm font-semibold text-textDark">First Name</label>
-                    <input type="text" required className="w-full bg-[#FAF8F5] border border-borderCustom rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Jane" />
+                    <input type="text" required value={firstName} onChange={(e) => setFirstName(e.target.value)} className="w-full bg-[#FAF8F5] border border-borderCustom rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Jane" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-sm font-semibold text-textDark">Last Name</label>
-                    <input type="text" required className="w-full bg-[#FAF8F5] border border-borderCustom rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Doe" />
+                    <input type="text" required value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full bg-[#FAF8F5] border border-borderCustom rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Doe" />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-textDark">University Email</label>
-                  <input type="email" required className="w-full bg-[#FAF8F5] border border-borderCustom rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="jane@university.edu" />
+                  <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-[#FAF8F5] border border-borderCustom rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="jane@university.edu" />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-textDark">Topic</label>
-                  <select required className="w-full bg-[#FAF8F5] border border-borderCustom rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
-                    <option value="" disabled selected>Select a topic...</option>
-                    <option value="account">Account & Verification</option>
-                    <option value="report">Report an Issue</option>
-                    <option value="feedback">General Feedback</option>
-                    <option value="other">Other</option>
+                  <select required value={topic} onChange={(e) => setTopic(e.target.value)} className="w-full bg-[#FAF8F5] border border-borderCustom rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                    <option value="" disabled>Select a topic...</option>
+                    <option value="Account & Verification">Account & Verification</option>
+                    <option value="Report an Issue">Report an Issue</option>
+                    <option value="General Feedback">General Feedback</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-textDark">Message</label>
-                  <textarea required rows={5} className="w-full bg-[#FAF8F5] border border-borderCustom rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none" placeholder="How can we help you?"></textarea>
+                  <textarea required rows={5} value={message} onChange={(e) => setMessage(e.target.value)} className="w-full bg-[#FAF8F5] border border-borderCustom rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none" placeholder="How can we help you?"></textarea>
                 </div>
 
-                <button type="submit" className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl transition-colors mt-2">
-                  Send Message
+                <button type="submit" disabled={isLoading} className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl transition-colors mt-2 flex items-center justify-center gap-2">
+                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send Message'}
                 </button>
               </form>
             )}
@@ -125,3 +149,4 @@ export const ContactUsPage: React.FC = () => {
     </div>
   );
 };
+

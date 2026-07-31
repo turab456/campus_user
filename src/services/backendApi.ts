@@ -526,6 +526,12 @@ export const backendApi = {
   async unsubscribePush(endpoint: string): Promise<any> {
     return post<any>('/api/users/push-subscription/remove', { endpoint });
   },
+  async submitContactForm(firstName: string, lastName: string, email: string, topic: string, message: string): Promise<any> {
+    return post<any>('/api/support/contact-us', { firstName, lastName, email, topic, message });
+  },
+  async submitSupportTicket(issueType: string, description: string, name?: string, email?: string): Promise<any> {
+    return post<any>('/api/support/report-issue', { issueType, description, name, email });
+  },
 };
 
 export default backendApi;

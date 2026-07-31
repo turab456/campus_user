@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { HelpCircle, MessageCircle, ShieldAlert, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
+import { useLocation, Link } from 'react-router-dom';
+import { HelpCircle, MessageCircle, ShieldAlert, AlertTriangle, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { backendApi as api } from '../services/backendApi';
+import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 
 const FAQ_ITEMS = [
   {
@@ -23,8 +26,24 @@ const FAQ_ITEMS = [
 
 export const SupportPage: React.FC = () => {
   const location = useLocation();
+  const { user } = useAuth();
+  const { showToast } = useToast();
+
   const [activeTab, setActiveTab] = useState('help');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+
+  // Form states for Contact Us
+  const [contactName, setContactName] = useState(user?.name || '');
+  const [contactEmail, setContactEmail] = useState(user?.email || '');
+  const [contactMessage, setContactMessage] = useState('');
+  const [isContactLoading, setIsContactLoading] = useState(false);
+  const [isContactSubmitted, setIsContactSubmitted] = useState(false);
+
+  // Form states for Report an Issue
+  const [issueType, setIssueType] = useState('Technical Bug');
+  const [description, setDescription] = useState('');
+  const [isReportLoading, setIsReportLoading] = useState(false);
+  const [isReportSubmitted, setIsReportSubmitted] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -33,6 +52,53 @@ export const SupportPage: React.FC = () => {
       setActiveTab(hash);
     }
   }, [location]);
+
+  // Sync user info if auth loads after mounting
+  useEffect(() => {
+    if (user) {
+      setContactName(prev => prev || user.name);
+      setContactEmail(prev => prev || user.email);
+    }
+  }, [user]);
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsContactLoading(true);
+    try {
+      // Split name into first and last for the API
+      const parts = contactName.trim().split(' ');
+      const firstName = parts[0] || 'User';
+      const lastName = parts.slice(1).join(' ') || 'User';
+
+      await api.submitContactForm(firstName, lastName, contactEmail, 'General Support Request', contactMessage);
+      setIsContactSubmitted(true);
+      showToast('Contact message sent successfully!', 'success');
+      setContactMessage('');
+    } catch (err: any) {
+      showToast(err.message || 'Failed to send message. Please try again.', 'danger');
+    } finally {
+      setIsContactLoading(false);
+    }
+  };
+
+  const handleReportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      showToast('You must be logged in to report an issue.', 'warning');
+      return;
+    }
+    setIsReportLoading(true);
+    try {
+      await api.submitSupportTicket(issueType, description);
+      setIsReportSubmitted(true);
+      showToast('Support ticket raised successfully!', 'success');
+      setDescription('');
+    } catch (err: any) {
+      showToast(err.message || 'Failed to submit report. Please try again.', 'danger');
+    } finally {
+      setIsReportLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-8 py-8 md:py-12 flex flex-col md:flex-row gap-8">
@@ -145,23 +211,39 @@ export const SupportPage: React.FC = () => {
               Have a question that wasn't answered in the FAQ? Want to provide feedback? We'd love to hear from you.
             </p>
 
-            <form className="space-y-5 max-w-lg">
-              <div>
-                <label className="block text-sm font-semibold text-textDark mb-1.5">Name</label>
-                <input type="text" className="w-full bg-background border border-borderCustom rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="Your name" />
+            {isContactSubmitted ? (
+              <div className="text-center py-12 animate-fade-in max-w-lg">
+                <div className="bg-green-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Send className="w-8 h-8 text-success" />
+                </div>
+                <h3 className="text-2xl font-bold text-textDark mb-2">Message Sent!</h3>
+                <p className="text-textSec mb-6">Thank you for reaching out. We will get back to you shortly.</p>
+                <button
+                  onClick={() => setIsContactSubmitted(false)}
+                  className="text-primary hover:underline font-semibold"
+                >
+                  Send another message
+                </button>
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-textDark mb-1.5">Email</label>
-                <input type="email" className="w-full bg-background border border-borderCustom rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="Your college email" />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-textDark mb-1.5">Message</label>
-                <textarea rows={5} className="w-full bg-background border border-borderCustom rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none" placeholder="How can we help you?"></textarea>
-              </div>
-              <button type="button" className="bg-primary hover:bg-primary-hover text-white font-semibold py-2.5 px-6 rounded-lg transition-colors">
-                Send Message
-              </button>
-            </form>
+            ) : (
+              <form onSubmit={handleContactSubmit} className="space-y-5 max-w-lg">
+                <div>
+                  <label className="block text-sm font-semibold text-textDark mb-1.5">Name</label>
+                  <input type="text" required value={contactName} onChange={(e) => setContactName(e.target.value)} className="w-full bg-[#FAF8F5] border border-borderCustom rounded-lg px-4 py-2.5 text-sm focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Your name" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-textDark mb-1.5">Email</label>
+                  <input type="email" required value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} className="w-full bg-[#FAF8F5] border border-borderCustom rounded-lg px-4 py-2.5 text-sm focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Your college email" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-textDark mb-1.5">Message</label>
+                  <textarea required rows={5} value={contactMessage} onChange={(e) => setContactMessage(e.target.value)} className="w-full bg-[#FAF8F5] border border-borderCustom rounded-lg px-4 py-2.5 text-sm focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none" placeholder="How can we help you?"></textarea>
+                </div>
+                <button type="submit" disabled={isContactLoading} className="bg-primary hover:bg-primary-hover text-white font-semibold py-2.5 px-6 rounded-lg transition-colors flex items-center gap-2">
+                  {isContactLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send Message'}
+                </button>
+              </form>
+            )}
           </div>
         )}
 
@@ -179,24 +261,49 @@ export const SupportPage: React.FC = () => {
               If you encountered a technical bug, a fraudulent user, or inappropriate content, please let us know immediately so we can take action.
             </p>
 
-            <form className="space-y-5 max-w-lg">
-              <div>
-                <label className="block text-sm font-semibold text-textDark mb-1.5">Issue Type</label>
-                <select className="w-full bg-background border border-borderCustom rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none">
-                  <option>Technical Bug</option>
-                  <option>Fraudulent Seller/Buyer</option>
-                  <option>Inappropriate Content/Listing</option>
-                  <option>Other</option>
-                </select>
+            {!user ? (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center max-w-lg my-8">
+                <ShieldAlert className="w-10 h-10 text-warning mx-auto mb-3" />
+                <h3 className="font-bold text-textDark mb-1">Authentication Required</h3>
+                <p className="text-sm text-textSec mb-4">You must be logged in to raise a support ticket or report an issue.</p>
+                <Link to="/login" className="inline-block bg-primary hover:bg-primary-hover text-white text-sm font-semibold py-2 px-5 rounded-lg transition-colors">
+                  Log In
+                </Link>
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-textDark mb-1.5">Description</label>
-                <textarea rows={5} className="w-full bg-background border border-borderCustom rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none" placeholder="Please provide specific details..."></textarea>
+            ) : isReportSubmitted ? (
+              <div className="text-center py-12 animate-fade-in max-w-lg">
+                <div className="bg-red-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Send className="w-8 h-8 text-danger" />
+                </div>
+                <h3 className="text-2xl font-bold text-textDark mb-2">Report Submitted</h3>
+                <p className="text-textSec mb-6">Thank you for reporting. A support ticket has been created and we will investigate immediately.</p>
+                <button
+                  onClick={() => setIsReportSubmitted(false)}
+                  className="text-danger hover:underline font-semibold"
+                >
+                  Submit another report
+                </button>
               </div>
-              <button type="button" className="bg-danger hover:bg-red-600 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors">
-                Submit Report
-              </button>
-            </form>
+            ) : (
+              <form onSubmit={handleReportSubmit} className="space-y-5 max-w-lg">
+                <div>
+                  <label className="block text-sm font-semibold text-textDark mb-1.5">Issue Type</label>
+                  <select value={issueType} onChange={(e) => setIssueType(e.target.value)} className="w-full bg-[#FAF8F5] border border-borderCustom rounded-lg px-4 py-2.5 text-sm focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                    <option value="Technical Bug">Technical Bug</option>
+                    <option value="Fraudulent Seller/Buyer">Fraudulent Seller/Buyer</option>
+                    <option value="Inappropriate Content/Listing">Inappropriate Content/Listing</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-textDark mb-1.5">Description</label>
+                  <textarea required rows={5} value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-[#FAF8F5] border border-borderCustom rounded-lg px-4 py-2.5 text-sm focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none" placeholder="Please provide specific details..."></textarea>
+                </div>
+                <button type="submit" disabled={isReportLoading} className="bg-danger hover:bg-red-600 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors flex items-center gap-2">
+                  {isReportLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Submit Report'}
+                </button>
+              </form>
+            )}
           </div>
         )}
 
@@ -204,3 +311,4 @@ export const SupportPage: React.FC = () => {
     </div>
   );
 };
+
