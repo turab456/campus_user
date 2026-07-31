@@ -23,7 +23,7 @@ export default async (request: Request, context: Context) => {
   const url = new URL(request.url);
   const pathParts = url.pathname.split("/");
   const bookIndex = pathParts.indexOf("book");
-  
+
   if (bookIndex === -1 || bookIndex === pathParts.length - 1) {
     return context.next();
   }
@@ -34,7 +34,7 @@ export default async (request: Request, context: Context) => {
   }
 
   try {
-    const backendUrl = "https://campus-be-qkrx.onrender.com";
+    const backendUrl = "https://api.revoshelf.com";
     const res = await fetch(`${backendUrl}/api/listings/${bookId}`);
     if (!res.ok) {
       return context.next();
@@ -50,7 +50,7 @@ export default async (request: Request, context: Context) => {
     const description = `₹${listing.price} · ${listing.description || ''}`.substring(0, 150);
     const image = listing.images && listing.images[0]
       ? listing.images[0]
-      : "https://www.revoshelf.com/og-image.png";
+      : "https://www.revoshelf.com/logo.svg";
 
     // Get original index.html
     const response = await context.next();

@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ESNext", "DOM"],
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "https://edge.netlify.com": ["../../node_modules/@netlify/edge-functions"],
+      "https://edge.netlify.com/": ["../../node_modules/@netlify/edge-functions"]
+    },
+    "ignoreDeprecations": "6.0"
+  },
+  "include": ["**/*.ts"]
+}
