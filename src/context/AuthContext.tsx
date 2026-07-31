@@ -50,7 +50,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password?: string): Promise<boolean> => {
-    setIsLoading(true);
     try {
       await backendApi.login(email, password);
       const profile = await backendApi.getUserProfile();
@@ -66,21 +65,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err) {
       console.error('Login failed', err);
       throw err;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const register = async (name: string, email: string, password?: string): Promise<boolean> => {
-    setIsLoading(true);
     try {
       await backendApi.register(name, email, password);
       return true;
     } catch (err) {
       console.error('Register failed', err);
       throw err;
-    } finally {
-      setIsLoading(false);
     }
   };
 

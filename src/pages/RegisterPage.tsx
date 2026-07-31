@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { User as UserIcon, Mail, Lock, GraduationCap, MapPin, ArrowRight } from 'lucide-react';
+import { User as UserIcon, Mail, Lock, GraduationCap, MapPin, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { SEO } from '../components/SEO';
 
 
@@ -17,6 +17,7 @@ export const RegisterPage: React.FC = () => {
     password: '',
   });
 
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -89,12 +90,19 @@ export const RegisterPage: React.FC = () => {
           <div className="relative flex items-center">
             <Lock className="w-4 h-4 text-muted absolute left-3 pointer-events-none" />
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               placeholder="Min. 8 characters"
               value={formData.password}
               onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-              className="w-full bg-[#F5F3EF] border border-borderCustom rounded-[10px] py-2.5 pl-9 pr-4 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
+              className="w-full bg-[#F5F3EF] border border-borderCustom rounded-[10px] py-2.5 pl-9 pr-10 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 text-muted hover:text-textDark focus:outline-none"
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
-import { Lock, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Lock, CheckCircle2, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { backendApi as api } from '../services/backendApi';
 import { SEO } from '../components/SEO';
 
@@ -13,6 +13,8 @@ export const ResetPasswordPage: React.FC = () => {
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -84,12 +86,19 @@ export const ResetPasswordPage: React.FC = () => {
             <div className="relative flex items-center">
               <Lock className="w-4 h-4 text-muted absolute left-3 pointer-events-none" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder="Enter at least 6 characters"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[#F5F3EF] border border-borderCustom rounded-[10px] py-2.5 pl-9 pr-4 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
+                className="w-full bg-[#F5F3EF] border border-borderCustom rounded-[10px] py-2.5 pl-9 pr-10 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 text-muted hover:text-textDark focus:outline-none"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
           </div>
 
@@ -99,12 +108,19 @@ export const ResetPasswordPage: React.FC = () => {
             <div className="relative flex items-center">
               <Lock className="w-4 h-4 text-muted absolute left-3 pointer-events-none" />
               <input
-                type="password"
+                type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Confirm password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full bg-[#F5F3EF] border border-borderCustom rounded-[10px] py-2.5 pl-9 pr-4 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
+                className="w-full bg-[#F5F3EF] border border-borderCustom rounded-[10px] py-2.5 pl-9 pr-10 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 text-muted hover:text-textDark focus:outline-none"
+              >
+                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
           </div>
 
