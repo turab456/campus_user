@@ -32,7 +32,7 @@ export const SEO: React.FC<SEOProps> = ({
   // Base origin for absolute URLs in metadata (using www.revoshelf.com domain name for canonical URLs)
   const canonicalOrigin = 'https://www.revoshelf.com';
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.revoshelf.com';
-  const defaultImage = `${origin}/logo.svg`;
+  const defaultImage = `${origin}/og-image.png`;
 
   // Compute description using dynamic type utility or manual description / default fallback
   const metaDescription = descriptionType
