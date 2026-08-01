@@ -54,7 +54,7 @@ export const ListingDetailsPage: React.FC = () => {
           setBook(details);
           // Load similar books (same category, different id)
           const all = await api.getBooks({ category: details.category });
-          setSimilarBooks(all.filter(b => b.id !== details.id).slice(0, 4));
+          setSimilarBooks(all.filter(b => b.id !== details.id && (!user || b.sellerId !== user.id)).slice(0, 4));
         } else {
           setBook(null);
         }

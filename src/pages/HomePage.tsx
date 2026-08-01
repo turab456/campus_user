@@ -53,11 +53,13 @@ export const HomePage: React.FC = () => {
   };
 
   const recentBooks = getFilteredBooks()
+    .filter(b => !user || b.sellerId !== user.id)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 4);
 
   const recommendedBooks = getFilteredBooks()
     .filter(b => b.isFeatured || b.isPopular)
+    .filter(b => !user || b.sellerId !== user.id)
     .slice(0, 4);
 
   return (

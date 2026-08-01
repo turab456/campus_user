@@ -307,30 +307,33 @@ export const SearchPage: React.FC = () => {
         </div>
 
         {/* Listings Grid */}
-        {isLoading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {[1, 2, 3, 4, 5, 6].map(n => <CardSkeleton key={n} />)}
-          </div>
-        ) : books.length > 0 ? (
-          <div>
-            <div className="flex items-center justify-between text-xs text-muted mb-4">
-              <span>Found {books.length} {books.length === 1 ? 'listing' : 'listings'}</span>
-            </div>
+        {(() => {
+          const displayedBooks = books.filter(b => !user || b.sellerId !== user.id);
+          return isLoading ? (
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {books.map(book => (
-                <BookCard key={book.id} book={book} />
-              ))}
+              {[1, 2, 3, 4, 5, 6].map(n => <CardSkeleton key={n} />)}
             </div>
-          </div>
-        ) : (
-          <EmptyState
-            type="search"
-            title="No Results Found"
-            description="We couldn't find any listings matching your search parameters. Try adjusting your filter parameters or checking different campuses."
-            actionText="Clear All Filters"
-            onAction={handleClearFilters}
-          />
-        )}
+          ) : displayedBooks.length > 0 ? (
+            <div>
+              <div className="flex items-center justify-between text-xs text-muted mb-4">
+                <span>Found {displayedBooks.length} {displayedBooks.length === 1 ? 'listing' : 'listings'}</span>
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                {displayedBooks.map(book => (
+                  <BookCard key={book.id} book={book} />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <EmptyState
+              type="search"
+              title="No Results Found"
+              description="We couldn't find any listings matching your search parameters. Try adjusting your filter parameters or checking different campuses."
+              actionText="Clear All Filters"
+              onAction={handleClearFilters}
+            />
+          );
+        })()}
       </div>
 
       {/* Mobile Filters Slide-up Sheet */}

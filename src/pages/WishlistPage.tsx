@@ -25,7 +25,7 @@ export const WishlistPage: React.FC = () => {
       try {
         const allBooks = await api.getBooks();
         // Filter books which are inside the saved wishlist ids
-        const filtered = allBooks.filter(b => savedBookIds.includes(b.id) && b.status === 'active');
+        const filtered = allBooks.filter(b => savedBookIds.includes(b.id) && b.status === 'active' && (!user || b.sellerId !== user.id));
         setSavedBooks(filtered);
       } catch (err) {
         console.error('Error fetching wishlist books', err);
