@@ -444,8 +444,16 @@ export const ListingDetailsPage: React.FC = () => {
                 <div>
                   <span className="font-semibold text-textDark block">Pickup Spot</span>
                   <span className="text-[11px] block mt-0.5 leading-tight">{book.pickupLocation}</span>
-                  {/* {book.distanceKm !== undefined && (
-                    <span className="text-[10px] text-muted block mt-1 leading-none">
+                  {book.pickupCoordinates && book.pickupCoordinates.lat && (
+                    <button
+                      onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${book.pickupCoordinates.lat},${book.pickupCoordinates.lng}`, '_blank')}
+                      className="text-[10px] text-primary hover:underline font-bold mt-1.5 block text-left focus:outline-none"
+                    >
+                      Get Directions ↗
+                    </button>
+                  )}
+                  {book.distanceKm !== undefined && (
+                    <span className="text-[10px] text-muted block mt-1.5 leading-none">
                       Distance: <strong className="text-textDark">{book.distanceKm} km away</strong>
                       {book.isNearMe && (
                         <span className="ml-1.5 inline-flex bg-green-50 text-green-700 font-bold border border-green-200 rounded px-1.5 py-0.25 text-[8px] uppercase tracking-wider">
@@ -453,7 +461,7 @@ export const ListingDetailsPage: React.FC = () => {
                         </span>
                       )}
                     </span>
-                  )} */}
+                  )}
                 </div>
               </div>
             </div>

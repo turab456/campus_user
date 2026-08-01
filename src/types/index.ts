@@ -57,6 +57,7 @@ export interface Book {
   isNearMe?: boolean;
   sellerReviewsCount?: number;
   isDeleted?: boolean;
+  pickupCoordinates?: { lat: number; lng: number } | null;
 }
 
 export interface Review {
@@ -101,6 +102,8 @@ export interface Chat {
   buyerConfirmedReceipt?: boolean;
   salePending?: boolean;
   bookIsDeleted?: boolean;
+  pickupLocation?: string;
+  pickupCoordinates?: { lat: number; lng: number } | null;
 }
 
 export interface SearchFilters {

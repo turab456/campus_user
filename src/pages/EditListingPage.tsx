@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronRight, ChevronLeft, Plus, CheckCircle, Info, Trash2 } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Plus, CheckCircle, Info, Trash2, MapPin } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { backendApi as api } from '../services/backendApi';
@@ -72,6 +72,37 @@ const CATEGORY_FIELDS_CONFIG: Record<string, CustomField[]> = {
   ]
 };
 
+// Google Maps lazy loader
+let googleMapsLoaded = false;
+let googleMapsLoading = false;
+const googleMapsCallbacks: (() => void)[] = [];
+
+function loadGoogleMapsApi(apiKey: string, callback: () => void) {
+  if (window.google) { callback(); return; }
+  if (googleMapsLoaded) { callback(); return; }
+  googleMapsCallbacks.push(callback);
+  if (googleMapsLoading) return;
+  googleMapsLoading = true;
+
+  window.initGoogleMapsCallback = () => {
+    googleMapsLoaded = true;
+    googleMapsCallbacks.forEach((cb) => cb());
+    googleMapsCallbacks.length = 0;
+  };
+
+  const script = document.createElement('script');
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initGoogleMapsCallback&loading=async`;
+  script.async = true;
+  script.defer = true;
+  script.onerror = () => {
+    console.warn('[EditListingPage] Google Maps failed to load.');
+    googleMapsLoading = false;
+    googleMapsCallbacks.forEach((cb) => cb());
+    googleMapsCallbacks.length = 0;
+  };
+  document.head.appendChild(script);
+}
+
 export const EditListingPage: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
@@ -93,6 +124,7 @@ export const EditListingPage: React.FC = () => {
     price: '',
     originalPrice: '',
     pickupLocation: '',
+    pickupCoordinates: null as { lat: number; lng: number } | null,
     metadata: {} as Record<string, any>
   });
 
@@ -111,6 +143,7 @@ export const EditListingPage: React.FC = () => {
             price: String(listing.price || ''),
             originalPrice: String(listing.originalPrice || ''),
             pickupLocation: listing.pickupLocation || '',
+            pickupCoordinates: listing.pickupCoordinates || null,
             metadata: listing.metadata || {}
           });
         }
@@ -122,6 +155,43 @@ export const EditListingPage: React.FC = () => {
     };
     fetchListing();
   }, [id, showToast]);
+
+  const autocompleteInputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (step !== 4) return;
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) return;
+
+    const initAutocomplete = () => {
+      if (!autocompleteInputRef.current || !window.google) return;
+      const autocomplete = new window.google.maps.places.Autocomplete(autocompleteInputRef.current, {
+        types: ['geocode', 'establishment']
+      });
+
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (!place.geometry) return;
+
+        setFormData(prev => ({
+          ...prev,
+          pickupLocation: place.formatted_address || place.name || '',
+          pickupCoordinates: {
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng()
+          }
+        }));
+      });
+    };
+
+    loadGoogleMapsApi(apiKey, initAutocomplete);
+  }, [step]);
+
+  const handleLocationKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  };
 
   // Pre-fill education level from user profile if available, when category becomes books
   React.useEffect(() => {
@@ -292,6 +362,9 @@ export const EditListingPage: React.FC = () => {
       payload.append('department', deptVal);
       if (semVal) payload.append('semester', String(semVal));
       payload.append('pickupLocation', formData.pickupLocation);
+      if (formData.pickupCoordinates) {
+        payload.append('pickupCoordinates', JSON.stringify(formData.pickupCoordinates));
+      }
       payload.append('college', user.institutionName || user.college || '');
       payload.append('metadata', JSON.stringify(formData.metadata));
 
@@ -767,13 +840,18 @@ export const EditListingPage: React.FC = () => {
 
           <div className="flex flex-col gap-1">
             <label className="text-xs font-bold text-textDark uppercase tracking-wider">Pickup / Meeting Location *</label>
-            <input
-              type="text"
-              placeholder="e.g. College library, nearby cafe, or specific metro station"
-              value={formData.pickupLocation}
-              onChange={(e) => setFormData(prev => ({ ...prev, pickupLocation: e.target.value }))}
-              className="bg-[#F5F3EF] border border-borderCustom rounded-[10px] p-2.5 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
-            />
+            <div className="relative flex items-center">
+              <MapPin className="w-4 h-4 text-slate-400 absolute left-3" />
+              <input
+                ref={autocompleteInputRef}
+                type="text"
+                placeholder="Search campus, landmark, cafe, or station..."
+                value={formData.pickupLocation}
+                onChange={(e) => setFormData(prev => ({ ...prev, pickupLocation: e.target.value }))}
+                onKeyDown={handleLocationKeyDown}
+                className="w-full bg-[#F5F3EF] border border-borderCustom rounded-[10px] py-2.5 pl-9 pr-3 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
+              />
+            </div>
             {errors.pickupLocation && <p className="text-[10px] text-danger font-semibold mt-0.5">{errors.pickupLocation}</p>}
           </div>
 

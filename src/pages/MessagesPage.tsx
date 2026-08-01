@@ -208,6 +208,31 @@ export const MessagesPage: React.FC = () => {
     }
   };
 
+  const handleSendArrivalAlert = async () => {
+    if (!activeChat || !user) return;
+    const text = "📍 I have arrived at the pickup location!";
+    try {
+      const newMsg = await api.sendMessage(activeChat.id, user.id, text);
+      setMessages(prev => [...prev, newMsg]);
+
+      // Update last message preview in chat list sidebar
+      setChats(prev => prev.map(c => {
+        if (c.id === activeChat.id) {
+          return {
+            ...c,
+            lastMessage: text,
+            lastMessageTime: newMsg.timestamp
+          };
+        }
+        return c;
+      }));
+      showToast('Arrival alert sent!', 'success');
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || 'Failed to send arrival alert.', 'danger');
+    }
+  };
+
   const handleReviewSubmit = async () => {
     if (!activeChat || !reviewComment.trim()) return;
     setIsSubmittingReview(true);
@@ -421,6 +446,17 @@ export const MessagesPage: React.FC = () => {
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-1.5 flex-shrink-0">
+                  {!activeChat.bookIsSold && !activeChat.bookIsDeleted && (
+                    <button
+                      onClick={handleSendArrivalAlert}
+                      className="bg-primary/5 hover:bg-primary/10 active:bg-primary/20 text-primary border border-primary/20 text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 focus:outline-none"
+                      title="Send arrival alert notification to other person"
+                    >
+                      <MapPin className="w-3.5 h-3.5" />
+                      <span>I'm Here</span>
+                    </button>
+                  )}
+
                   {user?.id === activeChat.buyerId && (
                     <button
                       onClick={() => setShowReviewModal(true)}
@@ -541,7 +577,17 @@ export const MessagesPage: React.FC = () => {
                     />
                     <div className="min-w-0 hidden sm:block max-w-[120px]">
                       <p className="text-[10px] font-bold text-textDark truncate leading-tight">{activeChat.bookTitle}</p>
-                      <span className="text-[9px] text-muted font-bold block mt-0.5">₹{activeChat.bookPrice}</span>
+                      {activeChat.pickupCoordinates && activeChat.pickupCoordinates.lat ? (
+                        <button
+                          onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${activeChat.pickupCoordinates?.lat},${activeChat.pickupCoordinates?.lng}`, '_blank')}
+                          className="text-[9px] text-primary hover:underline font-bold block mt-0.5 leading-none focus:outline-none text-left"
+                          title={`Pickup: ${activeChat.pickupLocation || ''}`}
+                        >
+                          Directions ↗
+                        </button>
+                      ) : (
+                        <span className="text-[9px] text-muted font-bold block mt-0.5">₹{activeChat.bookPrice}</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -682,11 +728,10 @@ export const MessagesPage: React.FC = () => {
             <div className="flex flex-col gap-1.5">
               <textarea
                 rows={3}
-                placeholder="Write your review... (e.g. 'Very friendly, punctual during exchange, and book is in perfect condition.')"
+                placeholder="Write your review... (Optional) (e.g. 'Very friendly, punctual during exchange, and book is in perfect condition.')"
                 value={reviewComment}
                 onChange={(e) => setReviewComment(e.target.value)}
                 className="w-full bg-[#F5F3EF] border border-borderCustom rounded-[10px] p-3 text-xs text-textDark placeholder-muted focus:outline-none focus:ring-1 focus:ring-primary leading-relaxed resize-none"
-                required
               />
             </div>
 
