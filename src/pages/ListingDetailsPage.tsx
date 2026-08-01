@@ -446,7 +446,7 @@ export const ListingDetailsPage: React.FC = () => {
                   <span className="text-[11px] block mt-0.5 leading-tight">{book.pickupLocation}</span>
                   {book.pickupCoordinates && book.pickupCoordinates.lat && (
                     <button
-                      onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${book.pickupCoordinates.lat},${book.pickupCoordinates.lng}`, '_blank')}
+                      onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${book.pickupCoordinates?.lat},${book.pickupCoordinates?.lng}`, '_blank')}
                       className="text-[10px] text-primary hover:underline font-bold mt-1.5 block text-left focus:outline-none"
                     >
                       Get Directions ↗
