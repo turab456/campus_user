@@ -50,10 +50,11 @@ export const MainLayout: React.FC = () => {
       socket.on('notification', (data: { type: string; title: string; body: string; chatId?: string }) => {
         // Show notification toast only if user is not on the messages page
         const isMessagesPage = window.location.pathname.startsWith('/messages');
+        const textContent = data.body || (data as any).message || '';
         if (data.type === 'review') {
-          showToast(`⭐️ ${data.title}: ${data.body}`, 'success');
+          showToast(`⭐️ ${data.title}: ${textContent}`, 'success');
         } else if (!isMessagesPage) {
-          showToast(`📩 ${data.title}: "${data.body}"`, 'info');
+          showToast(`📩 ${data.title}: "${textContent}"`, 'info');
         }
       });
 

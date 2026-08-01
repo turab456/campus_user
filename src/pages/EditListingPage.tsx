@@ -10,14 +10,7 @@ import { CATEGORIES, CONDITIONS, DEPARTMENTS, SEMESTERS } from '../constants';
 
 const EDUCATION_LEVELS = ['School', 'PUC', 'Diploma', 'Undergraduate (UG)', 'Postgraduate (PG)'];
 
-// Simulated default images that the student can choose from
-const MOCK_UPLOAD_PRESETS = [
-  'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=800&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1594897030264-ab7d87efc473?w=800&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1563770660941-20978e870e26?w=800&auto=format&fit=crop&q=80',
-];
+
 
 interface CustomField {
   key: string;
@@ -756,8 +749,8 @@ export const EditListingPage: React.FC = () => {
               );
             })}
 
-            {/* Show previously uploaded real files (Cloudinary URLs) */}
-            {formData.images.filter(url => !MOCK_UPLOAD_PRESETS.includes(url)).map((url, idx) => (
+            {/* Show previously uploaded real files */}
+            {formData.images.map((url, idx) => (
               <div key={`existing-${idx}`} className="aspect-square rounded-xl overflow-hidden border-2 border-primary relative group">
                 <img src={url} alt={`Existing ${idx}`} className="w-full h-full object-cover bg-white" />
                 <button 
@@ -775,30 +768,6 @@ export const EditListingPage: React.FC = () => {
                 </button>
               </div>
             ))}
-
-            {/* Show preset mocks if there's room */}
-            {MOCK_UPLOAD_PRESETS.map((url, idx) => {
-              const selected = formData.images.includes(url);
-              if (!selected && (selectedFiles.length + formData.images.length >= 3)) return null;
-              
-              return (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => handleImageToggle(url)}
-                  className={`aspect-square rounded-xl overflow-hidden border-2 relative focus:outline-none ${
-                    selected ? 'border-primary' : 'border-borderCustom opacity-75 hover:opacity-100'
-                  }`}
-                >
-                  <img src={url} alt={`Preset ${idx + 1}`} className="w-full h-full object-cover" />
-                  {selected && (
-                    <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                      <CheckCircle className="w-6 h-6 text-white" />
-                    </div>
-                  )}
-                </button>
-              );
-            })}
             
             {/* Actual photo upload input */}
             {(selectedFiles.length + formData.images.length) < 3 && (
