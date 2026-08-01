@@ -37,12 +37,14 @@ export const ListingDetailsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isContacting, setIsContacting] = useState(false);
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const { isSaved, toggleSave } = useWishlist();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (isAuthLoading) return;
+
     const loadBookDetails = async () => {
       if (!id) return;
       setIsLoading(true);
@@ -65,7 +67,7 @@ export const ListingDetailsPage: React.FC = () => {
 
     loadBookDetails();
     setActiveImageIndex(0);
-  }, [id]);
+  }, [id, isAuthLoading, user]);
 
   if (isLoading) {
     return (

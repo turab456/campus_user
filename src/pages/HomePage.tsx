@@ -10,7 +10,7 @@ import { CardSkeleton } from '../components/SkeletonLoader';
 import { SEO } from '../components/SEO';
 
 export const HomePage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [books, setBooks] = useState<Book[]>([]);
@@ -18,6 +18,8 @@ export const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (isAuthLoading) return;
+
     const fetchBooks = async () => {
       setIsLoading(true);
       try {
@@ -30,7 +32,7 @@ export const HomePage: React.FC = () => {
       }
     };
     fetchBooks();
-  }, []);
+  }, [isAuthLoading, user]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();

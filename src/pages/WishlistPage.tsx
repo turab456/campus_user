@@ -8,13 +8,18 @@ import { CardSkeleton } from '../components/SkeletonLoader';
 import { EmptyState } from '../components/EmptyState';
 import { useWishlist } from '../context/WishlistContext';
 
+import { useAuth } from '../context/AuthContext';
+
 export const WishlistPage: React.FC = () => {
+  const { user, isLoading: isAuthLoading } = useAuth();
   const { savedBookIds } = useWishlist();
   const [savedBooks, setSavedBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (isAuthLoading) return;
+
     const fetchSavedBooksData = async () => {
       setIsLoading(true);
       try {
@@ -29,7 +34,7 @@ export const WishlistPage: React.FC = () => {
       }
     };
     fetchSavedBooksData();
-  }, [savedBookIds]);
+  }, [savedBookIds, isAuthLoading, user]);
 
   return (
     <div className="flex flex-col gap-6">

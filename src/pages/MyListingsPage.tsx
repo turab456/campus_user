@@ -9,7 +9,7 @@ import { CardSkeleton } from '../components/SkeletonLoader';
 import { EmptyState } from '../components/EmptyState';
 
 export const MyListingsPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const { showToast } = useToast();
   const [activeListings, setActiveListings] = useState<Book[]>([]);
   const [soldListings, setSoldListings] = useState<Book[]>([]);
@@ -41,8 +41,13 @@ export const MyListingsPage: React.FC = () => {
   };
 
   useEffect(() => {
+    if (isAuthLoading) return;
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
     fetchUserListings();
-  }, [user]);
+  }, [user, isAuthLoading]);
 
   const handleMarkAsSold = async (id: string, title: string) => {
     try {
@@ -184,6 +189,28 @@ export const MyListingsPage: React.FC = () => {
       )}
     </div>
   );
+
+  if (isAuthLoading) {
+    return (
+      <div className="max-w-3xl mx-auto flex flex-col gap-6 animate-pulse">
+        <div className="h-8 w-48 bg-slate-200 rounded" />
+        <div className="h-64 bg-slate-200 rounded-xl" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="max-w-3xl mx-auto text-center py-16 px-4 flex flex-col items-center justify-center gap-4">
+        <BookOpen className="w-12 h-12 text-muted" />
+        <h2 className="text-lg font-bold text-textDark">Sign in to manage listings</h2>
+        <p className="text-xs text-muted max-w-sm">You must be logged in to view and manage your posted items.</p>
+        <Link to="/login" className="bg-primary text-white text-xs font-bold px-6 py-2.5 rounded-full hover:bg-primary-hover focus:outline-none">
+          Sign In
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-6">

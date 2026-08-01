@@ -10,7 +10,10 @@ import { CardSkeleton } from '../components/SkeletonLoader';
 import { EmptyState } from '../components/EmptyState';
 import { SEO } from '../components/SEO';
 
+import { useAuth } from '../context/AuthContext';
+
 export const SearchPage: React.FC = () => {
+  const { user, isLoading: isAuthLoading } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,6 +33,8 @@ export const SearchPage: React.FC = () => {
 
   // Trigger search on filter changes or URL updates
   useEffect(() => {
+    if (isAuthLoading) return;
+
     const fetchFilteredListings = async () => {
       setIsLoading(true);
       try {
@@ -55,7 +60,7 @@ export const SearchPage: React.FC = () => {
     };
  
     fetchFilteredListings();
-  }, [filters, setSearchParams]);
+  }, [filters, setSearchParams, isAuthLoading, user]);
  
   // Handle URL change externally (e.g. from navbar search)
   useEffect(() => {
