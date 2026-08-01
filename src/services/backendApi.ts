@@ -242,6 +242,14 @@ export const backendApi = {
     return mapUser(res.user);
   },
 
+  async loginWithGoogle(idToken: string) {
+    const res = await post<{ success: boolean; accessToken: string; user: any }>('/api/auth/google', {
+      idToken
+    });
+    setAccessToken(res.accessToken);
+    return mapUser(res.user);
+  },
+
   async register(name: string, email: string, password?: string) {
     return post<{ success: boolean; message: string }>('/api/auth/register', {
       name,

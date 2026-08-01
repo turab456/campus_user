@@ -5,6 +5,7 @@ import { useToast } from '../context/ToastContext';
 import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { backendApi } from '../services/backendApi';
 import { SEO } from '../components/SEO';
+import { GoogleLoginButton } from '../components/GoogleLoginButton';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -137,6 +138,14 @@ export const LoginPage: React.FC = () => {
           </button>
         </div>
       )}
+
+      <div className="relative flex py-1 items-center">
+        <div className="flex-grow border-t border-borderCustom"></div>
+        <span className="flex-shrink mx-4 text-[10px] font-bold text-muted uppercase tracking-wider">or</span>
+        <div className="flex-grow border-t border-borderCustom"></div>
+      </div>
+
+      <GoogleLoginButton />
 
       <hr className="border-borderCustom" />
 

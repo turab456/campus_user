@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password?: string) => Promise<boolean>;
+  loginWithGoogle: (idToken: string) => Promise<boolean>;
   register: (name: string, email: string, password?: string) => Promise<boolean>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<User> & { avatarFile?: File | null }) => Promise<boolean>;
@@ -68,6 +69,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loginWithGoogle = async (idToken: string): Promise<boolean> => {
+    try {
+      await backendApi.loginWithGoogle(idToken);
+      const profile = await backendApi.getUserProfile();
+      setUser(profile);
+      try {
+        const counts = await backendApi.getUnreadNotificationCount();
+        setUnreadChatCount(counts.unreadChatCount);
+      } catch (e) {
+        // ignore
+      }
+      sessionStorage.removeItem('setup_modal_dismissed');
+      return true;
+    } catch (err) {
+      console.error('Google login failed', err);
+      throw err;
+    }
+  };
+
   const register = async (name: string, email: string, password?: string): Promise<boolean> => {
     try {
       await backendApi.register(name, email, password);
@@ -109,7 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout, updateProfile, unreadChatCount, setUnreadChatCount }}>
+    <AuthContext.Provider value={{ user, isLoading, login, loginWithGoogle, register, logout, updateProfile, unreadChatCount, setUnreadChatCount }}>
       {children}
     </AuthContext.Provider>
   );
