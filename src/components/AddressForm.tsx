@@ -32,21 +32,35 @@ interface CountryOption {
   cca2: string;
 }
 
-// ── Google Maps lazy loader ───────────────────────────────────────────────
-let googleMapsLoaded = false;
-let googleMapsLoading = false;
-const googleMapsCallbacks: (() => void)[] = [];
+declare global {
+  interface Window {
+    google: any;
+    initGoogleMapsCallback: () => void;
+    googleMapsCallbacks?: (() => void)[];
+    googleMapsLoading?: boolean;
+  }
+}
 
 function loadGoogleMapsApi(apiKey: string, callback: () => void) {
-  if (googleMapsLoaded) { callback(); return; }
-  googleMapsCallbacks.push(callback);
-  if (googleMapsLoading) return;
-  googleMapsLoading = true;
+  if (window.google && window.google.maps && window.google.maps.places) {
+    callback();
+    return;
+  }
+
+  if (!window.googleMapsCallbacks) {
+    window.googleMapsCallbacks = [];
+  }
+  window.googleMapsCallbacks.push(callback);
+
+  if (window.googleMapsLoading) return;
+  window.googleMapsLoading = true;
 
   window.initGoogleMapsCallback = () => {
-    googleMapsLoaded = true;
-    googleMapsCallbacks.forEach((cb) => cb());
-    googleMapsCallbacks.length = 0;
+    window.googleMapsLoading = false;
+    if (window.googleMapsCallbacks) {
+      window.googleMapsCallbacks.forEach((cb) => cb());
+      window.googleMapsCallbacks = [];
+    }
   };
 
   const script = document.createElement('script');
@@ -55,9 +69,11 @@ function loadGoogleMapsApi(apiKey: string, callback: () => void) {
   script.defer = true;
   script.onerror = () => {
     console.warn('[AddressForm] Google Maps failed to load.');
-    googleMapsLoading = false;
-    googleMapsCallbacks.forEach((cb) => cb());
-    googleMapsCallbacks.length = 0;
+    window.googleMapsLoading = false;
+    if (window.googleMapsCallbacks) {
+      window.googleMapsCallbacks.forEach((cb) => cb());
+      window.googleMapsCallbacks = [];
+    }
   };
   document.head.appendChild(script);
 }
