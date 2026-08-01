@@ -358,6 +358,10 @@ export const MessagesPage: React.FC = () => {
           {chats.length > 0 ? (
             chats.map(chat => {
               const isActive = activeChat?.id === chat.id;
+              const isCompleted = chat.buyerConfirmedReceipt;
+              const isPending = chat.salePending && !chat.buyerConfirmedReceipt;
+              const isDeleted = chat.bookIsDeleted;
+
               return (
                 <button
                   key={chat.id}
@@ -383,9 +387,27 @@ export const MessagesPage: React.FC = () => {
                     <p className="text-[10px] text-primary font-bold mt-0.5 truncate leading-tight">
                       Item: {chat.bookTitle}
                     </p>
-                    <p className={`text-[11px] text-muted mt-1 truncate ${chat.unread ? 'text-textDark font-semibold' : ''}`}>
-                      {chat.lastMessage}
-                    </p>
+                    {/* Trade status badges */}
+                    {isCompleted && (
+                      <span className="inline-flex items-center gap-0.5 mt-1 text-[9px] font-bold text-success bg-success/10 border border-success/20 px-1.5 py-0.5 rounded-full">
+                        ✓ Trade Complete
+                      </span>
+                    )}
+                    {isPending && (
+                      <span className="inline-flex items-center gap-0.5 mt-1 text-[9px] font-bold text-warning bg-warning/10 border border-warning/20 px-1.5 py-0.5 rounded-full">
+                        ⏳ Awaiting Confirmation
+                      </span>
+                    )}
+                    {isDeleted && (
+                      <span className="inline-flex items-center gap-0.5 mt-1 text-[9px] font-bold text-muted bg-slate-100 border border-borderCustom px-1.5 py-0.5 rounded-full">
+                        🗑 Listing Deleted
+                      </span>
+                    )}
+                    {!isCompleted && !isPending && !isDeleted && (
+                      <p className={`text-[11px] text-muted mt-1 truncate ${chat.unread ? 'text-textDark font-semibold' : ''}`}>
+                        {chat.lastMessage}
+                      </p>
+                    )}
                   </div>
                   {chat.unread && (
                     <div className="w-2.5 h-2.5 rounded-full bg-primary mt-1 flex-shrink-0 self-center" />
@@ -395,7 +417,7 @@ export const MessagesPage: React.FC = () => {
             })
           ) : (
             <div className="p-8 text-center">
-              <p className="text-xs text-muted">No active conversations found.</p>
+              <p className="text-xs text-muted">No conversations yet.</p>
             </div>
           )}
         </div>
