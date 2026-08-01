@@ -255,9 +255,10 @@ export const MessagesPage: React.FC = () => {
     setIsMarkingSold(true);
     try {
       await api.markAsSold(activeChat.bookId);
-      setActiveChat(prev => prev ? { ...prev, bookIsSold: true } : prev);
-      setChats(prev => prev.map(c => c.id === activeChat.id ? { ...c, bookIsSold: true } : c));
-      showToast('Book marked as sold successfully!', 'success');
+      // Backend sets salePending=true, NOT isSold=true (buyer must confirm first)
+      setActiveChat(prev => prev ? { ...prev, salePending: true, bookIsSold: false } : prev);
+      setChats(prev => prev.map(c => c.id === activeChat.id ? { ...c, salePending: true, bookIsSold: false } : c));
+      showToast('Awaiting buyer confirmation...', 'success');
     } catch (err: any) {
       console.error(err);
       showToast(err.message || 'Failed to update book status.', 'danger');
