@@ -122,18 +122,18 @@ export const MyListingsPage: React.FC = () => {
       key={book.id}
       className="bg-white border border-borderCustom rounded-xl p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between shadow-subtle hover:border-slate-300 transition-colors"
     >
-      <div className="flex gap-3.5 items-center min-w-0 flex-1">
+      <div className="flex gap-3.5 items-center min-w-0 flex-1 w-full">
         <img
           src={book.images[0]}
           alt={book.title}
           className="w-16 h-16 rounded-lg border border-borderCustom object-cover flex-shrink-0"
         />
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <span className="text-[10px] font-bold text-primary uppercase tracking-wider">{book.category}</span>
           <Link to={`/book/${book.id}`} className="block font-bold text-sm text-textDark hover:text-primary transition-colors leading-snug truncate">
             {book.title}
           </Link>
-          <p className="text-[11px] text-muted leading-none mt-1">by {book.author}</p>
+          <p className="text-[11px] text-muted leading-none mt-1 truncate">by {book.author}</p>
           <div className="flex items-center gap-2 mt-2">
             <span className="text-xs font-bold text-textDark">₹{book.price}</span>
             <span className="text-[10px] bg-slate-100 text-muted border border-borderCustom px-1.5 py-0.5 rounded">

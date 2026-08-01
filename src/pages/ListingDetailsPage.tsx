@@ -271,13 +271,13 @@ export const ListingDetailsPage: React.FC = () => {
 
       <div className="flex flex-col md:flex-row gap-8 items-start w-full">
         {/* Left Column: Image Gallery */}
-        <div className="flex-1 w-full flex flex-col gap-4">
+        <div className="flex-1 w-full max-w-2xl flex flex-col gap-4">
           <div className="bg-slate-50 border border-borderCustom rounded-2xl overflow-hidden aspect-[4/3] relative flex items-center justify-center">
             <img
               src={book.images[activeImageIndex]}
               alt={book.title}
               fetchPriority="high"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
 
             {/* Gallery Navigation Arrows (if multiple images exist) */}
