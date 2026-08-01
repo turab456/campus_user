@@ -247,6 +247,17 @@ export const ListingDetailsPage: React.FC = () => {
         </button>
       </div>
 
+      {/* Full Width Warning Banner for Deleted Listings */}
+      {book.isDeleted && (
+        <div className="bg-amber-50 border border-amber-200 text-amber-850 p-4 rounded-xl flex items-start gap-3">
+          <span className="text-xl leading-none">⚠️</span>
+          <div>
+            <h4 className="font-bold text-sm">Listing Deleted</h4>
+            <p className="text-xs mt-0.5">This listing has been deleted by the seller and is no longer available for trade.</p>
+          </div>
+        </div>
+      )}
+
       {/* Full Width Warning Banner for Risky Listings */}
       {book.status === 'risky' && (
         <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl flex items-start gap-3">
@@ -450,7 +461,11 @@ export const ListingDetailsPage: React.FC = () => {
 
           {/* CTAs */}
           <div className="flex gap-2.5 mt-2">
-            {user && user.id === book.sellerId ? (
+            {book.isDeleted ? (
+              <div className="bg-slate-100 text-slate-400 text-xs font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-1.5 flex-1 border border-slate-200 cursor-not-allowed select-none">
+                <span>This Listing Has Been Deleted</span>
+              </div>
+            ) : user && user.id === book.sellerId ? (
               <button
                 onClick={() => navigate('/my-listings')}
                 className="bg-primary hover:bg-primary-hover active:bg-primary-active text-white text-xs font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-1.5 flex-1 transition-colors shadow-subtle focus:outline-none"

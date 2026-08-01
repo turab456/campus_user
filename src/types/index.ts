@@ -56,6 +56,7 @@ export interface Book {
   distanceKm?: number;
   isNearMe?: boolean;
   sellerReviewsCount?: number;
+  isDeleted?: boolean;
 }
 
 export interface Review {
@@ -99,6 +100,7 @@ export interface Chat {
   bookIsSold?: boolean;
   buyerConfirmedReceipt?: boolean;
   salePending?: boolean;
+  bookIsDeleted?: boolean;
 }
 
 export interface SearchFilters {
