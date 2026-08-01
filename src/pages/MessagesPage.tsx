@@ -426,21 +426,6 @@ export const MessagesPage: React.FC = () => {
                     <h3 className="text-xs font-bold text-textDark truncate leading-snug">
                       {activeChat.otherParticipant.name}
                     </h3>
-                    <div className="flex items-center gap-1 text-[10px] text-muted mt-0.5">
-                      {activeChat.otherParticipant.reviewsCount && activeChat.otherParticipant.reviewsCount > 0 ? (
-                        <span className="font-semibold text-warning">
-                          &#9733; {activeChat.otherParticipant.rating.toFixed(1)} ({activeChat.otherParticipant.reviewsCount})
-                        </span>
-                      ) : (
-                        <span className="text-slate-400 font-medium">No ratings yet</span>
-                      )}
-                      <span>&middot;</span>
-                      <span className="truncate">
-                        {activeChat.otherParticipant.college && activeChat.otherParticipant.college !== 'N/A'
-                          ? activeChat.otherParticipant.college.split(',')[0]
-                          : 'Unknown College'}
-                      </span>
-                    </div>
                   </div>
                 </div>
 
@@ -569,29 +554,39 @@ export const MessagesPage: React.FC = () => {
                     )
                   )}
 
-                  <div className="flex items-center gap-1.5 border border-borderCustom rounded-lg p-1 bg-slate-50">
-                    <img
-                      src={activeChat.bookImage}
-                      alt={activeChat.bookTitle}
-                      className="w-7 h-7 rounded border border-borderCustom object-cover flex-shrink-0"
-                    />
-                    <div className="min-w-0 hidden sm:block max-w-[120px]">
-                      <p className="text-[10px] font-bold text-textDark truncate leading-tight">{activeChat.bookTitle}</p>
-                      {activeChat.pickupCoordinates && activeChat.pickupCoordinates.lat ? (
-                        <button
-                          onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${activeChat.pickupCoordinates?.lat},${activeChat.pickupCoordinates?.lng}`, '_blank')}
-                          className="text-[9px] text-primary hover:underline font-bold block mt-0.5 leading-none focus:outline-none text-left"
-                          title={`Pickup: ${activeChat.pickupLocation || ''}`}
-                        >
-                          Directions ↗
-                        </button>
-                      ) : (
-                        <span className="text-[9px] text-muted font-bold block mt-0.5">₹{activeChat.bookPrice}</span>
-                      )}
-                    </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Active Listing Sticky Banner (Universal Directions & Details) */}
+            <div className="bg-white border-b border-borderCustom px-4 py-3 flex items-center justify-between gap-4 flex-shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+              <div className="flex items-center gap-3 min-w-0">
+                <img
+                  src={activeChat.bookImage}
+                  alt={activeChat.bookTitle}
+                  className="w-10 h-10 rounded-lg border border-borderCustom object-cover flex-shrink-0 bg-slate-50"
+                />
+                <div className="min-w-0">
+                  <h3 className="text-xs font-bold text-textDark truncate leading-tight">{activeChat.bookTitle}</h3>
+                  <div className="flex items-center gap-1.5 mt-1 text-[10px] text-muted font-medium">
+                    <span className="text-textDark font-bold">₹{activeChat.bookPrice}</span>
+                    <span>&middot;</span>
+                    <span className="truncate max-w-[150px] sm:max-w-xs" title={activeChat.pickupLocation}>
+                      📍 {activeChat.pickupLocation || 'No pickup location set'}
+                    </span>
                   </div>
                 </div>
               </div>
+
+              {activeChat.pickupCoordinates?.lat && (
+                <button
+                  onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${activeChat.pickupCoordinates?.lat},${activeChat.pickupCoordinates?.lng}`, '_blank')}
+                  className="flex-shrink-0 bg-primary/5 hover:bg-primary/10 text-primary text-[10px] font-bold px-3 py-1.5 rounded-lg border border-primary/10 transition-colors focus:outline-none flex items-center gap-1"
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span>Directions</span>
+                </button>
+              )}
             </div>
 
             {/* Message Feed Scroll Area */}
