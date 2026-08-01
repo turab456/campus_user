@@ -147,7 +147,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
   const autocompleteRef = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [mapsReady, setMapsReady] = useState(googleMapsLoaded);
+  const [mapsReady, setMapsReady] = useState(!!(window.google && window.google.maps && window.google.maps.places));
   const [isFetching, setIsFetching] = useState(false);
 
   const [countries, setCountries] = useState<CountryOption[]>([]);
