@@ -7,7 +7,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'https://campus-be-qkrx.onrender.com',
+        target: 'https://api.revoshelf.com',
         changeOrigin: true
       }
     }

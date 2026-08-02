@@ -38,6 +38,9 @@ const mapUser = (user: any): User => {
   return {
     ...user,
     id: user._id || user.id,
+    college: user.institutionName || user.college || '',
+    department: user.academicDetails?.department || user.department || '',
+    semester: user.academicDetails?.semester || user.semester || 0,
     avatar: user.avatarUrl || user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
     rating: user.rating || 5.0,
     reviewsCount: user.reviewsCount || 0,
