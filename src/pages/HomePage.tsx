@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Search, MapPin, Sparkles, Clock, Compass } from 'lucide-react';
 import { CATEGORIES } from '../constants';
 import { BookCard } from '../components/BookCard';
@@ -83,8 +83,9 @@ export const HomePage: React.FC = () => {
 
       {/* Category Chips Carousel */}
       <section className="-mx-4 md:mx-0">
-        <div className="flex items-center gap-2 overflow-x-auto px-4 md:px-0 no-scrollbar">
-          <button
+        <nav className="flex items-center gap-2 overflow-x-auto px-4 md:px-0 no-scrollbar" aria-label="Product categories">
+          <Link
+            to="/search"
             onClick={() => setSelectedCategory('all')}
             className={`px-4 py-1.5 rounded-lg text-xs font-bold flex-shrink-0 transition-colors ${selectedCategory === 'all'
               ? 'bg-primary text-white'
@@ -92,10 +93,11 @@ export const HomePage: React.FC = () => {
               }`}
           >
             All Categories
-          </button>
+          </Link>
           {CATEGORIES.map(cat => (
-            <button
+            <Link
               key={cat.id}
+              to={`/search?category=${cat.id}`}
               onClick={() => setSelectedCategory(cat.id)}
               className={`px-4 py-1.5 rounded-lg text-xs font-bold flex-shrink-0 transition-colors ${selectedCategory === cat.id
                 ? 'bg-primary text-white'
@@ -103,9 +105,9 @@ export const HomePage: React.FC = () => {
                 }`}
             >
               {cat.name}
-            </button>
+            </Link>
           ))}
-        </div>
+        </nav>
       </section>
 
       {isLoading ? (

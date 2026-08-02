@@ -200,16 +200,54 @@ export const SearchPage: React.FC = () => {
   const categoryName = filters.category !== 'all' 
     ? (CATEGORIES.find(c => c.id === filters.category)?.name || '')
     : '';
-  const pageTitle = categoryName ? `${categoryName} | RevoShelf` : 'Marketplace | RevoShelf';
+  const pageTitle = categoryName
+    ? `Used ${categoryName} for Students | RevoShelf`
+    : 'Student Marketplace — Buy & Sell College Essentials | RevoShelf';
+
+  // Only pure category pages (no other active filters) are indexable
+  const hasActiveFilters =
+    filters.query.trim() !== '' ||
+    filters.condition.length > 0 ||
+    filters.minPrice > 0 ||
+    filters.maxPrice < 5000 ||
+    filters.nearMe ||
+    filters.sort !== 'recent';
+
+  // Canonical: category pages get a stable canonical; filtered/search pages get noindex
+  const canonicalPath = categoryName ? `/search?category=${filters.category}` : '/search';
+
+  // CollectionPage schema for indexable category pages
+  const collectionSchema = !hasActiveFilters && categoryName ? {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    'name': pageTitle,
+    'description': `Browse used ${categoryName.toLowerCase()} for sale by verified students on RevoShelf. Affordable prices, safe peer-to-peer transactions.`,
+    'url': `https://www.revoshelf.com${canonicalPath}`,
+    'breadcrumb': {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      'itemListElement': [
+        { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://www.revoshelf.com/' },
+        { '@type': 'ListItem', 'position': 2, 'name': 'Marketplace', 'item': 'https://www.revoshelf.com/search' },
+        { '@type': 'ListItem', 'position': 3, 'name': categoryName, 'item': `https://www.revoshelf.com${canonicalPath}` }
+      ]
+    }
+  } : undefined;
 
   return (
     <div className="flex flex-col md:flex-row gap-6 items-start">
-      <SEO 
-        title={pageTitle} 
-        descriptionType={categoryName ? 'category' : 'marketplace'} 
-        descriptionDetails={categoryName} 
+      <SEO
+        title={pageTitle}
+        description={
+          categoryName
+            ? `Find affordable used ${categoryName.toLowerCase()} listed by verified students near you. No commission, no middlemen — direct peer-to-peer campus trading on RevoShelf.`
+            : 'Browse the RevoShelf student marketplace. Buy and sell used textbooks, calculators, hostel essentials, cycles and electronics directly with peers. Zero commission.'
+        }
+        url={canonicalPath}
+        meta={hasActiveFilters ? [{ name: 'robots', content: 'noindex, follow' }] : []}
+        structuredData={collectionSchema}
       />
-      <h1 className="sr-only">Marketplace Search | RevoShelf</h1>
+      <h1 className="sr-only">{pageTitle}</h1>
       {/* Desktop Filter Sidebar */}
       <aside className="hidden md:block w-[260px] bg-white border border-borderCustom rounded-xl p-5 sticky top-24 flex-shrink-0 max-h-[80vh] overflow-y-auto">
         <div className="flex items-center justify-between pb-3 border-b border-borderCustom mb-5">

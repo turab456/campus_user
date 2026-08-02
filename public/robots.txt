@@ -1,25 +1,45 @@
-# Robots.txt configuration for RevoShelf P2P College Marketplace
+# Robots.txt for RevoShelf — Student P2P Marketplace
 User-agent: *
 
-# Allow search engines to crawl public pages
+# Allow crawling of all public-facing pages
 Allow: /
-Allow: /marketplace
-Allow: /categories
-Allow: /listings
+Allow: /search
+Allow: /book/
+Allow: /seller/
+Allow: /about
+Allow: /faq
+Allow: /contact-us
+Allow: /how-it-works
+Allow: /help-center
+Allow: /safety-tips
+Allow: /community-guidelines
+Allow: /privacy
+Allow: /terms
 
-# Block indexing of administrative, private, api, and authenticated pages
-Disallow: /admin
-Disallow: /dashboard
-Disallow: /profile/edit
-Disallow: /api
-Disallow: /login
-Disallow: /signup
+# Block authenticated and private pages
+Disallow: /home
 Disallow: /messages
+Disallow: /my-listings
+Disallow: /wishlist
 Disallow: /settings
+Disallow: /profile
 Disallow: /create-listing
 Disallow: /edit-listing
-Disallow: /wishlist
-Disallow: /my-listings
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /report-issue
+Disallow: /support
 
-# Reference dynamically generated sitemap XML
-Sitemap: https://www.api.revoshelf.com/sitemap.xml
+# Block parameterized search pages to avoid duplicate content
+Disallow: /search?query=
+Disallow: /search?condition=
+Disallow: /search?sort=
+Disallow: /search?minPrice=
+Disallow: /search?maxPrice=
+Disallow: /search?nearMe=
+
+# Sitemap
+Sitemap: https://www.revoshelf.com/sitemap.xml

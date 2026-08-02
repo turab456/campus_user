@@ -6,37 +6,40 @@ import { WishlistProvider } from './context/WishlistContext';
 import { ToastProvider } from './context/ToastContext';
 import { MainLayout } from './layouts/MainLayout';
 import { AuthLayout } from './layouts/AuthLayout';
-import { LandingPage } from './pages/LandingPage';
-import { HomePage } from './pages/HomePage';
-import { SearchPage } from './pages/SearchPage';
-import { ListingDetailsPage } from './pages/ListingDetailsPage';
-import { CreateListingPage } from './pages/CreateListingPage';
-import { EditListingPage } from './pages/EditListingPage';
-import { ProfilePage } from './pages/ProfilePage';
-import { MyListingsPage } from './pages/MyListingsPage';
-import { WishlistPage } from './pages/WishlistPage';
-import { SettingsPage } from './pages/SettingsPage';
-import { MessagesPage } from './pages/MessagesPage';
-import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
-import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
-import { VerifyEmailPage } from './pages/VerifyEmailPage';
-import { ResetPasswordPage } from './pages/ResetPasswordPage';
-import { NotFoundPage } from './pages/NotFoundPage';
-import { HowItWorksPage } from './pages/HowItWorksPage';
-import { HelpCenterPage } from './pages/HelpCenterPage';
-import { FaqPage } from './pages/FaqPage';
-import { ContactUsPage } from './pages/ContactUsPage';
-import { SafetyTipsPage } from './pages/SafetyTipsPage';
-import { ReportIssuePage } from './pages/ReportIssuePage';
-import { AboutUsPage } from './pages/AboutUsPage';
-import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
-import { TermsConditionsPage } from './pages/TermsConditionsPage';
-import { CommunityGuidelinesPage } from './pages/CommunityGuidelinesPage';
-
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { backendApi } from './services/backendApi';
 import { useToast } from './context/ToastContext';
+
+// Lazy-loaded page components — each becomes its own JS chunk (improves LCP)
+const LandingPage = lazy(() => import('./pages/LandingPage').then(m => ({ default: m.LandingPage })));
+const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
+const SearchPage = lazy(() => import('./pages/SearchPage').then(m => ({ default: m.SearchPage })));
+const ListingDetailsPage = lazy(() => import('./pages/ListingDetailsPage').then(m => ({ default: m.ListingDetailsPage })));
+const CreateListingPage = lazy(() => import('./pages/CreateListingPage').then(m => ({ default: m.CreateListingPage })));
+const EditListingPage = lazy(() => import('./pages/EditListingPage').then(m => ({ default: m.EditListingPage })));
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
+const MyListingsPage = lazy(() => import('./pages/MyListingsPage').then(m => ({ default: m.MyListingsPage })));
+const WishlistPage = lazy(() => import('./pages/WishlistPage').then(m => ({ default: m.WishlistPage })));
+const SettingsPage = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
+const MessagesPage = lazy(() => import('./pages/MessagesPage').then(m => ({ default: m.MessagesPage })));
+const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
+const RegisterPage = lazy(() => import('./pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage').then(m => ({ default: m.VerifyEmailPage })));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
+const HowItWorksPage = lazy(() => import('./pages/HowItWorksPage').then(m => ({ default: m.HowItWorksPage })));
+const HelpCenterPage = lazy(() => import('./pages/HelpCenterPage').then(m => ({ default: m.HelpCenterPage })));
+const FaqPage = lazy(() => import('./pages/FaqPage').then(m => ({ default: m.FaqPage })));
+const ContactUsPage = lazy(() => import('./pages/ContactUsPage').then(m => ({ default: m.ContactUsPage })));
+const SafetyTipsPage = lazy(() => import('./pages/SafetyTipsPage').then(m => ({ default: m.SafetyTipsPage })));
+const ReportIssuePage = lazy(() => import('./pages/ReportIssuePage').then(m => ({ default: m.ReportIssuePage })));
+const AboutUsPage = lazy(() => import('./pages/AboutUsPage').then(m => ({ default: m.AboutUsPage })));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })));
+const TermsConditionsPage = lazy(() => import('./pages/TermsConditionsPage').then(m => ({ default: m.TermsConditionsPage })));
+const CommunityGuidelinesPage = lazy(() => import('./pages/CommunityGuidelinesPage').then(m => ({ default: m.CommunityGuidelinesPage })));
+
+
 
 const GlobalApiHandler = () => {
   const { showToast } = useToast();
@@ -142,7 +145,30 @@ const PageTitleManager = () => {
     }
   }
 
-  return <SEO title={title} descriptionType={descType} descriptionDetails={descDetails} url={pathname} />;
+  const publicIndexableRoutes = [
+    '/',
+    '/search',
+    '/about',
+    '/privacy',
+    '/terms',
+    '/community-guidelines',
+    '/how-it-works',
+    '/help-center',
+    '/faq',
+    '/contact-us',
+    '/safety-tips'
+  ];
+
+  const isPublicIndexable = 
+    publicIndexableRoutes.includes(pathname) || 
+    pathname.startsWith('/book/') || 
+    pathname.startsWith('/seller/');
+
+  const meta = !isPublicIndexable 
+    ? [{ name: 'robots', content: 'noindex, nofollow' }] 
+    : [];
+
+  return <SEO title={title} descriptionType={descType} descriptionDetails={descDetails} url={pathname} meta={meta} />;
 };
 
 function App() {
@@ -154,47 +180,49 @@ function App() {
             <GlobalApiHandler />
             <BrowserRouter>
               <PageTitleManager />
-              <Routes>
-                {/* App Shell and General Pages */}
-                <Route element={<MainLayout />}>
-                  <Route path="/" element={<LandingPage />} />
-                  <Route path="/home" element={<HomePage />} />
-                  <Route path="/search" element={<SearchPage />} />
-                  <Route path="/book/:id" element={<ListingDetailsPage />} />
-                  <Route path="/create-listing" element={<CreateListingPage />} />
-                  <Route path="/edit-listing/:id" element={<EditListingPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/seller/:id" element={<ProfilePage />} />
-                  <Route path="/my-listings" element={<MyListingsPage />} />
-                  <Route path="/wishlist" element={<WishlistPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
-                  <Route path="/messages" element={<MessagesPage />} />
-                  
-                  {/* Static Pages */}
-                  <Route path="/how-it-works" element={<HowItWorksPage />} />
-                  <Route path="/help-center" element={<HelpCenterPage />} />
-                  <Route path="/faq" element={<FaqPage />} />
-                  <Route path="/contact-us" element={<ContactUsPage />} />
-                  <Route path="/safety-tips" element={<SafetyTipsPage />} />
-                  <Route path="/report-issue" element={<ReportIssuePage />} />
-                  <Route path="/about" element={<AboutUsPage />} />
-                  <Route path="/privacy" element={<PrivacyPolicyPage />} />
-                  <Route path="/terms" element={<TermsConditionsPage />} />
-                  <Route path="/community-guidelines" element={<CommunityGuidelinesPage />} />
-                </Route>
+              <Suspense fallback={null}>
+                <Routes>
+                  {/* App Shell and General Pages */}
+                  <Route element={<MainLayout />}>
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/home" element={<HomePage />} />
+                    <Route path="/search" element={<SearchPage />} />
+                    <Route path="/book/:id" element={<ListingDetailsPage />} />
+                    <Route path="/create-listing" element={<CreateListingPage />} />
+                    <Route path="/edit-listing/:id" element={<EditListingPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/seller/:id" element={<ProfilePage />} />
+                    <Route path="/my-listings" element={<MyListingsPage />} />
+                    <Route path="/wishlist" element={<WishlistPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/messages" element={<MessagesPage />} />
 
-                {/* Centered Auth Layout Pages */}
-                <Route element={<AuthLayout />}>
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
-                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                  <Route path="/reset-password" element={<ResetPasswordPage />} />
-                  <Route path="/verify-email" element={<VerifyEmailPage />} />
-                </Route>
+                    {/* Static / SEO Pages */}
+                    <Route path="/how-it-works" element={<HowItWorksPage />} />
+                    <Route path="/help-center" element={<HelpCenterPage />} />
+                    <Route path="/faq" element={<FaqPage />} />
+                    <Route path="/contact-us" element={<ContactUsPage />} />
+                    <Route path="/safety-tips" element={<SafetyTipsPage />} />
+                    <Route path="/report-issue" element={<ReportIssuePage />} />
+                    <Route path="/about" element={<AboutUsPage />} />
+                    <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                    <Route path="/terms" element={<TermsConditionsPage />} />
+                    <Route path="/community-guidelines" element={<CommunityGuidelinesPage />} />
+                  </Route>
 
-                {/* Fallback 404 Route */}
-                <Route path="*" element={<NotFoundPage />} />
-              </Routes>
+                  {/* Centered Auth Layout Pages */}
+                  <Route element={<AuthLayout />}>
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
+                    <Route path="/verify-email" element={<VerifyEmailPage />} />
+                  </Route>
+
+                  {/* Fallback 404 Route */}
+                  <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+              </Suspense>
             </BrowserRouter>
           </ToastProvider>
         </WishlistProvider>

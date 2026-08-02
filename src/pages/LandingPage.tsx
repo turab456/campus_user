@@ -91,9 +91,27 @@ export const LandingPage: React.FC = () => {
     }
   ];
 
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    'mainEntity': faqs.map(faq => ({
+      '@type': 'Question',
+      'name': faq.q,
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': faq.a
+      }
+    }))
+  };
+
   return (
     <div className="flex flex-col -mt-2">
-      <SEO title="RevoShelf | Buy & Sell College Essentials" descriptionType="home" />
+      <SEO
+        title="RevoShelf | Buy & Sell College Essentials — Student Marketplace"
+        descriptionType="home"
+        url="/"
+        structuredData={faqSchema}
+      />
       {/* Hero Section */}
       <section className="pt-8 pb-16 grid md:grid-cols-2 gap-12 items-center">
         <div className="space-y-6">

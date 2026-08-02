@@ -32,7 +32,7 @@ export const SEO: React.FC<SEOProps> = ({
   // Base origin for absolute URLs in metadata (using www.revoshelf.com domain name for canonical URLs)
   const canonicalOrigin = 'https://www.revoshelf.com';
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.revoshelf.com';
-  const defaultImage = `${origin}/logo.svg`;
+  const defaultImage = `${canonicalOrigin}/og_banner.png`;
 
   // Compute description using dynamic type utility or manual description / default fallback
   const metaDescription = descriptionType
@@ -79,7 +79,12 @@ export const SEO: React.FC<SEOProps> = ({
     '@type': 'Organization',
     'name': 'RevoShelf',
     'url': 'https://www.revoshelf.com',
-    'logo': 'https://www.revoshelf.com/logo.png'
+    'logo': 'https://www.revoshelf.com/logo.png',
+    'sameAs': [
+      'https://www.instagram.com/revoshelf',
+      'https://twitter.com/revoshelf',
+      'https://www.linkedin.com/company/revoshelf'
+    ]
   };
 
   // Normalize structured data to array and combine with global schemas
@@ -111,6 +116,11 @@ export const SEO: React.FC<SEOProps> = ({
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={metaDescription} />
       <meta name="twitter:image" content={ogImage} />
+      <meta name="twitter:site" content="@revoshelf" />
+
+      {/* OG Image dimensions for WhatsApp/Telegram/Facebook */}
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
 
       {meta.map(({ name, content }) => (
         <meta key={name} name={name} content={content} />

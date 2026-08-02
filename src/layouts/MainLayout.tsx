@@ -73,10 +73,9 @@ export const MainLayout: React.FC = () => {
     }
   }, [user, showToast, setUnreadChatCount]);
 
-  // Show footer only on landing page
-  const hideFooter = location.pathname !== '/';
-
+  // Hide footer only on full-screen pages
   const isMessagesPage = location.pathname.startsWith('/messages');
+  const hideFooter = isMessagesPage;
 
   return (
     <div className={`bg-background ${isMessagesPage
@@ -148,15 +147,22 @@ export const MainLayout: React.FC = () => {
               </div>
             </div>
 
-            {/* Column 2 */}
+            {/* Column 2 — Marketplace + Category links */}
             <div className="flex flex-col gap-3">
               <h4 className="text-xs font-bold text-textDark uppercase tracking-wider">Marketplace</h4>
               <div className="flex flex-col gap-2 text-xs text-textSec">
-                <Link to="/home" className="hover:text-primary hover:underline transition-colors">Browse Books</Link>
+                <Link to="/search" className="hover:text-primary hover:underline transition-colors">Browse All Listings</Link>
                 <Link to="/create-listing" className="hover:text-primary hover:underline transition-colors">Sell a Book</Link>
-                <Link to="/home" className="hover:text-primary hover:underline transition-colors">Categories</Link>
                 <Link to="/how-it-works" className="hover:text-primary hover:underline transition-colors">How It Works</Link>
-                <Link to="/home" className="hover:text-primary hover:underline transition-colors">Recently Added</Link>
+              </div>
+              <h4 className="text-xs font-bold text-textDark uppercase tracking-wider mt-3">Categories</h4>
+              <div className="flex flex-col gap-2 text-xs text-textSec">
+                <Link to="/search?category=books" className="hover:text-primary hover:underline transition-colors">Used Books</Link>
+                <Link to="/search?category=calculators" className="hover:text-primary hover:underline transition-colors">Calculators</Link>
+                <Link to="/search?category=electronics" className="hover:text-primary hover:underline transition-colors">Electronics</Link>
+                <Link to="/search?category=lab-coats" className="hover:text-primary hover:underline transition-colors">Lab Coats</Link>
+                <Link to="/search?category=hostel-essentials" className="hover:text-primary hover:underline transition-colors">Hostel Essentials</Link>
+                <Link to="/search?category=bicycles" className="hover:text-primary hover:underline transition-colors">Bicycles</Link>
               </div>
             </div>
 
