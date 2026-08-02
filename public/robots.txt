@@ -42,4 +42,4 @@ Disallow: /search?maxPrice=
 Disallow: /search?nearMe=
 
 # Sitemap
-Sitemap: https://www.revoshelf.com/sitemap.xml
+Sitemap: https://www.api.revoshelf.com/sitemap.xml
