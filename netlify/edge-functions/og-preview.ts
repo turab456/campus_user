@@ -50,7 +50,7 @@ export default async (request: Request, context: Context) => {
     const description = `₹${listing.price} · ${listing.description || ''}`.substring(0, 150);
     const image = listing.images && listing.images[0]
       ? listing.images[0]
-      : "https://www.revoshelf.com/logo.png";
+      : "https://www.revoshelf.com/og_banner.png";
 
     // Get original index.html
     const response = await context.next();
