@@ -46,9 +46,27 @@ export default async (request: Request, context: Context) => {
     }
 
     const listing = data.listing;
-    const title = `${listing.title} | RevoShelf`;
-    const description = `₹${listing.price} · ${listing.description || ''}`.substring(0, 150);
-    const image = listing.images && listing.images[0]
+
+    // Calculate discount if originalPrice is present and greater than selling price
+    let discountText = "";
+    if (listing.originalPrice && listing.originalPrice > listing.price) {
+      const discount = Math.round(((listing.originalPrice - listing.price) / listing.originalPrice) * 100);
+      if (discount > 0) {
+        discountText = `(${discount}% OFF)`;
+      }
+    }
+
+    // Dynamic title: Item Name - ₹Price (Discount) | RevoShelf
+    const title = `${listing.title} - ₹${listing.price} ${discountText ? discountText + ' ' : ''}| RevoShelf`.replace(/\s+/g, ' ').trim();
+
+    // Dynamic description: Price details + condition + description snippet
+    let descPrefix = `Price: ₹${listing.price}`;
+    if (listing.originalPrice && listing.originalPrice > listing.price) {
+      descPrefix += ` (Original: ₹${listing.originalPrice} · Save ${Math.round(((listing.originalPrice - listing.price) / listing.originalPrice) * 100)}%)`;
+    }
+    const description = `${descPrefix} · Condition: ${listing.condition || 'Good'} · ${listing.description || ''}`.substring(0, 150);
+
+    const image = listing.images && listing.images.length > 0
       ? listing.images[0]
       : "https://www.revoshelf.com/og_banner.png";
 
