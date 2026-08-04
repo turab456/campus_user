@@ -161,7 +161,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
           <div className="flex items-center gap-1 mt-2 text-[9px] text-muted sm:hidden">
             <MapPin className="w-2.5 h-2.5 text-slate-400 flex-shrink-0" />
             <span className="truncate">
-              {book.isNearMe ? 'Near You' : (book.distanceKm !== undefined ? `${book.distanceKm} km` : '')}
+              {book.distanceKm !== undefined ? (book.isNearMe ? `Near You (${book.distanceKm} km)` : `${book.distanceKm} km`) : (book.isNearMe ? 'Near You' : '')}
               {(book.distanceKm !== undefined || book.isNearMe) && (book.pickupLocation || book.college) ? ' · ' : ''}
               {book.pickupLocation ? book.pickupLocation.split(',')[0] : (book.college && book.college !== 'N/A' ? book.college.split(',')[0] : '')}
             </span>
