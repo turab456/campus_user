@@ -63,7 +63,7 @@ export const AppSetupModal: React.FC = () => {
   const needsAddress = user ? (!user.city || !user.pincode) : false;
   const needsNotifications = permission !== 'granted';
   // Mobile requires PWA to be standalone first; desktop fallback to isInstallable
-  const needsPwa = isMobile ? !isStandalone : (isInstallable && !isStandalone && safeGetItem('pwa_installed') !== 'true');
+  const needsPwa = isMobile ? (!isStandalone && safeGetItem('pwa_installed') !== 'true') : (isInstallable && !isStandalone && safeGetItem('pwa_installed') !== 'true');
 
   // Check if we should display the modal
   useEffect(() => {
@@ -162,6 +162,7 @@ export const AppSetupModal: React.FC = () => {
 
   const handleClose = () => {
     sessionStorage.setItem('setup_modal_dismissed', 'true');
+    safeSetItem('pwa_installed', 'true'); // Persist so browser tab stops prompting after user closes/completes
     setIsOpen(false);
   };
 
