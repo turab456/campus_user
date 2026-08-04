@@ -7,7 +7,7 @@ import { Bell, Smartphone, User as UserIcon } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { COLLEGES, DEPARTMENTS, SEMESTERS } from '../constants';
 import { AddressForm } from './AddressForm';
-import { safeGetItem, safeSetItem } from '../utils/storage';
+import { safeGetItem, safeSetItem, safeRemoveItem } from '../utils/storage';
 import type { AddressFormData } from './AddressForm';
 
 export const AppSetupModal: React.FC = () => {
@@ -63,7 +63,15 @@ export const AppSetupModal: React.FC = () => {
   const needsAddress = user ? (!user.city || !user.pincode) : false;
   const needsNotifications = permission !== 'granted';
   // Mobile requires PWA to be standalone first; desktop fallback to isInstallable
-  const needsPwa = isMobile ? (!isStandalone && safeGetItem('pwa_installed') !== 'true') : (isInstallable && !isStandalone && safeGetItem('pwa_installed') !== 'true');
+  const needsPwa = isMobile ? (!isStandalone && !isPwaInstalled) : (isInstallable && !isStandalone && !isPwaInstalled);
+
+  // Reset PWA install status if browser fires the installable prompt again (meaning shortcut was deleted)
+  useEffect(() => {
+    if (isInstallable) {
+      safeRemoveItem('pwa_installed');
+      setIsPwaInstalled(false);
+    }
+  }, [isInstallable]);
 
   // Check if we should display the modal
   useEffect(() => {
@@ -311,7 +319,7 @@ export const AppSetupModal: React.FC = () => {
                 )}
               </div>
             ) : (
-              /* Success state: App is standalone */
+              /* Success state: App is standalone or marked as installed */
               <div className="flex items-center justify-between border border-borderCustom rounded-xl p-4 bg-green-50/50">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 bg-green-100 text-green-700 rounded-xl">
@@ -319,10 +327,26 @@ export const AppSetupModal: React.FC = () => {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-xs font-bold text-green-800">RevoShelf App Installed</span>
-                    <span className="text-[10px] text-green-700">Running in standalone mode</span>
+                    <span className="text-[10px] text-green-700">
+                      {isStandalone ? 'Running in standalone mode' : 'Marked as installed on this device'}
+                    </span>
                   </div>
                 </div>
-                <span className="text-xs font-bold text-green-700">✓ Done</span>
+                {!isStandalone ? (
+                  <button
+                    onClick={() => {
+                      safeRemoveItem('pwa_installed');
+                      setIsPwaInstalled(false);
+                      showToast('Installation status reset. You can now reinstall RevoShelf.', 'info');
+                    }}
+                    className="text-[10px] text-slate-500 hover:text-primary font-bold underline focus:outline-none"
+                    type="button"
+                  >
+                    Reinstall
+                  </button>
+                ) : (
+                  <span className="text-xs font-bold text-green-700">✓ Done</span>
+                )}
               </div>
             )}
 
@@ -341,7 +365,7 @@ export const AppSetupModal: React.FC = () => {
                       <span className="text-[10px] text-muted">Receive alerts on chat messages & orders</span>
                     </div>
                   </div>
-                  
+
                   {needsPwa ? (
                     /* Locked state indicator */
                     <div className="p-1.5 bg-slate-200 text-slate-400 rounded-lg flex items-center justify-center" title="Complete PWA installation first">
