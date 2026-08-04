@@ -120,6 +120,9 @@ export const AppSetupModal: React.FC = () => {
         setIsPwaInstalled(true);
         safeSetItem('pwa_installed', 'true');
         showToast('App added to Home Screen!', 'success');
+      } else {
+        // Safe fallback instructions for Android/Chrome if deferredPrompt is null or prompt fails
+        showToast("Install prompt not ready. Tap Chrome's menu (3 dots) & select 'Add to Home screen' manually.", 'info');
       }
     } catch (err) {
       console.error(err);
