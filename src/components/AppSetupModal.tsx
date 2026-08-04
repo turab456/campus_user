@@ -55,9 +55,15 @@ export const AppSetupModal: React.FC = () => {
     }
   }, [user]);
 
+  const isIOS = typeof navigator !== 'undefined' && 
+    (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+  const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+  const isMobile = isIOS || isAndroid;
+
   const needsAddress = user ? (!user.city || !user.pincode) : false;
   const needsNotifications = permission !== 'granted';
-  const needsPwa = isInstallable && !isStandalone && safeGetItem('pwa_installed') !== 'true';
+  // Mobile requires PWA to be standalone first; desktop fallback to isInstallable
+  const needsPwa = isMobile ? !isStandalone : (isInstallable && !isStandalone && safeGetItem('pwa_installed') !== 'true');
 
   // Check if we should display the modal
   useEffect(() => {
@@ -65,9 +71,6 @@ export const AppSetupModal: React.FC = () => {
       setIsOpen(false);
       return;
     }
-
-    const isMobile = typeof window !== 'undefined' && 
-      (/Mobi|Android|iPhone/i.test(navigator.userAgent) || window.innerWidth < 768);
 
     // Ask everytime on mobile if notifications or PWA are missing
     const forcePrompt = isMobile && (needsNotifications || needsPwa);
@@ -80,7 +83,7 @@ export const AppSetupModal: React.FC = () => {
     if (needsAddress || needsNotifications || needsPwa) {
       setIsOpen(true);
     }
-  }, [user, permission, isInstallable, isStandalone, needsAddress, needsNotifications, needsPwa]);
+  }, [user, permission, isInstallable, isStandalone, needsAddress, needsNotifications, needsPwa, isMobile]);
 
   // Synchronize state when hook permissions update
   useEffect(() => {
@@ -241,69 +244,132 @@ export const AppSetupModal: React.FC = () => {
       ) : (
         <div className="flex flex-col gap-5">
           <p className="text-xs text-muted leading-relaxed">
-            Enhance your RevoShelf experience by configuring push notifications and installing the PWA.
+            Configure RevoShelf on your mobile device to receive real-time push alerts for chat messages and listing updates.
           </p>
 
           <div className="flex flex-col gap-4">
-            {/* Notification Prompt */}
-            {needsNotifications && (
-              <div className="flex items-center justify-between border border-borderCustom rounded-xl p-4 bg-slate-50/50">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
-                    <Bell className="w-5 h-5" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold text-textDark">Push Notifications</span>
-                    <span className="text-[10px] text-muted">Receive alerts on chat & orders</span>
-                  </div>
-                </div>
-                
-                {/* Toggle Switch */}
-                <button
-                  onClick={handleNotificationToggle}
-                  disabled={isNotificationsEnabled}
-                  type="button"
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                    isNotificationsEnabled ? 'bg-success cursor-default' : 'bg-slate-200 hover:bg-slate-300'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      isNotificationsEnabled ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-            )}
-
-            {/* Add to Homescreen Prompt */}
-            {needsPwa && (
-              <div className="flex items-center justify-between border border-borderCustom rounded-xl p-4 bg-slate-50/50">
+            {/* Step 1: Install PWA (Mobile-first app wrapper) */}
+            {needsPwa ? (
+              <div className="border border-borderCustom rounded-xl p-4 bg-slate-50/50 flex flex-col gap-3">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
                     <Smartphone className="w-5 h-5" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-xs font-bold text-textDark">Add to Homescreen</span>
-                    <span className="text-[10px] text-muted">Install PWA for instant access</span>
+                    <span className="text-xs font-bold text-textDark">Step 1: Install RevoShelf App</span>
+                    <span className="text-[10px] text-muted">Add RevoShelf to your Home Screen to unlock push alerts</span>
                   </div>
                 </div>
 
-                {/* Toggle Switch */}
-                <button
-                  onClick={handlePwaInstallToggle}
-                  disabled={isPwaInstalled}
-                  type="button"
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                    isPwaInstalled ? 'bg-success cursor-default' : 'bg-slate-200 hover:bg-slate-300'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      isPwaInstalled ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
+                {isIOS ? (
+                  /* Custom iOS Safari walkthrough */
+                  <div className="bg-white border border-borderCustom rounded-lg p-3 mt-1 flex flex-col gap-2.5 text-[11px] text-textDark">
+                    <p className="font-bold text-primary">Safari Installation Steps:</p>
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary font-extrabold text-[10px] flex-shrink-0">1</span>
+                      <span>Tap the <strong>Share</strong> button at the bottom of Safari:</span>
+                      <span className="inline-block p-1 bg-slate-100 rounded border border-slate-200 flex-shrink-0">
+                        <svg className="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                          <polyline points="16 6 12 2 8 6" />
+                          <line x1="12" y1="2" x2="12" y2="15" />
+                        </svg>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary font-extrabold text-[10px] flex-shrink-0">2</span>
+                      <span>Scroll down and select <strong>Add to Home Screen</strong>:</span>
+                      <span className="inline-block p-1 bg-slate-100 rounded border border-slate-200 flex-shrink-0">
+                        <svg className="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                          <line x1="12" y1="8" x2="12" y2="16" />
+                          <line x1="8" y1="12" x2="16" y2="12" />
+                        </svg>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary font-extrabold text-[10px] flex-shrink-0">3</span>
+                      <span>Open the new <strong>RevoShelf</strong> icon on your Home Screen!</span>
+                    </div>
+                  </div>
+                ) : (
+                  /* Standard / Android prompt */
+                  <div className="flex justify-end mt-1">
+                    <button
+                      onClick={handlePwaInstallToggle}
+                      disabled={isPwaInstalled}
+                      type="button"
+                      className="bg-primary hover:bg-primary/90 text-white text-xs font-bold py-1.5 px-4 rounded-lg focus:outline-none transition-colors"
+                    >
+                      Install App
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Success state: App is standalone */
+              <div className="flex items-center justify-between border border-borderCustom rounded-xl p-4 bg-green-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-green-100 text-green-700 rounded-xl">
+                    <Smartphone className="w-5 h-5" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-green-800">RevoShelf App Installed</span>
+                    <span className="text-[10px] text-green-700">Running in standalone mode</span>
+                  </div>
+                </div>
+                <span className="text-xs font-bold text-green-700">✓ Done</span>
+              </div>
+            )}
+
+            {/* Step 2: Push Notifications */}
+            {needsNotifications && (
+              <div className={`border border-borderCustom rounded-xl p-4 flex flex-col gap-2 ${needsPwa ? 'opacity-60 bg-slate-100/50' : 'bg-slate-50/50'}`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2.5 rounded-xl ${needsPwa ? 'bg-slate-200 text-slate-400' : 'bg-primary/10 text-primary'}`}>
+                      <Bell className="w-5 h-5" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-textDark">
+                        {needsPwa ? 'Step 2: Push Notifications' : 'Enable Push Notifications'}
+                      </span>
+                      <span className="text-[10px] text-muted">Receive alerts on chat messages & orders</span>
+                    </div>
+                  </div>
+                  
+                  {needsPwa ? (
+                    /* Locked state indicator */
+                    <div className="p-1.5 bg-slate-200 text-slate-400 rounded-lg flex items-center justify-center" title="Complete PWA installation first">
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                      </svg>
+                    </div>
+                  ) : (
+                    /* Unlocked Toggle Switch */
+                    <button
+                      onClick={handleNotificationToggle}
+                      disabled={isNotificationsEnabled}
+                      type="button"
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                        isNotificationsEnabled ? 'bg-success cursor-default' : 'bg-slate-200 hover:bg-slate-300'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          isNotificationsEnabled ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  )}
+                </div>
+
+                {needsPwa && (
+                  <p className="text-[10px] text-slate-500 italic mt-1 leading-snug">
+                    🔒 Push notifications require RevoShelf to be opened as an installed App. Please complete Step 1 first.
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -312,7 +378,7 @@ export const AppSetupModal: React.FC = () => {
             onClick={handleClose}
             className="w-full bg-primary hover:bg-primary/95 text-white font-bold py-2.5 rounded-xl text-xs transition-colors shadow-subtle focus:outline-none"
           >
-            Done
+            {needsPwa ? 'Close Setup' : 'Done'}
           </button>
         </div>
       )}
