@@ -157,13 +157,13 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
         </div>
 
         {/* Mobile-only location & distance line (compact & short) */}
-        {(book.isNearMe || book.distanceKm !== undefined || (book.college && book.college !== 'N/A')) && (
+        {(book.isNearMe || book.distanceKm !== undefined || book.pickupLocation || (book.college && book.college !== 'N/A')) && (
           <div className="flex items-center gap-1 mt-2 text-[9px] text-muted sm:hidden">
             <MapPin className="w-2.5 h-2.5 text-slate-400 flex-shrink-0" />
             <span className="truncate">
               {book.isNearMe ? 'Near You' : (book.distanceKm !== undefined ? `${book.distanceKm} km` : '')}
-              {(book.distanceKm !== undefined || book.isNearMe) && (book.college && book.college !== 'N/A') ? ' · ' : ''}
-              {book.college && book.college !== 'N/A' ? book.college.split(',')[0] : ''}
+              {(book.distanceKm !== undefined || book.isNearMe) && (book.pickupLocation || book.college) ? ' · ' : ''}
+              {book.pickupLocation ? book.pickupLocation.split(',')[0] : (book.college && book.college !== 'N/A' ? book.college.split(',')[0] : '')}
             </span>
           </div>
         )}
@@ -183,11 +183,11 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
                 </span>
               </div>
             )}
-            {book.college && book.college !== 'N/A' && (
+            {(book.pickupLocation || (book.college && book.college !== 'N/A')) && (
               <div className="flex items-center gap-1.5 mt-0.5">
                 <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
-                <span className="truncate" title={book.college}>
-                  {book.college.split(',')[0]}
+                <span className="truncate" title={book.pickupLocation || book.college}>
+                  {book.pickupLocation ? book.pickupLocation.split(',')[0] : (book.college ? book.college.split(',')[0] : '')}
                 </span>
               </div>
             )}
