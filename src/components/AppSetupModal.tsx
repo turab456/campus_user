@@ -66,8 +66,13 @@ export const AppSetupModal: React.FC = () => {
       return;
     }
 
+    const isMobile = typeof window !== 'undefined' && 
+      (/Mobi|Android|iPhone/i.test(navigator.userAgent) || window.innerWidth < 768);
+
+    // Ask everytime on mobile if notifications or PWA are missing
+    const forcePrompt = isMobile && (needsNotifications || needsPwa);
     const hasDismissed = sessionStorage.getItem('setup_modal_dismissed') === 'true';
-    if (hasDismissed) {
+    if (hasDismissed && !forcePrompt) {
       return;
     }
 
