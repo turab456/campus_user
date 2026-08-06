@@ -603,7 +603,7 @@ export const MessagesPage: React.FC = () => {
 
               {activeChat.pickupCoordinates?.lat && (
                 <button
-                  onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${activeChat.pickupCoordinates?.lat},${activeChat.pickupCoordinates?.lng}`, '_blank')}
+                  onClick={() => window.open(`https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=;${activeChat.pickupCoordinates?.lat}%2C${activeChat.pickupCoordinates?.lng}`, '_blank')}
                   className="flex-shrink-0 bg-primary/5 hover:bg-primary/10 text-primary text-[10px] font-bold px-3 py-1.5 rounded-lg border border-primary/10 transition-colors focus:outline-none flex items-center gap-1"
                 >
                   <MapPin className="w-3.5 h-3.5" />

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronRight, ChevronLeft, Plus, CheckCircle, Info, Trash2, MapPin } from 'lucide-react';
+import { LocationSearchInput } from '../components/LocationSearchInput';
+import { LocationPickerMap } from '../components/LocationPickerMap';
+import { reverseGeocodeNominatim, PhotonSuggestion } from '../services/osmService';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { backendApi as api } from '../services/backendApi';
@@ -65,52 +68,6 @@ const CATEGORY_FIELDS_CONFIG: Record<string, CustomField[]> = {
   ]
 };
 
-declare global {
-  interface Window {
-    google: any;
-    initGoogleMapsCallback: () => void;
-    googleMapsCallbacks?: (() => void)[];
-    googleMapsLoading?: boolean;
-  }
-}
-
-function loadGoogleMapsApi(apiKey: string, callback: () => void) {
-  if (window.google && window.google.maps && window.google.maps.places) {
-    callback();
-    return;
-  }
-
-  if (!window.googleMapsCallbacks) {
-    window.googleMapsCallbacks = [];
-  }
-  window.googleMapsCallbacks.push(callback);
-
-  if (window.googleMapsLoading) return;
-  window.googleMapsLoading = true;
-
-  window.initGoogleMapsCallback = () => {
-    window.googleMapsLoading = false;
-    if (window.googleMapsCallbacks) {
-      window.googleMapsCallbacks.forEach((cb) => cb());
-      window.googleMapsCallbacks = [];
-    }
-  };
-
-  const script = document.createElement('script');
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initGoogleMapsCallback&loading=async`;
-  script.async = true;
-  script.defer = true;
-  script.onerror = () => {
-    console.warn('[EditListingPage] Google Maps failed to load.');
-    window.googleMapsLoading = false;
-    if (window.googleMapsCallbacks) {
-      window.googleMapsCallbacks.forEach((cb) => cb());
-      window.googleMapsCallbacks = [];
-    }
-  };
-  document.head.appendChild(script);
-}
-
 export const EditListingPage: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
@@ -164,41 +121,21 @@ export const EditListingPage: React.FC = () => {
     fetchListing();
   }, [id, showToast]);
 
-  const autocompleteInputRef = React.useRef<HTMLInputElement>(null);
+  const handleSelectLocation = (location: PhotonSuggestion) => {
+    setFormData(prev => ({
+      ...prev,
+      pickupLocation: location.fullAddress || location.name,
+      pickupCoordinates: location.coordinates,
+    }));
+  };
 
-  React.useEffect(() => {
-    if (step !== 4) return;
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-    if (!apiKey) return;
-
-    const initAutocomplete = () => {
-      if (!autocompleteInputRef.current || !window.google) return;
-      const autocomplete = new window.google.maps.places.Autocomplete(autocompleteInputRef.current, {
-        types: ['geocode', 'establishment']
-      });
-
-      autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace();
-        if (!place.geometry) return;
-
-        setFormData(prev => ({
-          ...prev,
-          pickupLocation: place.formatted_address || place.name || '',
-          pickupCoordinates: {
-            lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng()
-          }
-        }));
-      });
-    };
-
-    loadGoogleMapsApi(apiKey, initAutocomplete);
-  }, [step]);
-
-  const handleLocationKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-    }
+  const handleMapPinSelect = async (lat: number, lng: number) => {
+    const geocoded = await reverseGeocodeNominatim(lat, lng);
+    setFormData(prev => ({
+      ...prev,
+      pickupLocation: geocoded?.fullAddress || geocoded?.addressLine || prev.pickupLocation,
+      pickupCoordinates: { lat, lng },
+    }));
   };
 
   // Pre-fill education level from user profile if available, when category becomes books
@@ -824,20 +761,28 @@ export const EditListingPage: React.FC = () => {
 
           <div className="flex flex-col gap-1">
             <label className="text-xs font-bold text-textDark uppercase tracking-wider">Pickup / Meeting Location *</label>
-            <div className="relative flex items-center">
-              <MapPin className="w-4 h-4 text-slate-400 absolute left-3" />
-              <input
-                ref={autocompleteInputRef}
-                type="text"
-                placeholder="Search campus, landmark, cafe, or station..."
-                value={formData.pickupLocation}
-                onChange={(e) => setFormData(prev => ({ ...prev, pickupLocation: e.target.value }))}
-                onKeyDown={handleLocationKeyDown}
-                className="w-full bg-[#F5F3EF] border border-borderCustom rounded-[10px] py-2.5 pl-9 pr-3 text-xs text-textDark focus:bg-white focus:border-primary focus:outline-none"
-              />
-            </div>
+            <LocationSearchInput
+              value={formData.pickupLocation}
+              onChange={(val) => setFormData(prev => ({ ...prev, pickupLocation: val }))}
+              onSelectLocation={handleSelectLocation}
+              placeholder="Search campus, landmark, cafe, or station..."
+            />
             {errors.pickupLocation && <p className="text-[10px] text-danger font-semibold mt-0.5">{errors.pickupLocation}</p>}
           </div>
+
+          {formData.pickupCoordinates && (
+            <div className="flex flex-col gap-1.5 mt-1">
+              <span className="text-[11px] font-bold text-textDark">
+                Confirm / Adjust Pickup Pin on OpenStreetMap:
+              </span>
+              <LocationPickerMap
+                center={formData.pickupCoordinates}
+                draggable={true}
+                onLocationSelect={handleMapPinSelect}
+                className="h-48 w-full rounded-xl border border-borderCustom"
+              />
+            </div>
+          )}
 
           <div className="bg-[#F5F3EF] border border-borderCustom p-3.5 rounded-xl flex gap-2.5 mt-2">
             <Info className="w-5 h-5 text-primary flex-shrink-0" />

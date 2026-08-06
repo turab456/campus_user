@@ -1,14 +1,13 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { MapPin, Loader2, Navigation, ChevronDown } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { MapPin, Loader2, Navigation, ChevronDown, Map as MapIcon } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
-
-// ── Global Google Maps types ──────────────────────────────────────────────
-declare global {
-  interface Window {
-    google: any;
-    initGoogleMapsCallback: () => void;
-  }
-}
+import {
+  getCurrentCoordinates,
+  reverseGeocodeNominatim,
+  PhotonSuggestion,
+} from '../services/osmService';
+import { LocationSearchInput } from './LocationSearchInput';
+import { LocationPickerMap } from './LocationPickerMap';
 
 // ── Exported types ────────────────────────────────────────────────────────
 export interface AddressFormData {
@@ -30,52 +29,6 @@ interface AddressFormProps {
 interface CountryOption {
   name: string;
   cca2: string;
-}
-
-declare global {
-  interface Window {
-    google: any;
-    initGoogleMapsCallback: () => void;
-    googleMapsCallbacks?: (() => void)[];
-    googleMapsLoading?: boolean;
-  }
-}
-
-function loadGoogleMapsApi(apiKey: string, callback: () => void) {
-  if (window.google && window.google.maps && window.google.maps.places) {
-    callback();
-    return;
-  }
-
-  if (!window.googleMapsCallbacks) {
-    window.googleMapsCallbacks = [];
-  }
-  window.googleMapsCallbacks.push(callback);
-
-  if (window.googleMapsLoading) return;
-  window.googleMapsLoading = true;
-
-  window.initGoogleMapsCallback = () => {
-    window.googleMapsLoading = false;
-    if (window.googleMapsCallbacks) {
-      window.googleMapsCallbacks.forEach((cb) => cb());
-      window.googleMapsCallbacks = [];
-    }
-  };
-
-  const script = document.createElement('script');
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initGoogleMapsCallback&loading=async`;
-  script.async = true;
-  script.defer = true;
-  script.onerror = () => {
-    console.warn('[AddressForm] Google Maps failed to load.');
-    window.googleMapsLoading = false;
-    if (window.googleMapsCallbacks) {
-      window.googleMapsCallbacks.forEach((cb) => cb());
-      window.googleMapsCallbacks = [];
-    }
-  };
-  document.head.appendChild(script);
 }
 
 // ── Country list (REST Countries API) ────────────────────────────────────
@@ -144,70 +97,14 @@ export const AddressForm: React.FC<AddressFormProps> = ({
   compact = false,
 }) => {
   const { showToast } = useToast();
-  const autocompleteRef = useRef<any>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const [mapsReady, setMapsReady] = useState(!!(window.google && window.google.maps && window.google.maps.places));
   const [isFetching, setIsFetching] = useState(false);
+  const [showMap, setShowMap] = useState(false);
 
   const [countries, setCountries] = useState<CountryOption[]>([]);
   const [countriesLoading, setCountriesLoading] = useState(true);
 
   const [states, setStates] = useState<string[]>([]);
   const [statesLoading, setStatesLoading] = useState(false);
-
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-  const hasValidKey = Boolean(apiKey && apiKey !== 'YOUR_GOOGLE_MAPS_API_KEY_HERE' && apiKey !== '');
-
-  // Load Google Maps API
-  useEffect(() => {
-    if (!hasValidKey) return;
-    loadGoogleMapsApi(apiKey, () => setMapsReady(true));
-  }, [apiKey, hasValidKey]);
-
-  // Attach Places Autocomplete once Maps is ready
-  useEffect(() => {
-    if (!mapsReady || !window.google?.maps?.places || !inputRef.current || autocompleteRef.current) return;
-
-    const ac = new window.google.maps.places.Autocomplete(inputRef.current, {
-      types: ['address'],
-      fields: ['address_components', 'formatted_address', 'geometry'],
-    });
-    autocompleteRef.current = ac;
-
-    ac.addListener('place_changed', () => {
-      const place = ac.getPlace();
-      if (!place.address_components) return;
-
-      const get = (type: string) =>
-        place.address_components.find((c: any) => c.types.includes(type));
-
-      const cca2: string = get('country')?.short_name || '';
-      const countryLong: string = get('country')?.long_name || value.country;
-      const matched = cachedCountries?.find((c) => c.cca2 === cca2);
-
-      onChange({
-        addressLine:
-          [get('street_number')?.long_name, get('route')?.long_name]
-            .filter(Boolean)
-            .join(' ') ||
-          place.formatted_address?.split(',')[0] ||
-          '',
-        city:
-          get('locality')?.long_name || get('postal_town')?.long_name || '',
-        state: get('administrative_area_level_1')?.long_name || '',
-        pincode: get('postal_code')?.long_name || '',
-        country: matched?.name || countryLong,
-        countryCode: cca2,
-        coordinates: place.geometry?.location
-          ? {
-            lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng(),
-          }
-          : null,
-      });
-    });
-  }, [mapsReady, onChange, value.country]);
 
   // Fetch country list on mount
   useEffect(() => {
@@ -244,105 +141,88 @@ export const AddressForm: React.FC<AddressFormProps> = ({
     onChange({ ...value, country: name, countryCode: found?.cca2 || '', state: '' });
   };
 
-  // Fetch Current Location
-  const handleFetchLocation = useCallback(() => {
-    if (!navigator.geolocation) {
-      showToast('Geolocation is not supported by your browser.', 'warning');
-      return;
-    }
+  // Fetch Current Location using Browser Geolocation + OpenStreetMap Nominatim Reverse Geocoding
+  const handleFetchLocation = useCallback(async () => {
     setIsFetching(true);
+    try {
+      const coords = await getCurrentCoordinates();
+      const geocoded = await reverseGeocodeNominatim(coords.lat, coords.lng);
 
-    navigator.geolocation.getCurrentPosition(
-      async ({ coords: { latitude: lat, longitude: lng } }) => {
-        // Try Google Geocoder first
-        const tryGoogle = async (): Promise<Partial<AddressFormData> | null> => {
-          if (!hasValidKey || !window.google?.maps) return null;
-          const geocoder = new window.google.maps.Geocoder();
-          return new Promise((resolve) => {
-            geocoder.geocode({ location: { lat, lng } }, (results: any, status: string) => {
-              if (status !== 'OK' || !results?.[0]) { resolve(null); return; }
-              const comps = results[0].address_components;
-              const get = (type: string) => comps.find((c: any) => c.types.includes(type));
-              const cca2 = get('country')?.short_name || '';
-              const countryLong = get('country')?.long_name || '';
-              const matched = cachedCountries?.find((c) => c.cca2 === cca2);
-              resolve({
-                addressLine:
-                  [get('street_number')?.long_name, get('route')?.long_name]
-                    .filter(Boolean).join(' ') ||
-                  results[0].formatted_address?.split(',')[0] || '',
-                city: get('locality')?.long_name || get('postal_town')?.long_name || '',
-                state: get('administrative_area_level_1')?.long_name || '',
-                pincode: get('postal_code')?.long_name || '',
-                country: matched?.name || countryLong,
-                countryCode: cca2,
-                coordinates: { lat, lng },
-              });
-            });
-          });
-        };
+      if (geocoded) {
+        const matchedCountry = countries.find(
+          (c) => c.name.toLowerCase() === geocoded.country.toLowerCase() || c.cca2 === geocoded.countryCode
+        );
 
-        // Fallback: Nominatim (OpenStreetMap)
-        const tryNominatim = async (): Promise<Partial<AddressFormData> | null> => {
-          try {
-            const r = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
-              { headers: { 'User-Agent': 'CampusMarketplace/1.0' } }
-            );
-            if (!r.ok) return null;
-            const data = await r.json();
-            if (!data?.address) return null;
-            const a = data.address;
-            const countryName: string = a.country || '';
-            const matched = cachedCountries?.find(
-              (c) => c.name.toLowerCase() === countryName.toLowerCase()
-            );
-            return {
-              addressLine:
-                [a.house_number, a.road || a.suburb || ''].filter(Boolean).join(', ') ||
-                data.display_name?.split(',')[0] || '',
-              city: a.city || a.town || a.village || a.county || '',
-              state: a.state || '',
-              pincode: a.postcode || '',
-              country: matched?.name || countryName,
-              countryCode: matched?.cca2 || '',
-              coordinates: { lat, lng },
-            };
-          } catch {
-            return null;
-          }
-        };
+        onChange({
+          ...value,
+          addressLine: geocoded.addressLine || value.addressLine,
+          city: geocoded.city || value.city,
+          state: geocoded.state || value.state,
+          pincode: geocoded.pincode || value.pincode,
+          country: matchedCountry?.name || geocoded.country || value.country,
+          countryCode: matchedCountry?.cca2 || geocoded.countryCode || value.countryCode,
+          coordinates: { lat: coords.lat, lng: coords.lng },
+        });
+        showToast('Location and address detected via OpenStreetMap!', 'success');
+      } else {
+        onChange({ ...value, coordinates: { lat: coords.lat, lng: coords.lng } });
+        showToast('Coordinates captured — please fill in remaining address fields.', 'info');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Could not get location.', 'danger');
+    } finally {
+      setIsFetching(false);
+    }
+  }, [countries, onChange, showToast, value]);
 
-        try {
-          const result = (await tryGoogle()) || (await tryNominatim());
-          if (result) {
-            onChange({ ...value, ...result, coordinates: { lat, lng } });
-            showToast('Location fetched successfully!', 'success');
-          } else {
-            onChange({ ...value, coordinates: { lat, lng } });
-            showToast('Coordinates captured — please fill in address fields.', 'info');
-          }
-        } catch {
-          onChange({ ...value, coordinates: { lat, lng } });
-          showToast('Could not fetch full address. Please enter manually.', 'warning');
-        } finally {
-          setIsFetching(false);
-        }
-      },
-      (err) => {
-        console.error(err);
-        showToast('Could not get your location. Check browser permissions.', 'danger');
-        setIsFetching(false);
-      },
-      { enableHighAccuracy: true, timeout: 12000 }
+  // Handle selecting a location suggestion from Photon Autocomplete
+  const handleSelectPhotonSuggestion = (suggestion: PhotonSuggestion) => {
+    const matchedCountry = countries.find(
+      (c) => (suggestion.country && c.name.toLowerCase() === suggestion.country.toLowerCase())
     );
-  }, [hasValidKey, onChange, showToast, value]);
+
+    onChange({
+      ...value,
+      addressLine: suggestion.street || suggestion.name || suggestion.fullAddress,
+      city: suggestion.city || value.city,
+      state: suggestion.state || value.state,
+      pincode: suggestion.postcode || value.pincode,
+      country: matchedCountry?.name || suggestion.country || value.country,
+      countryCode: matchedCountry?.cca2 || value.countryCode,
+      coordinates: suggestion.coordinates,
+    });
+    showToast('Location selected!', 'success');
+  };
+
+  // Handle dragging pin marker on Leaflet map
+  const handleMapLocationSelect = async (lat: number, lng: number) => {
+    const geocoded = await reverseGeocodeNominatim(lat, lng);
+    if (geocoded) {
+      const matchedCountry = countries.find(
+        (c) => c.name.toLowerCase() === geocoded.country.toLowerCase() || c.cca2 === geocoded.countryCode
+      );
+
+      onChange({
+        ...value,
+        addressLine: geocoded.addressLine || value.addressLine,
+        city: geocoded.city || value.city,
+        state: geocoded.state || value.state,
+        pincode: geocoded.pincode || value.pincode,
+        country: matchedCountry?.name || geocoded.country || value.country,
+        countryCode: matchedCountry?.cca2 || geocoded.countryCode || value.countryCode,
+        coordinates: { lat, lng },
+      });
+      showToast('Pin position updated!', 'info');
+    } else {
+      onChange({ ...value, coordinates: { lat, lng } });
+    }
+  };
 
   const gap = compact ? 'gap-2' : 'gap-3';
 
   return (
     <div className={`flex flex-col ${gap}`}>
-      {/* ── Use Current Location ─────────────────────────── */}
+      {/* ── Use Current Location Button ─────────────────────────── */}
       <button
         type="button"
         onClick={handleFetchLocation}
@@ -394,28 +274,20 @@ export const AddressForm: React.FC<AddressFormProps> = ({
         </div>
       </div>
 
-      {/* ── Address Line (Google Places Autocomplete) ────── */}
+      {/* ── Address Line (Photon OpenStreetMap Autocomplete) ────── */}
       <div className="flex flex-col gap-1">
         <label className={labelCls}>
           Address Line
-          {hasValidKey && mapsReady && (
-            <span className="ml-1 text-[9px] font-normal text-primary/80 normal-case">
-              — start typing for suggestions
-            </span>
-          )}
+          <span className="ml-1 text-[9px] font-normal text-primary/80 normal-case">
+            — start typing for OpenStreetMap suggestions
+          </span>
         </label>
-        <div className="relative">
-          <MapPin className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="Apartment, Street, Area…"
-            value={value.addressLine}
-            onChange={(e) => onChange({ ...value, addressLine: e.target.value })}
-            className={`${inputCls} pl-8`}
-            autoComplete="off"
-          />
-        </div>
+        <LocationSearchInput
+          value={value.addressLine}
+          onChange={(val) => onChange({ ...value, addressLine: val })}
+          onSelectLocation={handleSelectPhotonSuggestion}
+          placeholder="Apartment, Street, Area…"
+        />
       </div>
 
       {/* ── City ─────────────────────────────────────────── */}
@@ -483,11 +355,39 @@ export const AddressForm: React.FC<AddressFormProps> = ({
         </div>
       </div>
 
-      {/* ── GPS indicator ─────────────────────────────────── */}
+      {/* ── GPS Captured Indicator & Leaflet Interactive Map ───── */}
       {value.coordinates && (
-        <div className="flex items-center gap-1.5 text-[10px] text-green-600 bg-green-50 border border-green-200 rounded-md px-2.5 py-1.5">
-          <MapPin className="w-3 h-3 flex-shrink-0" />
-          <span>GPS captured — distances to sellers will be accurate.</span>
+        <div className="flex flex-col gap-2 mt-1">
+          <div className="flex items-center justify-between text-[10px] text-green-700 bg-green-50 border border-green-200 rounded-md px-2.5 py-1.5">
+            <div className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
+              <span>
+                GPS captured ({value.coordinates.lat.toFixed(4)}, {value.coordinates.lng.toFixed(4)})
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowMap(!showMap)}
+              className="flex items-center gap-1 font-bold text-primary hover:underline focus:outline-none"
+            >
+              <MapIcon className="w-3 h-3" />
+              {showMap ? 'Hide Map' : 'Adjust Pin on Map'}
+            </button>
+          </div>
+
+          {showMap && (
+            <div className="flex flex-col gap-1">
+              <span className="text-[9px] text-muted font-medium">
+                Drag the marker or click anywhere on the OpenStreetMap to adjust your location:
+              </span>
+              <LocationPickerMap
+                center={value.coordinates}
+                draggable={true}
+                onLocationSelect={handleMapLocationSelect}
+                className="h-56 w-full rounded-lg border border-borderCustom"
+              />
+            </div>
+          )}
         </div>
       )}
     </div>
