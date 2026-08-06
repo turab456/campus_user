@@ -10,7 +10,6 @@ import { BookCard } from '../components/BookCard';
 import { ListingDetailSkeleton } from '../components/SkeletonLoader';
 import { SEO } from '../components/SEO';
 import { slugify } from '../utils/seoUtils';
-import { LocationPickerMap } from '../components/LocationPickerMap';
 
 const METADATA_LABELS: Record<string, string> = {
   author: 'Author / Created By',
@@ -447,22 +446,12 @@ export const ListingDetailsPage: React.FC = () => {
                   <span className="font-semibold text-textDark block">Pickup Spot</span>
                   <span className="text-[11px] block mt-0.5 leading-tight">{book.pickupLocation}</span>
                   {book.pickupCoordinates && book.pickupCoordinates.lat && (
-                    <>
-                      <button
-                        onClick={() => window.open(`https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=;${book.pickupCoordinates?.lat}%2C${book.pickupCoordinates?.lng}`, '_blank')}
-                        className="text-[10px] text-primary hover:underline font-bold mt-1.5 block text-left focus:outline-none"
-                      >
-                        Get Directions on OpenStreetMap ↗
-                      </button>
-                      <div className="mt-2 rounded-lg overflow-hidden border border-borderCustom">
-                        <LocationPickerMap
-                          center={book.pickupCoordinates}
-                          zoom={14}
-                          draggable={false}
-                          className="h-36 w-full"
-                        />
-                      </div>
-                    </>
+                    <button
+                      onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${book.pickupCoordinates?.lat},${book.pickupCoordinates?.lng}`, '_blank')}
+                      className="text-[10px] text-primary hover:underline font-bold mt-1.5 block text-left focus:outline-none"
+                    >
+                      Get Directions ↗
+                    </button>
                   )}
                   {book.distanceKm !== undefined && (
                     <span className="text-[10px] text-muted block mt-1.5 leading-none">

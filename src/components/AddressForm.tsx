@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { MapPin, Loader2, Navigation, ChevronDown, Map as MapIcon } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { MapPin, Loader2, ChevronDown, Map as MapIcon } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import {
-  getCurrentCoordinates,
   reverseGeocodeNominatim,
   PhotonSuggestion,
 } from '../services/osmService';
@@ -97,7 +96,6 @@ export const AddressForm: React.FC<AddressFormProps> = ({
   compact = false,
 }) => {
   const { showToast } = useToast();
-  const [isFetching, setIsFetching] = useState(false);
   const [showMap, setShowMap] = useState(false);
 
   const [countries, setCountries] = useState<CountryOption[]>([]);
@@ -141,39 +139,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
     onChange({ ...value, country: name, countryCode: found?.cca2 || '', state: '' });
   };
 
-  // Fetch Current Location using Browser Geolocation + OpenStreetMap Nominatim Reverse Geocoding
-  const handleFetchLocation = useCallback(async () => {
-    setIsFetching(true);
-    try {
-      const coords = await getCurrentCoordinates();
-      const geocoded = await reverseGeocodeNominatim(coords.lat, coords.lng);
 
-      if (geocoded) {
-        const matchedCountry = countries.find(
-          (c) => c.name.toLowerCase() === geocoded.country.toLowerCase() || c.cca2 === geocoded.countryCode
-        );
-
-        onChange({
-          ...value,
-          addressLine: geocoded.addressLine || value.addressLine,
-          city: geocoded.city || value.city,
-          state: geocoded.state || value.state,
-          pincode: geocoded.pincode || value.pincode,
-          country: matchedCountry?.name || geocoded.country || value.country,
-          countryCode: matchedCountry?.cca2 || geocoded.countryCode || value.countryCode,
-          coordinates: { lat: coords.lat, lng: coords.lng },
-        });
-        showToast('Location and address detected via OpenStreetMap!', 'success');
-      } else {
-        onChange({ ...value, coordinates: { lat: coords.lat, lng: coords.lng } });
-        showToast('Coordinates captured — please fill in remaining address fields.', 'info');
-      }
-    } catch (err: any) {
-      showToast(err.message || 'Could not get location.', 'danger');
-    } finally {
-      setIsFetching(false);
-    }
-  }, [countries, onChange, showToast, value]);
 
   // Handle selecting a location suggestion from Photon Autocomplete
   const handleSelectPhotonSuggestion = (suggestion: PhotonSuggestion) => {
@@ -222,26 +188,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
 
   return (
     <div className={`flex flex-col ${gap}`}>
-      {/* ── Use Current Location Button ─────────────────────────── */}
-      <button
-        type="button"
-        onClick={handleFetchLocation}
-        disabled={isFetching}
-        className="flex items-center justify-center gap-2 w-full border border-primary/50 hover:border-primary bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold py-2.5 rounded-lg transition-colors focus:outline-none disabled:opacity-60"
-      >
-        {isFetching ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-        ) : (
-          <Navigation className="w-3.5 h-3.5" />
-        )}
-        {isFetching ? 'Fetching location...' : 'Use Current Location'}
-      </button>
 
-      <div className="flex items-center gap-2 text-[10px] text-muted">
-        <div className="flex-1 h-px bg-borderCustom" />
-        <span>or enter manually</span>
-        <div className="flex-1 h-px bg-borderCustom" />
-      </div>
 
       {/* ── Country Dropdown ─────────────────────────────── */}
       <div className="flex flex-col gap-1">
@@ -279,7 +226,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
         <label className={labelCls}>
           Address Line
           <span className="ml-1 text-[9px] font-normal text-primary/80 normal-case">
-            — start typing for OpenStreetMap suggestions
+            — start typing for suggestions
           </span>
         </label>
         <LocationSearchInput
