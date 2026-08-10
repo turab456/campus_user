@@ -73,22 +73,10 @@ export const MainLayout: React.FC = () => {
     }
   }, [user, showToast, setUnreadChatCount]);
 
-  // Hide footer inside authenticated app dashboards to maintain a clean app-like UX, 
-  // but keep it active on public indexable pages for crawler accessibility and SEO.
+  // Hide footer for authenticated users — they use the app-like bottom nav instead.
+  // Keep footer visible for public/unauthenticated visitors for SEO and discoverability.
   const isMessagesPage = location.pathname.startsWith('/messages');
-  const appPathsToHideFooter = [
-    '/home',
-    '/create-listing',
-    '/settings',
-    '/my-listings',
-    '/wishlist',
-    '/profile',
-    '/report-issue'
-  ];
-  const hideFooter = 
-    isMessagesPage || 
-    appPathsToHideFooter.includes(location.pathname) || 
-    location.pathname.startsWith('/edit-listing/');
+  const hideFooter = !!user || isMessagesPage;
 
   return (
     <div className={`bg-background ${isMessagesPage

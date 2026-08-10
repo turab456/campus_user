@@ -189,11 +189,22 @@ export const ProfilePage: React.FC = () => {
       <SEO title={pageTitle} descriptionType="profile" descriptionDetails={isOwnProfile ? 'my account' : user.name} />
       {/* Profile Header Card */}
       <section className="bg-white border border-borderCustom rounded-2xl p-5 md:p-8 shadow-subtle flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
-        <img
-          src={user.avatar}
-          alt={user.name}
-          className="w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-primary/20 object-cover"
-        />
+        <div className="relative flex-shrink-0">
+          <img
+            src={user.avatar}
+            alt={user.name}
+            className="w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-primary/20 object-cover"
+          />
+          {user.isVerified && (
+            <span
+              title="Verified by RevoShelf"
+              aria-label="Verified by RevoShelf"
+              className="absolute bottom-0.5 right-0.5 bg-white rounded-full p-0.5 shadow-md"
+            >
+              <BadgeCheck className="w-5 h-5 text-primary" />
+            </span>
+          )}
+        </div>
         
         <div className="flex-1 flex flex-col gap-3 min-w-0 w-full">
           <div>
@@ -201,12 +212,6 @@ export const ProfilePage: React.FC = () => {
               <h1 className="text-xl md:text-2xl font-extrabold text-textDark tracking-tight leading-tight truncate">
                 {user.name}
               </h1>
-              {user.isVerified && (
-                <BadgeCheck
-                  className="w-5 h-5 text-primary flex-shrink-0 self-center"
-                  title="Verified by RevoShelf"
-                />
-              )}
               {isOwnProfile && (
                 <span className="inline-block self-center bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full border border-primary/15">
                   My Profile

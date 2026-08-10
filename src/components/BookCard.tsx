@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, MapPin, GraduationCap, BadgeCheck } from 'lucide-react';
+import { Heart, MapPin, GraduationCap } from 'lucide-react';
 import type { Book } from '../types';
 import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
@@ -141,11 +141,8 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
             {book.title}
           </h3>
           {(book.author?.trim() || book.sellerName?.trim()) && (
-            <p className="text-[10px] sm:text-[11px] text-muted truncate mt-0.5 flex items-center gap-0.5">
-              <span>by {book.author?.trim() || book.sellerName?.trim()}</span>
-              {book.sellerVerified && (
-                <BadgeCheck className="w-2.5 h-2.5 text-primary flex-shrink-0" title="Verified Seller" />
-              )}
+            <p className="text-[10px] sm:text-[11px] text-muted truncate mt-0.5">
+              by {book.author?.trim() || book.sellerName?.trim()}
             </p>
           )}
 

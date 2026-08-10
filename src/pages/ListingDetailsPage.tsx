@@ -217,7 +217,7 @@ export const ListingDetailsPage: React.FC = () => {
     <div className="flex flex-col gap-12">
       <SEO 
         title={`${book.title} | RevoShelf`} 
-        description={`Buy ${book.title} for ₹${book.price} · Condition: ${book.condition} · Category: ${book.category}. Verified student seller on RevoShelf campus marketplace.`}
+        description={`Buy ${book.title} for ₹${book.price.toLocaleString('en-IN')} · Condition: ${book.condition} · Category: ${book.category}. Verified student seller on RevoShelf campus marketplace.`}
         image={book.images && book.images.length > 0 ? book.images[0] : undefined}
         url={canonicalUrl}
         type="product"
@@ -343,14 +343,16 @@ export const ListingDetailsPage: React.FC = () => {
             <h1 className="text-xl md:text-2xl font-bold text-textDark tracking-tight leading-tight">
               {book.title}
             </h1>
-            <p className="text-xs text-muted mt-1 font-medium">by {book.author}</p>
+            {book.author && (
+              <p className="text-xs text-muted mt-1 font-medium">by {book.author}</p>
+            )}
           </div>
 
           {/* Price details */}
           <div className="flex items-baseline gap-2.5 bg-[#F5F3EF] p-4 rounded-xl border border-borderCustom">
-            <span className="text-2xl font-bold text-textDark">₹{book.price}</span>
+            <span className="text-2xl font-bold text-textDark">₹{book.price.toLocaleString('en-IN')}</span>
             {book.originalPrice > book.price && (
-              <span className="text-sm text-muted line-through">₹{book.originalPrice}</span>
+              <span className="text-sm text-muted line-through">₹{book.originalPrice.toLocaleString('en-IN')}</span>
             )}
             {book.originalPrice > book.price && (
               <span className="text-xs font-bold text-success bg-[#E8F5E9] border border-[#C8E6C9] px-1.5 py-0.5 rounded-md">
@@ -365,19 +367,25 @@ export const ListingDetailsPage: React.FC = () => {
           <div>
             <h3 className="font-bold text-xs text-textDark uppercase tracking-wider mb-3">Listed by</h3>
             <Link to={`/seller/${book.sellerId}`} className="flex items-center gap-3 group">
-              <img
-                src={book.sellerAvatar}
-                alt={book.sellerName}
-                className="w-10 h-10 rounded-full border border-borderCustom object-cover"
-              />
+              <div className="relative flex-shrink-0">
+                <img
+                  src={book.sellerAvatar}
+                  alt={book.sellerName}
+                  className="w-10 h-10 rounded-full border border-borderCustom object-cover"
+                />
+                {book.sellerVerified && (
+                  <span
+                    title="Verified by RevoShelf"
+                    aria-label="Verified by RevoShelf"
+                    className="absolute -bottom-0.5 -right-0.5 bg-white rounded-full p-0.5 shadow-md"
+                  >
+                    <BadgeCheck className="w-3.5 h-3.5 text-primary" />
+                  </span>
+                )}
+              </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-textDark group-hover:text-primary transition-colors truncate flex items-center gap-1">
+                <p className="text-sm font-semibold text-textDark group-hover:text-primary transition-colors truncate">
                   {book.sellerName}
-                  {book.sellerVerified && (
-                    <span title="Verified by RevoShelf" aria-label="Verified by RevoShelf">
-                      <BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" />
-                    </span>
-                  )}
                 </p>
                 <div className="flex items-center gap-1.5 mt-0.5 text-xs text-muted">
                   {book.sellerReviewsCount && book.sellerReviewsCount > 0 ? (
