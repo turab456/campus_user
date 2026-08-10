@@ -140,13 +140,15 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
           <h3 className="font-bold text-xs sm:text-sm text-[#111827] leading-tight line-clamp-2 group-hover:text-primary transition-colors">
             {book.title}
           </h3>
-          <p className="text-[10px] sm:text-[11px] text-muted truncate mt-0.5">by {book.author}</p>
+          {(book.author?.trim() || book.sellerName?.trim()) && (
+            <p className="text-[10px] sm:text-[11px] text-muted truncate mt-0.5">by {book.author?.trim() || book.sellerName?.trim()}</p>
+          )}
 
           {/* Price Section */}
           <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 mt-1.5">
-            <span className="text-sm sm:text-base font-bold text-textDark font-sans">₹{book.price}</span>
+            <span className="text-sm sm:text-base font-bold text-textDark font-sans">₹{book.price.toLocaleString('en-IN')}</span>
             {book.originalPrice > book.price && (
-              <span className="text-[10px] sm:text-xs text-muted line-through">₹{book.originalPrice}</span>
+              <span className="text-[10px] sm:text-xs text-muted line-through">₹{book.originalPrice.toLocaleString('en-IN')}</span>
             )}
             {book.originalPrice > book.price && (
               <span className="text-[8px] sm:text-[10px] font-bold text-success bg-[#E8F5E9] border border-[#C8E6C9] px-1 rounded-sm whitespace-nowrap">

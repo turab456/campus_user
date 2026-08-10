@@ -30,6 +30,7 @@ const mapListing = (listing: any): Book => {
     metadata: listing.metadata || {},
     distanceKm: listing.distanceKm,
     isNearMe: listing.isNearMe,
+    author: listing.author || listing.authorName || '',
   };
 };
 

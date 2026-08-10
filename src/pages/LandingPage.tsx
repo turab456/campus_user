@@ -38,18 +38,13 @@ export const LandingPage: React.FC = () => {
       try {
         const books = await api.getBooks();
 
-        let featured = books.filter(b => b.isFeatured);
+        // "Picked by students" = items that have actually been sold/bought by students
+        let featured = books.filter(b => b.status === 'sold').slice(0, 4);
         let popular = books.filter(b => b.isPopular);
 
-        // Fallback to active catalog items if database seeds do not mark featured/popular listings
-        if (featured.length === 0) {
-          featured = books.slice(0, 4);
-        } else {
-          featured = featured.slice(0, 4);
-        }
-
         if (popular.length === 0) {
-          popular = books.slice(4, 8).length > 0 ? books.slice(4, 8) : books.slice(0, 4);
+          popular = books.filter(b => b.status === 'active').slice(0, 4);
+          if (popular.length === 0) popular = books.slice(0, 4);
         } else {
           popular = popular.slice(0, 4);
         }
@@ -177,20 +172,22 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Featured Book Section */}
-      <section className="pt-16 md:pt-20 border-t border-[#E5E7EB]">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 sm:gap-0 mb-8">
-          <div>
-            <h2 className="text-xl md:text-2xl font-bold text-textDark">Picked by students this week</h2>
-            <p className="text-xs text-muted mt-3 max-w-sm">Hand-picked essentials and listings popular on campus right now</p>
+      {/* Picked by Students Section — only shown when there are sold items */}
+      {featuredBooks.length > 0 && (
+        <section className="pt-16 md:pt-20 border-t border-[#E5E7EB]">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 sm:gap-0 mb-8">
+            <div>
+              <h2 className="text-xl md:text-2xl font-bold text-textDark">Picked by students this week</h2>
+              <p className="text-xs text-muted mt-3 max-w-sm">Items students have already bought — popular picks on campus</p>
+            </div>
           </div>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-          {featuredBooks.map(book => (
-            <BookCard key={book.id} book={book} />
-          ))}
-        </div>
-      </section>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {featuredBooks.map(book => (
+              <BookCard key={book.id} book={book} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* How it Works */}
       <section className="pt-16 md:pt-20 border-t border-[#E5E7EB]">
