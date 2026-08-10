@@ -10,6 +10,7 @@ export interface User {
   reviewsCount: number;
   joinedDate: string;
   isVerified?: boolean;
+  isEmailVerified?: boolean;
   spamScore?: number;
   scamScore?: number;
   flagged?: boolean;
