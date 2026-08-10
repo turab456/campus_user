@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Heart, MapPin, GraduationCap, Calendar, MessageSquare, ShieldAlert, ChevronLeft, ChevronRight, User } from 'lucide-react';
+import { Heart, MapPin, GraduationCap, Calendar, MessageSquare, ShieldAlert, ChevronLeft, ChevronRight, User, BadgeCheck } from 'lucide-react';
 import { backendApi as api } from '../services/backendApi';
 import type { Book } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -371,8 +371,13 @@ export const ListingDetailsPage: React.FC = () => {
                 className="w-10 h-10 rounded-full border border-borderCustom object-cover"
               />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-textDark group-hover:text-primary transition-colors truncate">
+                <p className="text-sm font-semibold text-textDark group-hover:text-primary transition-colors truncate flex items-center gap-1">
                   {book.sellerName}
+                  {book.sellerVerified && (
+                    <span title="Verified by RevoShelf" aria-label="Verified by RevoShelf">
+                      <BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" />
+                    </span>
+                  )}
                 </p>
                 <div className="flex items-center gap-1.5 mt-0.5 text-xs text-muted">
                   {book.sellerReviewsCount && book.sellerReviewsCount > 0 ? (

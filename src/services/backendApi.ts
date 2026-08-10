@@ -26,6 +26,7 @@ const mapListing = (listing: any): Book => {
     sellerReviewsCount: seller.reviewsCount || listing.sellerReviewsCount || 0,
     sellerSpamScore: seller.spamScore || 0,
     sellerScamScore: seller.scamScore || 0,
+    sellerVerified: seller.isVerified || false,
     college: listing.college || seller.institutionName || seller.college || '',
     metadata: listing.metadata || {},
     distanceKm: listing.distanceKm,

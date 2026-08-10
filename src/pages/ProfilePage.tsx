@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, GraduationCap, MapPin, Star, BookOpen, ShieldAlert, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Calendar, GraduationCap, MapPin, Star, BookOpen, ShieldAlert, CheckCircle, AlertTriangle, BadgeCheck } from 'lucide-react';
 import { backendApi as api } from '../services/backendApi';
 import type { Book, User, Review } from '../types';
 import { BookCard } from '../components/BookCard';
@@ -201,6 +201,12 @@ export const ProfilePage: React.FC = () => {
               <h1 className="text-xl md:text-2xl font-extrabold text-textDark tracking-tight leading-tight truncate">
                 {user.name}
               </h1>
+              {user.isVerified && (
+                <BadgeCheck
+                  className="w-5 h-5 text-primary flex-shrink-0 self-center"
+                  title="Verified by RevoShelf"
+                />
+              )}
               {isOwnProfile && (
                 <span className="inline-block self-center bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full border border-primary/15">
                   My Profile

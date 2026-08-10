@@ -9,6 +9,7 @@ export interface User {
   rating: number;
   reviewsCount: number;
   joinedDate: string;
+  isVerified?: boolean;
   spamScore?: number;
   scamScore?: number;
   flagged?: boolean;
@@ -52,6 +53,7 @@ export interface Book {
   salePending?: boolean;
   sellerSpamScore?: number;
   sellerScamScore?: number;
+  sellerVerified?: boolean;
   metadata?: Record<string, any>;
   distanceKm?: number;
   isNearMe?: boolean;
