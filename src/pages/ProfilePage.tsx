@@ -221,21 +221,25 @@ export const ProfilePage: React.FC = () => {
             <p className="text-xs text-muted font-medium mt-1 truncate">{user.email}</p>
           </div>
 
-          {/* College details info */}
-          <div className="flex flex-col gap-1.5 text-xs text-muted">
-            <div className="flex items-center justify-center sm:justify-start gap-2">
-              <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0" />
-              <span className="truncate">{user.college}</span>
-            </div>
-            <div className="flex items-center justify-center sm:justify-start gap-2">
-              <GraduationCap className="w-4 h-4 text-slate-400 flex-shrink-0" />
-              <span className="truncate">{user.department} &middot; Semester {user.semester}</span>
-            </div>
-            <div className="flex items-center justify-center sm:justify-start gap-2">
-              <Calendar className="w-4 h-4 text-slate-400 flex-shrink-0" />
-              <span>Joined {formatDate(user.joinedDate)}</span>
-            </div>
-          </div>
+          {/* User details info: Location & Joined date */}
+          {(() => {
+            const locationStr = [user.addressLine, user.city, user.state || user.country]
+              .filter(Boolean)
+              .join(', ') || user.college || 'Location not specified';
+
+            return (
+              <div className="flex flex-col gap-1.5 text-xs text-muted">
+                <div className="flex items-center justify-center sm:justify-start gap-2">
+                  <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                  <span className="truncate">{locationStr}</span>
+                </div>
+                <div className="flex items-center justify-center sm:justify-start gap-2">
+                  <Calendar className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                  <span>Joined {formatDate(user.joinedDate)}</span>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Star Rating details */}
           <div className="flex items-center justify-center sm:justify-start gap-4 mt-1 bg-slate-50 border border-borderCustom rounded-xl p-3 w-fit self-center sm:self-start">

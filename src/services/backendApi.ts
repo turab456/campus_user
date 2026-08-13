@@ -28,7 +28,26 @@ const mapListing = (listing: any): Book => {
     sellerScamScore: seller.scamScore || 0,
     sellerVerified: seller.isVerified || false,
     college: listing.college || seller.institutionName || seller.college || '',
-    metadata: listing.metadata || {},
+    metadata: (() => {
+      let m = listing.metadata;
+      if (typeof m === 'string') {
+        try {
+          m = JSON.parse(m);
+        } catch {
+          m = {};
+        }
+      }
+      if (typeof m === 'object' && m !== null && !Array.isArray(m)) {
+        const cleanObj: Record<string, any> = {};
+        for (const [k, v] of Object.entries(m)) {
+          if (!/^\d+$/.test(k)) {
+            cleanObj[k] = v;
+          }
+        }
+        return cleanObj;
+      }
+      return {};
+    })(),
     distanceKm: listing.distanceKm,
     isNearMe: listing.isNearMe,
     author: listing.author || listing.authorName || '',
@@ -330,6 +349,22 @@ export const backendApi = {
       return postFormData<{ success: boolean; listing: any }>('/api/listings', listingData).then((r) => mapListing(r.listing));
     }
     return post<{ success: boolean; listing: any }>('/api/listings', listingData).then((r) => mapListing(r.listing));
+  },
+  async validateImageCategory(imageFile: File, category: string) {
+    const formData = new FormData();
+    formData.append('images', imageFile);
+    formData.append('category', category);
+    return postFormData<{
+      success: boolean;
+      analysis: {
+        match: boolean;
+        detected_category: string;
+        item: string;
+        confidence: number;
+        reason: string;
+        skipped?: boolean;
+      };
+    }>('/api/listings/validate-image', formData);
   },
   async updateListing(id: string, updates: any) {
     if (updates instanceof FormData) {

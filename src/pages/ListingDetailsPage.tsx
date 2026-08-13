@@ -432,26 +432,47 @@ export const ListingDetailsPage: React.FC = () => {
               )}
 
               {/* Dynamic Metadata Specifications Card */}
-              {book.metadata && Object.keys(book.metadata).length > 0 && (
-                <div className="bg-[#FAF8F5] p-3 rounded-xl border border-borderCustom flex flex-col gap-2 w-full my-1">
-                  <h4 className="font-extrabold text-[10px] text-textDark uppercase tracking-wider">Specifications</h4>
-                  <div className="grid grid-cols-2 gap-2 text-[11px]">
-                    {Object.entries(book.metadata).map(([k, v]) => {
-                      if (['author', 'department', 'semester'].includes(k) && (book.category === 'books' || book.category === 'notes')) {
-                        return null; // Shown elsewhere or already processed
-                      }
-                      const label = METADATA_LABELS[k] || k.charAt(0).toUpperCase() + k.slice(1);
-                      const valStr = Array.isArray(v) ? v.join(', ') : String(v);
-                      return (
-                        <div key={k} className="flex flex-col min-w-0">
-                          <span className="font-bold text-textDark text-[10px] tracking-wide uppercase">{label}</span>
-                          <span className="text-muted leading-tight mt-0.5 break-words">{valStr}</span>
-                        </div>
-                      );
-                    })}
+              {(() => {
+                let metaObj: Record<string, any> = {};
+                if (typeof book.metadata === 'string') {
+                  try {
+                    metaObj = JSON.parse(book.metadata);
+                  } catch {
+                    metaObj = {};
+                  }
+                } else if (typeof book.metadata === 'object' && book.metadata !== null && !Array.isArray(book.metadata)) {
+                  metaObj = book.metadata;
+                }
+
+                const validEntries = Object.entries(metaObj).filter(([k, v]) => {
+                  // Ignore corrupted numeric character index keys (0, 1, 2... 14) from legacy '[object Object]' string conversions
+                  if (/^\d+$/.test(k)) return false;
+                  if (['author', 'department', 'semester'].includes(k) && (book.category === 'books' || book.category === 'notes')) {
+                    return false;
+                  }
+                  return k && v !== undefined && v !== null && v !== '';
+                });
+
+                if (validEntries.length === 0) return null;
+
+                return (
+                  <div className="bg-[#FAF8F5] p-3 rounded-xl border border-borderCustom flex flex-col gap-2 w-full my-1">
+                    <h4 className="font-extrabold text-[10px] text-textDark uppercase tracking-wider">Specifications</h4>
+                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                      {validEntries.map(([k, v]) => {
+                        const label = METADATA_LABELS[k] || k.charAt(0).toUpperCase() + k.slice(1);
+                        const valStr = Array.isArray(v) ? v.join(', ') : String(v);
+                        return (
+                          <div key={k} className="flex flex-col min-w-0">
+                            <span className="font-bold text-textDark text-[10px] tracking-wide uppercase">{label}</span>
+                            <span className="text-muted leading-tight mt-0.5 break-words">{valStr}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               <div className="flex items-start gap-2 mt-0.5">
                 <MapPin className="w-4.5 h-4.5 text-slate-400 flex-shrink-0 mt-0.5" />

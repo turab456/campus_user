@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { backendApi as api } from '../services/backendApi';
 import { compressImage } from '../utils/imageCompressor';
+import { AiImageScanner } from '../components/AiImageScanner';
 import type { BookCondition } from '../types';
 import { CATEGORIES, CONDITIONS, DEPARTMENTS, SEMESTERS } from '../constants';
 
@@ -76,6 +77,7 @@ export const CreateListingPage: React.FC = () => {
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [fileValidationStatus, setFileValidationStatus] = useState<Record<number, boolean>>({});
   const [isPublishing, setIsPublishing] = useState(false);
   
   // Form State
@@ -178,7 +180,14 @@ export const CreateListingPage: React.FC = () => {
     }
     
     if (currentStep === 3) {
-      if (formData.images.length === 0 && selectedFiles.length === 0) errs.images = 'Please select at least one photo';
+      if (selectedFiles.length === 0 && formData.images.length === 0) {
+        errs.images = 'Please select or upload at least 1 image.';
+      } else {
+        const hasInvalidImage = Object.values(fileValidationStatus).some(status => status === false);
+        if (hasInvalidImage) {
+          errs.images = `AI detected a category mismatch in your photo. Please upload a photo matching "${formData.category}".`;
+        }
+      }
     }
     
     if (currentStep === 4) {
@@ -253,6 +262,11 @@ export const CreateListingPage: React.FC = () => {
 
   const removeFile = (index: number) => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setFileValidationStatus(prev => {
+      const copy = { ...prev };
+      delete copy[index];
+      return copy;
+    });
   };
 
   const handlePublish = async () => {
@@ -632,32 +646,51 @@ export const CreateListingPage: React.FC = () => {
           
           {errors.images && <p className="text-xs text-danger font-medium">{errors.images}</p>}
 
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-            {/* Show real file previews */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Show AI Vision Image Scanners for real file previews */}
             {selectedFiles.map((file, idx) => {
               const objUrl = URL.createObjectURL(file);
+              const stableKey = `file-${file.name}-${file.size}-${file.lastModified}`;
               return (
-                <div key={`file-${idx}`} className="aspect-square rounded-xl overflow-hidden border-2 border-primary relative group">
-                  <img src={objUrl} alt={`Selected ${idx}`} className="w-full h-full object-cover" />
-                  <button 
-                    type="button" 
-                    onClick={() => removeFile(idx)}
-                    className="absolute top-1.5 right-1.5 bg-danger/90 text-white rounded-full p-1.5 shadow-sm hover:bg-danger transition-colors opacity-0 group-hover:opacity-100"
-                    title="Remove Photo"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                <AiImageScanner
+                  key={stableKey}
+                  file={file}
+                  previewUrl={objUrl}
+                  category={formData.category}
+                  onRemove={() => removeFile(idx)}
+                  onStatusChange={(isValid) => {
+                    setFileValidationStatus(prev => ({
+                      ...prev,
+                      [idx]: isValid
+                    }));
+                  }}
+                />
               );
             })}
 
+            {/* Preset image picker fallback */}
+            {formData.images.map((url, idx) => (
+              <div key={`preset-${idx}`} className="aspect-square rounded-2xl overflow-hidden border border-slate-200 relative group bg-slate-100">
+                <img src={url} alt={`Preset ${idx}`} className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== idx) }))}
+                  className="absolute top-2 right-2 bg-slate-900/70 hover:bg-red-600 text-white p-1.5 rounded-full shadow backdrop-blur-sm transition-colors"
+                  title="Remove image"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
 
-            
             {/* Actual photo upload input */}
             {(selectedFiles.length + formData.images.length) < 3 && (
-              <label className="aspect-square rounded-xl border-2 border-dashed border-slate-300 hover:border-primary transition-colors flex flex-col items-center justify-center text-center p-2 cursor-pointer bg-slate-50">
-                <Plus className="w-5 h-5 text-slate-400" />
-                <span className="text-[10px] text-muted font-semibold mt-1">Upload Photo</span>
+              <label className="aspect-square rounded-2xl border-2 border-dashed border-slate-300 hover:border-primary transition-colors flex flex-col items-center justify-center text-center p-4 cursor-pointer bg-[#F5F3EF]/60 hover:bg-[#F5F3EF]">
+                <div className="p-3 rounded-full bg-primary/10 text-primary mb-1.5">
+                  <Plus className="w-5 h-5" />
+                </div>
+                <span className="text-xs font-bold text-textDark">Upload Photo</span>
+                <span className="text-[10px] text-muted mt-0.5 font-medium">Auto AI Validation</span>
                 <input 
                   type="file" 
                   accept="image/*"
