@@ -94,9 +94,13 @@ export const AiImageScanner: React.FC<AiImageScannerProps> = ({
 
           if (match === false) {
             validationCache.set(fileId, { isValid: false, analysis: res.analysis });
-            // Category mismatch: auto remove photo and trigger danger toast
-            const toastMsg = reason || `Image appears to be "${item}" (${detected_category}), not "${category}".`;
-            showToast(`Category Mismatch: ${toastMsg}`, 'danger');
+            // Category mismatch: auto remove photo and trigger clear concise toast
+            const formattedCat = category ? category.charAt(0).toUpperCase() + category.slice(1) : 'selected category';
+            const detectedItem = item ? item.toLowerCase().replace(/^(a|an|the)\s+/, '').trim() : '';
+            const shortReason = detectedItem
+              ? `Photo shows "${detectedItem}", not ${formattedCat}.`
+              : `Photo does not match category ${formattedCat}.`;
+            showToast(`Category Mismatch: ${shortReason}`, 'danger');
             onStatusChange?.(false, res.analysis);
             onRemove();
             return;

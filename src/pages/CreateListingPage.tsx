@@ -185,7 +185,8 @@ export const CreateListingPage: React.FC = () => {
       } else {
         const hasInvalidImage = Object.values(fileValidationStatus).some(status => status === false);
         if (hasInvalidImage) {
-          errs.images = `AI detected a category mismatch in your photo. Please upload a photo matching "${formData.category}".`;
+          const cat = formData.category ? formData.category.charAt(0).toUpperCase() + formData.category.slice(1) : 'selected category';
+          errs.images = `Photo category mismatch. Please upload photos matching ${cat}.`;
         }
       }
     }
